@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bản sao: Dựng bữa cơm hoàn chỉnh | BUNGOIANGI</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="./meal.css" />
+    <style>
+        .standalone-nav {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-light);
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-xs);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .standalone-logo {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .standalone-badge {
+            background: var(--accent-amber-light);
+            color: #b45309;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: var(--radius-full);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .standalone-back {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: var(--radius-full);
+            border: 1px solid var(--border-light);
+            background: var(--bg-card);
+            transition: all var(--transition-fast);
+        }
+
+        .standalone-back:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="standalone-nav">
+        <div class="standalone-logo">
+            <span>🍽️ BungOiAnGi</span>
+            <span class="standalone-badge">Meal Feature Module</span>
+        </div>
+        <a href="/" class="standalone-back">← Quay lại ứng dụng chính</a>
+    </header>
+
+    <main class="meal-standalone-page">
+        <!-- Container Dựng bữa cơm hoàn chỉnh -->
+        <div id="meal-container"></div>
+
+        <!-- Container Modal Chi tiết món ăn (F04) -->
+        <div id="dish-detail-container"></div>
+    </main>
+
+    <footer
+        style="text-align: center; padding: 24px 16px; color: var(--text-subtle); font-size: 0.85rem; border-top: 1px solid var(--border-light); margin-top: 40px;">
+        Bản sao chức năng <strong>F11 - Dựng bữa cơm hoàn chỉnh</strong> tách riêng độc lập.
+    </footer>
+
+    <script type="module" src="./main.js"></script>
+</body>
+
+</html>
