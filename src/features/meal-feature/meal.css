@@ -3,8 +3,8 @@
    Tách độc lập từ BungOiAnGi
    ========================================================== */
 
-@import "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap";
-:root {
+.meal-feature-page,
+.meal-feature-standalone {
 --primary:#ff5722;
 --primary-hover:#f44336;
 --primary-active:#e64a19;
@@ -55,55 +55,43 @@
 --transition-spring:.4s cubic-bezier(.175, .885, .32, 1.275)
 }
 
-*,:before,:after {
-box-sizing:border-box;
-margin:0;
-padding:0
-}
-html {
-scroll-behavior:smooth;
--webkit-font-smoothing:antialiased;
--moz-osx-font-smoothing:grayscale
-}
-body {
-font-family:var(--font-sans);
-background-color:var(--bg-page);
-color:var(--text-body);
-line-height:var(--line-height-normal);
-background-image:radial-gradient(65% 50% at 85% -10%,#ff57220f,#0000 70%),radial-gradient(55% 45% at 10% 30%,#f59e0b0d,#0000 60%);
-min-height:100vh;
-font-size:15px;
-position:relative;
-overflow-x:hidden
-}
 body.modal-open {
 overflow:hidden
 }
-img {
-object-fit:cover;
-max-width:100%;
-display:block
+
+.meal-feature-standalone {
+  font-family: var(--font-sans);
+  background: var(--bg-page);
+  color: var(--text-body);
+  line-height: var(--line-height-normal);
+  min-height: 100vh;
+  font-size: 15px;
 }
-button {
-cursor:pointer;
-background:0 0;
-border:none;
-outline:none;
-font-family:inherit
+
+.meal-feature-standalone *,
+.meal-feature-standalone *::before,
+.meal-feature-standalone *::after {
+  box-sizing: border-box;
 }
-button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible {
-outline:2px solid var(--primary);
-outline-offset:3px
+
+.meal-feature-standalone img {
+  object-fit: cover;
+  max-width: 100%;
+  display: block;
 }
-input,select {
-font-family:inherit;
-font-size:inherit
+
+.meal-feature-standalone button {
+  cursor: pointer;
+  font-family: inherit;
 }
-a {
-color:inherit;
-text-decoration:none
+
+.meal-feature-standalone button:focus-visible,
+.meal-feature-standalone a:focus-visible,
+.meal-feature-standalone input:focus-visible,
+.meal-feature-standalone select:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
 }
-#app {
 
 /* ============ STYLES DỰNG BỮA CƠM ============ */
 /* Bảng màu riêng cho panel, đổi theo chế độ bữa đang chọn */
@@ -1292,7 +1280,8 @@ transform:scale(1)
 }
 
 /* ============ CHI TIẾT MÓN ĂN & MODAL ============ */
-.modal-overlay {
+.meal-feature-page .modal-overlay,
+.meal-standalone-page .modal-overlay {
 z-index:1000;
 -webkit-backdrop-filter:blur(10px);
 background:#1c1917a6;
@@ -1312,7 +1301,8 @@ opacity:0
 opacity:1
   }
 }
-.modal-card {
+.meal-feature-page .modal-card,
+.meal-feature-standalone .modal-card {
 border-radius:var(--radius-xl);
 z-index:2;
 background:#fff;
@@ -1326,7 +1316,8 @@ position:relative;
 overflow:hidden;
 box-shadow:0 25px 60px -12px #00000059
 }
-.modal-overlay.is-celebrate .modal-card {
+.meal-feature-page .modal-overlay.is-celebrate .modal-card,
+.meal-standalone-page .modal-overlay.is-celebrate .modal-card {
 animation:.4s cubic-bezier(.16,1,.3,1) both modal-slide-up,.62s cubic-bezier(.2,.9,.25,1.25) .32s both modal-card-jolt
 }
 @keyframes modal-card-jolt {
@@ -1340,7 +1331,8 @@ transform:scale(1.04)rotate(-.8deg)
 transform:scale(1)rotate(0)
   }
 }
-.modal-overlay.is-celebrate .modal-card:after {
+.meal-feature-page .modal-overlay.is-celebrate .modal-card:after,
+.meal-standalone-page .modal-overlay.is-celebrate .modal-card:after {
 content:"";
 z-index:6;
 border-radius:inherit;
@@ -1363,7 +1355,8 @@ opacity:0;
 background-position:-90% 0
   }
 }
-.modal-celebrate {
+.meal-feature-page .modal-celebrate,
+.meal-feature-standalone .modal-celebrate {
 pointer-events:none;
 z-index:1;
 place-items:center;
@@ -1372,7 +1365,8 @@ position:absolute;
 inset:0;
 overflow:hidden
 }
-.modal-overlay.is-celebrate {
+.meal-feature-page .modal-overlay.is-celebrate,
+.meal-standalone-page .modal-overlay.is-celebrate {
 background:radial-gradient(70% 60%,#ff8a4c4d 0%,#1c1917b8 70%,#1c1917d1 100%)
 }
 .modal-celebrate-badge {
@@ -1418,7 +1412,8 @@ opacity:1;
 transform:translateY(0)scale(1)
   }
 }
-.modal-close {
+.meal-feature-page .modal-close,
+.meal-feature-standalone .modal-close {
 z-index:10;
 -webkit-backdrop-filter:blur(4px);
 backdrop-filter:blur(4px);
@@ -1439,18 +1434,21 @@ position:absolute;
 top:16px;
 right:16px
 }
-.modal-close:hover {
+.meal-feature-page .modal-close:hover,
+.meal-feature-standalone .modal-close:hover {
 color:var(--primary);
 background:#fff;
 transform:rotate(90deg)
 }
-.modal-image {
+.meal-feature-page .modal-image,
+.meal-feature-standalone .modal-image {
 object-fit:cover;
 width:100%;
 height:100%;
 min-height:380px
 }
-.modal-content {
+.meal-feature-page .modal-content,
+.meal-feature-standalone .modal-content {
 flex-direction:column;
 gap:14px;
 padding:36px 32px;
@@ -1570,11 +1568,13 @@ transform:translateY(-2px)
 /* ============ RESPONSIVE CHO BỮA ĂN ============ */
 
 @media (width <= 960px) {
-  .modal-card {
+  .meal-feature-page .modal-card,
+  .meal-feature-standalone .modal-card {
     grid-template-columns: 1fr;
     max-height: 92vh;
   }
-  .modal-image {
+  .meal-feature-page .modal-image,
+  .meal-feature-standalone .modal-image {
     min-height: 220px;
     max-height: 260px;
   }
@@ -1650,10 +1650,12 @@ transform:translateY(-2px)
   .meal-served-price {
     grid-column: 3;
   }
-  .modal-overlay {
+  .meal-feature-page .modal-overlay,
+  .meal-feature-standalone .modal-overlay {
     padding: 12px;
   }
-  .modal-content {
+  .meal-feature-page .modal-content,
+  .meal-feature-standalone .modal-content {
     padding: 20px 18px;
   }
 }
@@ -1682,4 +1684,3 @@ transform:translateY(-2px)
   color: var(--text-muted);
   font-size: 1rem;
 }
-
