@@ -14,6 +14,7 @@ export function findDishById(dishes, id) {
     const dishId = Number(id);
     return dishes.find(dish => dish.id === dishId) || null;
 }
+
 /**
  * Xếp hạng các món ăn tương tự với một món cho trước
  * Điểm = số tag chung (ưu tiên cao nhất) + cùng danh mục + cùng loại chay/mặn
@@ -40,4 +41,18 @@ function rankSimilarDishes(dishes, dish, excludedIds = []) {
         })
         .filter(item => item.score > 0)
         .sort((a, b) => b.score - a.score);
+}
+
+/**
+ * Lấy danh sách món tương tự đã sắp xếp
+ * @param {Array} dishes - Danh sách món ăn
+ * @param {Object} dish - Món đang xem
+ * @param {Array<number>} excludedIds - Các ID cần loại
+ * @param {number} limit - Số món tối đa
+ * @returns {Array<Object>}
+ */
+export function getSimilarDishes(dishes, dish, excludedIds = [], limit = 6) {
+    return rankSimilarDishes(dishes, dish, excludedIds)
+        .slice(0, limit)
+        .map(item => item.dish);
 }
