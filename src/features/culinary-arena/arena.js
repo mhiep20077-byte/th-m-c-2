@@ -335,6 +335,7 @@ function renderAltar() {
         <div class="tarot-card ${card.flipped ? 'flipped' : ''}" data-index="${idx}">
           <!-- MẶT SAU THẦN BÍ (BACK FACE) -->
           <div class="tarot-face tarot-back">
+            <div class="tarot-shimmer-layer"></div>
             <div class="tarot-back-top">★ ✦ ✦ ★</div>
             <div class="tarot-mandala">
               <div class="tarot-cosmic-glyph">🔯</div>
@@ -345,6 +346,7 @@ function renderAltar() {
 
           <!-- MẶT TRƯỚC TIẾT LỘ MÓN ĂN (FRONT FACE) -->
           <div class="tarot-face tarot-front">
+            <div class="tarot-shimmer-layer"></div>
             <div class="tarot-dish-img-wrap">
               <img class="tarot-dish-img" src="${card.dish.image || fallbackImg}" alt="${card.dish.name}" onerror="this.src='${fallbackImg}'" />
               <div class="tarot-dish-gradient"></div>
@@ -440,6 +442,29 @@ function renderAltar() {
     if (shareBtn) {
         shareBtn.addEventListener('click', shareFortune);
     }
+
+    // Hiệu ứng nghiêng 3D Hologram theo vị trí chuột
+    attachCardTiltEffects(container);
+}
+
+function attachCardTiltEffects(container) {
+    container.querySelectorAll('.tarot-card').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+            const isFlipped = card.classList.contains('flipped');
+            const baseRotateY = isFlipped ? 180 : 0;
+            const tiltX = -y * 14;
+            const tiltY = baseRotateY + x * (isFlipped ? -14 : 14);
+            card.style.transform = `perspective(1000px) translateY(-8px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg)`;
+        });
+
+        card.addEventListener('mouseleave', () => {
+            const isFlipped = card.classList.contains('flipped');
+            card.style.transform = isFlipped ? 'rotateY(180deg)' : '';
+        });
+    });
 }
 
 function flipCard(idx, cardEl) {

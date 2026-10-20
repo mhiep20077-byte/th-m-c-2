@@ -475,6 +475,34 @@ body.culinary-arena-standalone {
   box-shadow: var(--shadow-card);
 }
 
+/* Hiệu ứng Holographic Shimmer lấp lánh phản quang 3D */
+.tarot-shimmer-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    transparent 35%,
+    rgba(255, 255, 255, 0.18) 45%,
+    rgba(216, 180, 254, 0.32) 50%,
+    rgba(251, 191, 36, 0.25) 55%,
+    transparent 65%,
+    transparent 100%
+  );
+  background-size: 250% 250%;
+  background-position: 0% 0%;
+  opacity: 0;
+  transition: opacity 0.4s ease, background-position 0.75s ease;
+  z-index: 5;
+}
+
+.tarot-card:hover .tarot-shimmer-layer {
+  opacity: 1;
+  background-position: 100% 100%;
+}
+
 /* MẶT SAU THẺ BÀI: Mạn-đà-la thần bí & Viền mạ vàng */
 .tarot-back {
   background: radial-gradient(circle at 50% 50%, #2e0854 0%, #0c0418 100%);
