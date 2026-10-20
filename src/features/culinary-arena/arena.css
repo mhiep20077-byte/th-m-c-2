@@ -1,0 +1,776 @@
+/* ==========================================================================
+   CHIÊM TINH ẨM THỰC (CULINARY ORACLE & FOOD TAROT) - STYLESHEET
+   Phong cách Celestial Mysticism & Neo-Tarot Glassmorphism
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --font-mystic: 'Cinzel', serif;
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+
+  /* Bảng màu vũ trụ huyền bí */
+  --bg-deep: #070312;
+  --bg-surface: #0f0924;
+  --bg-card: rgba(23, 14, 46, 0.75);
+  --bg-card-hover: rgba(35, 21, 71, 0.9);
+  --bg-glass: rgba(18, 10, 36, 0.65);
+
+  --border-mystic: rgba(216, 180, 254, 0.2);
+  --border-gold: rgba(245, 158, 11, 0.5);
+
+  --text-main: #f8fafc;
+  --text-muted: #cbd5e1;
+  --text-dim: #94a3b8;
+
+  /* Hào quang & Gradient bài Tarot */
+  --purple-glow: rgba(168, 85, 247, 0.45);
+  --purple-gradient: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+  
+  --gold-glow: rgba(245, 158, 11, 0.5);
+  --gold-foil: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #b45309 100%);
+
+  --shadow-card: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 30px var(--purple-glow);
+  --shadow-gold: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 25px var(--gold-glow);
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+
+  --trans-smooth: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  --trans-card: 0.85s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Reset & Nền vũ trụ sao */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text-main);
+  min-height: 100vh;
+  line-height: 1.5;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(circle at 50% 10%, rgba(147, 51, 234, 0.18) 0%, transparent 60%),
+    radial-gradient(circle at 85% 40%, rgba(245, 158, 11, 0.1) 0%, transparent 45%),
+    radial-gradient(circle at 15% 80%, rgba(79, 70, 229, 0.14) 0%, transparent 50%),
+    radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 140px 70px, #e9d5ff, rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 280px 180px, #fde047, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 420px 240px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 600px 90px, #cbd5e1, rgba(0,0,0,0));
+  background-size: 100% 100%, 100% 100%, 100% 100%, 550px 550px, 450px 450px, 600px 600px, 500px 500px, 650px 650px;
+  background-attachment: fixed;
+}
+
+/* Header Chiêm Tinh */
+.oracle-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(7, 3, 18, 0.85);
+  border-bottom: 1px solid var(--border-mystic);
+  padding: 14px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.oracle-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.oracle-logo-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: radial-gradient(circle, #a855f7 0%, #4c1d95 100%);
+  border: 1.5px solid rgba(216, 180, 254, 0.5);
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  box-shadow: 0 0 20px var(--purple-glow);
+  animation: pulseGlow 3s infinite ease-in-out;
+}
+
+.oracle-brand-text h1 {
+  font-family: var(--font-mystic);
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  background: linear-gradient(to right, #ffffff, #d8b4fe 60%, #fbbf24 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.2;
+}
+
+.oracle-brand-text span {
+  font-size: 0.72rem;
+  color: #c084fc;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+}
+
+.oracle-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-mystic-link {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-mystic);
+  color: var(--text-muted);
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn-mystic-link:hover {
+  background: rgba(168, 85, 247, 0.15);
+  color: #ffffff;
+  border-color: #a855f7;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+}
+
+.btn-sound-toggle {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-mystic);
+  color: #fbbf24;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+}
+
+.btn-sound-toggle:hover {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: #f59e0b;
+  transform: scale(1.05);
+}
+
+/* Khung chính */
+.oracle-wrapper {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 24px 20px 80px;
+}
+
+/* Tiêu đề Hero */
+.oracle-hero {
+  text-align: center;
+  padding: 24px 20px 10px;
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #d8b4fe;
+  padding: 6px 18px;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 14px;
+}
+
+.oracle-hero h2 {
+  font-family: var(--font-mystic);
+  font-size: 2.6rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #ffffff 30%, #e9d5ff 70%, #fde047 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.2;
+}
+
+.oracle-hero p {
+  color: var(--text-muted);
+  max-width: 640px;
+  margin: 0 auto;
+  font-size: 1.02rem;
+}
+
+/* ==========================================================================
+   BẢN ĐIỀU KHIỂN RÚT BÀI (RITUAL CONTROLS)
+   ========================================================================== */
+.ritual-panel {
+  max-width: 860px;
+  margin: 30px auto 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-mystic);
+  border-radius: var(--radius-xl);
+  padding: 22px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.ritual-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ritual-label {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #e9d5ff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Bộ nút chọn Kiểu trải bài (Spread Types) */
+.spread-type-selector {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.spread-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-mystic);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+}
+
+.spread-btn:hover {
+  color: #ffffff;
+  background: rgba(168, 85, 247, 0.15);
+  border-color: #a855f7;
+}
+
+.spread-btn.active {
+  background: var(--purple-gradient);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 4px 18px var(--purple-glow);
+}
+
+/* Bộ chọn Tâm trạng / Bắt mạch cảm xúc */
+.mood-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mood-chip {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mood-chip:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--text-main);
+}
+
+.mood-chip.active {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: #f59e0b;
+  color: #fef08a;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.3);
+}
+
+/* ==========================================================================
+   BÀN THỜ KHAI MỞ QUẺ TAROT (ALTAR & 3D CARDS)
+   ========================================================================== */
+.tarot-altar {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+.tarot-cards-container {
+  display: grid;
+  gap: 26px;
+  width: 100%;
+  max-width: 1080px;
+  perspective: 1400px;
+}
+
+/* Bố cục theo số lượng thẻ */
+.tarot-cards-container.cards-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.tarot-cards-container.cards-1 {
+  grid-template-columns: minmax(280px, 420px);
+  justify-content: center;
+}
+
+/* Khung từng vị trí lá bài */
+.tarot-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.slot-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #d8b4fe;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Thẻ bài Tarot 3D */
+.tarot-card {
+  width: 100%;
+  height: 480px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform var(--trans-card), box-shadow 0.3s ease;
+  cursor: pointer;
+  border-radius: var(--radius-xl);
+}
+
+.tarot-card.flipped {
+  transform: rotateY(180deg);
+}
+
+.tarot-card:hover {
+  transform: translateY(-8px);
+}
+
+.tarot-card.flipped:hover {
+  transform: rotateY(180deg) translateY(-8px);
+}
+
+.tarot-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-xl);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+/* MẶT SAU THẺ BÀI: Mạn-đà-la thần bí & Viền mạ vàng */
+.tarot-back {
+  background: radial-gradient(circle at 50% 50%, #2e0854 0%, #0c0418 100%);
+  border: 2px solid rgba(216, 180, 254, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30px 20px;
+  box-shadow: inset 0 0 30px rgba(168, 85, 247, 0.3);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.tarot-back::before {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border: 1px dashed rgba(245, 158, 11, 0.4);
+  border-radius: calc(var(--radius-xl) - 8px);
+  pointer-events: none;
+}
+
+.tarot-card:hover .tarot-back {
+  border-color: #fbbf24;
+  box-shadow: inset 0 0 40px rgba(245, 158, 11, 0.4), 0 0 35px var(--gold-glow);
+}
+
+.tarot-back-top, .tarot-back-bottom {
+  font-size: 1.2rem;
+  color: #fbbf24;
+  letter-spacing: 0.4em;
+  opacity: 0.8;
+}
+
+.tarot-mandala {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.tarot-cosmic-glyph {
+  font-size: 4.5rem;
+  filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.8));
+  animation: floatSlow 3.5s infinite ease-in-out;
+}
+
+.tarot-touch-hint {
+  font-family: var(--font-mystic);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #e9d5ff;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(216, 180, 254, 0.2);
+}
+
+/* MẶT TRƯỚC THẺ BÀI (KHI LẬT TIẾT LỘ MÓN ĂN) */
+.tarot-front {
+  transform: rotateY(180deg);
+  background: var(--bg-surface);
+  border: 2px solid var(--border-gold);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-gold);
+}
+
+.tarot-dish-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  background: #140d28;
+  overflow: hidden;
+}
+
+.tarot-dish-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.tarot-card:hover .tarot-dish-img {
+  transform: scale(1.08);
+}
+
+.tarot-dish-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(15, 9, 36, 0.95) 0%, rgba(15, 9, 36, 0.2) 60%, transparent 100%);
+}
+
+.tarot-type-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.tarot-price-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: var(--gold-foil);
+  color: #070312;
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+/* Phần nội dung lời sấm tiên tri */
+.tarot-front-body {
+  padding: 18px 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-grow: 1;
+}
+
+.tarot-dish-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.25;
+}
+
+.tarot-prophecy-quote {
+  font-size: 0.86rem;
+  color: #e9d5ff;
+  line-height: 1.5;
+  font-style: italic;
+  background: rgba(168, 85, 247, 0.08);
+  border-left: 3px solid #a855f7;
+  padding: 8px 12px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin-top: auto;
+}
+
+.tarot-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tarot-tag {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-dim);
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+/* ==========================================================================
+   THANH THAO TÁC QUẺ (ALTAR ACTION BAR)
+   ========================================================================== */
+.altar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.btn-mystic-primary {
+  background: var(--purple-gradient);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 800;
+  padding: 14px 32px;
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 6px 25px var(--purple-glow);
+  transition: all 0.25s ease;
+}
+
+.btn-mystic-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(168, 85, 247, 0.6);
+}
+
+.btn-mystic-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-mystic);
+  color: var(--text-main);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 14px 24px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+}
+
+.btn-mystic-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: #a855f7;
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   MODAL / SỔ TAY QUẺ CHIÊM TINH (JOURNAL DRAWER)
+   ========================================================================== */
+.journal-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 2, 10, 0.85);
+  backdrop-filter: blur(12px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.journal-modal-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.journal-modal {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-mystic);
+  border-radius: var(--radius-xl);
+  max-width: 760px;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px var(--purple-glow);
+  transform: scale(0.92);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.journal-modal-backdrop.open .journal-modal {
+  transform: scale(1);
+}
+
+.journal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-mystic);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.journal-header h3 {
+  font-family: var(--font-mystic);
+  font-size: 1.35rem;
+  color: #fbbf24;
+  letter-spacing: 0.05em;
+}
+
+.journal-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+
+.journal-body {
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.journal-entry-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.journal-entry-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.journal-dishes-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.journal-dish-chip {
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  color: #e9d5ff;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   ANIMATIONS & KEYFRAMES
+   ========================================================================== */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 15px var(--purple-glow); }
+  50% { box-shadow: 0 0 28px rgba(168, 85, 247, 0.8); }
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(4deg); }
+}
+
+/* Responsive */
+@media (max-width: 860px) {
+  .tarot-cards-container.cards-3 {
+    grid-template-columns: 1fr;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+
+  .tarot-card {
+    height: 440px;
+  }
+
+  .oracle-hero h2 {
+    font-size: 2rem;
+  }
+
+  .ritual-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
