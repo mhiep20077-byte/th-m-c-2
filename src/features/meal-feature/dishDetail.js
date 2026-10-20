@@ -56,3 +56,38 @@ export function getSimilarDishes(dishes, dish, excludedIds = [], limit = 6) {
         .slice(0, limit)
         .map(item => item.dish);
 }
+
+/**
+ * Bốc ngẫu nhiên một món tương tự trong nhóm món tương tự nhất
+ * @param {Array} dishes - Danh sách món ăn
+ * @param {Object} dish - Món đang xem
+ * @param {Array<number>} excludedIds - Các ID cần loại
+ * @param {number} poolSize - Số món đưa vào "bể bốc" để vẫn giữ tính tương tự
+ * @returns {Object|null} Món được bốc hoặc null nếu không có món tương tự
+ */
+export function pickRandomSimilar(dishes, dish, excludedIds = [], poolSize = 3) {
+    const pool = rankSimilarDishes(dishes, dish, excludedIds).slice(0, poolSize);
+    if (pool.length === 0) return null;
+    return pool[Math.floor(Math.random() * pool.length)].dish;
+}
+
+/**
+ * Tạo nội dung chi tiết của một món ăn (F04)
+ * @param {Object} dish - Món ăn
+ * @param {boolean} isFavorite - Món này đang được yêu thích hay không
+ * @param {string} notice - Thông báo phụ cần hiển thị (VD: không còn món tương tự)
+ * @returns {string} HTML string
+ */
+function buildDetailContentHTML(dish, isFavorite, isExcluded, notice) {
+    const type = DISH_TYPES.find(t => t.id === dish.type);
+    const typeBadge = type
+        ? `<span class="detail-badge ${dish.type === 'chay' ? 'detail-badge-chay' : 'detail-badge-man'}">${type.icon} ${type.name}</span>`
+        : '';
+
+    const tagsHTML = (dish.tags || [])
+        .map(tag => `<span class="tag-chip">#${tag}</span>`)
+        .join('');
+
+    const noticeHTML = notice
+        ? `<div class="detail-notice">${notice}</div>`
+        : '';
