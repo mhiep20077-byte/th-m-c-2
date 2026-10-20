@@ -7,6 +7,7 @@
  */
 
 import './meal.css';
+import { formatCurrency } from './dishRender.js';
 import {
   MEAL_BUDGETS,
   MEAL_COURSES,
@@ -218,6 +219,36 @@ export function handleMealCloseServed() {
   renderMealState();
 }
 
+/** Sao chép thực đơn mâm cơm đã dọn */
+export function handleMealShareMenu() {
+  const served = mealState.servedMeal;
+  if (!served || !served.dishes) return;
+  const totalCalo = (served.dishes || []).reduce((sum, d) => sum + (d?.calo || d?.calories || 0), 0);
+  const menuLines = served.dishes
+    .map((dish, i) => {
+      const course = MEAL_COURSES[i];
+      return course ? `${course.icon} ${course.name}: ${dish.name} (${formatCurrency(dish.price)})` : `• ${dish.name}`;
+    })
+    .join('\n');
+
+  const shareText = `🍱 [MÂM CƠM HÔM NAY - BUNG OI AN GI]\n${menuLines}\n💵 Tổng cộng: ${formatCurrency(served.total)}${totalCalo > 0 ? `\n🔥 Năng lượng: ~${totalCalo} kcal` : ''}\n👉 Xem thêm tại BungOiAnGi!`;
+
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(shareText).then(() => {
+      const btn = mealContainer?.querySelector('[data-action="share-menu"]');
+      if (btn) {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '✅ Đã sao chép!';
+        setTimeout(() => { btn.innerHTML = originalText; }, 2000);
+      }
+    }).catch(() => {
+      prompt('Sao chép thực đơn mâm cơm:', shareText);
+    });
+  } else {
+    prompt('Sao chép thực đơn mâm cơm:', shareText);
+  }
+}
+
 /** Đổi chế độ bữa ăn: Tất cả / Bữa chay / Bữa mặn */
 export function handleMealSetPreference(preference) {
   if (!Object.values(MEAL_PREFERENCE).includes(preference)) return;
@@ -268,6 +299,7 @@ export function renderMealState() {
     onServe: handleMealServe,
     onNewMeal: handleMealNew,
     onCloseServed: handleMealCloseServed,
+    onShareMenu: handleMealShareMenu,
     onSetPreference: handleMealSetPreference,
     onSetBudget: handleMealSetBudget,
     onViewDetail: (id, trigger) => openDishDetail(id, trigger),

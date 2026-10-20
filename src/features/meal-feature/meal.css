@@ -1208,6 +1208,16 @@ font-size:2rem;
 font-weight:800;
 animation:.6s cubic-bezier(.22,1.2,.36,1) meal-count
 }
+.meal-served-energy {
+  color: #ea580c;
+  margin: 6px 0 0;
+  font-size: .86rem;
+  font-weight: 600;
+}
+.meal-served-energy b {
+  color: #c2410c;
+  font-weight: 800;
+}
 .meal-served-verdict {
   color:var(--text-body);
   margin:8px 0 0;

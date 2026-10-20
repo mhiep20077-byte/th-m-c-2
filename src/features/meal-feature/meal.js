@@ -475,6 +475,7 @@ function renderServedHTML(meal) {
   const kind = getMealKind(meal.dishes);
   const label = MEAL_KIND_LABEL[kind] || MEAL_KIND_LABEL[MEAL_PREFERENCE.ALL];
   const budgetGroup = getMealBudgetGroup(meal.budget);
+  const totalCalo = (meal.dishes || []).reduce((sum, d) => sum + (d?.calo || d?.calories || 0), 0);
 
   return `
     <div class="meal-served meal-served--${kind}" role="dialog" aria-label="Bữa ăn đã dọn">
@@ -519,12 +520,14 @@ function renderServedHTML(meal) {
             <span>Tổng cộng</span>
             <strong>${formatCurrency(meal.total)}</strong>
           </div>
+          ${totalCalo > 0 ? `<p class="meal-served-energy">🔥 Tổng năng lượng ước tính: <b>${totalCalo} kcal</b></p>` : ''}
           <p class="meal-served-verdict">${verdict.icon} <b>${verdict.label}</b> — ${verdict.note}</p>
           <p class="meal-served-budget">${budgetGroup.icon} Mức giá đã dùng: <b>${budgetGroup.name}</b></p>
         </div>
 
         <div class="meal-served-actions">
           <button type="button" class="meal-btn meal-btn--primary" data-action="new">🍳 Dọn bữa mới</button>
+          <button type="button" class="meal-btn" data-action="share-menu">📋 Sao chép thực đơn</button>
           <button type="button" class="meal-btn" data-action="close-served">Xem lại trên khay</button>
         </div>
       </div>
@@ -616,6 +619,7 @@ const ACTION_HANDLERS = {
   serve: (handlers) => handlers.onServe?.(),
   new: (handlers) => handlers.onNewMeal?.(),
   'close-served': (handlers) => handlers.onCloseServed?.(),
+  'share-menu': (handlers) => handlers.onShareMenu?.(),
   pref: (handlers, trigger) => handlers.onSetPreference?.(trigger.dataset.pref),
   budget: (handlers, trigger) => handlers.onSetBudget?.(trigger.dataset.budget),
   detail: (handlers, trigger) => handlers.onViewDetail?.(Number(trigger.dataset.id), trigger)

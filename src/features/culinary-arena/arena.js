@@ -103,15 +103,18 @@ const PROPHECIES_BY_SLOT = {
 
 // Trạng thái cục bộ của Chiêm Tinh
 let allDishes = [];
-let currentSpread = 'three'; // 'three' | 'single'
+let currentSpread = 'three'; // 'single' | 'pair' | 'three' | 'elemental'
 let currentMood = 'all';
 let altarCards = []; // Mảng chứa các lá bài hiện tại trên bàn thờ
 let isRevealingAll = false;
+let oracleCallbacks = {};
+let journalSearchQuery = '';
 
 /* ==========================================================================
    KHỞI TẠO ỨNG DỤNG
    ========================================================================== */
 export async function initCulinaryOracle(options = {}) {
+    oracleCallbacks = options;
     if (options.dishes && Array.isArray(options.dishes) && options.dishes.length > 0) {
         allDishes = options.dishes;
     } else {
@@ -364,6 +367,14 @@ function renderAltar() {
               <div class="tarot-prophecy-quote">
                 "${card.prophecy}"
               </div>
+              <div class="tarot-card-actions">
+                <button type="button" class="btn-tarot-action btn-tarot-fav ${oracleCallbacks.isFav?.(card.dish.id) ? 'active' : ''}" data-dish-id="${card.dish.id}" title="Lưu vào Gu của tôi">
+                  ${oracleCallbacks.isFav?.(card.dish.id) ? '❤️ Đã lưu gu' : '🤍 Lưu gu'}
+                </button>
+                <button type="button" class="btn-tarot-action btn-tarot-meal" data-dish-name="${card.dish.name}" title="Chuyển sang Dựng bữa">
+                  🍽️ Dựng bữa
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -445,6 +456,31 @@ function renderAltar() {
 
     // Hiệu ứng nghiêng 3D Hologram theo vị trí chuột
     attachCardTiltEffects(container);
+
+    // Gắn sự kiện các nút tương tác trên mặt thẻ bài
+    container.querySelectorAll('.btn-tarot-fav').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            playUiClick();
+            const dishId = Number(btn.dataset.dishId);
+            if (oracleCallbacks.onToggleFav) {
+                oracleCallbacks.onToggleFav(dishId);
+                const isNowFav = oracleCallbacks.isFav ? oracleCallbacks.isFav(dishId) : false;
+                btn.classList.toggle('active', isNowFav);
+                btn.textContent = isNowFav ? '❤️ Đã lưu gu' : '🤍 Lưu gu';
+            }
+        });
+    });
+
+    container.querySelectorAll('.btn-tarot-meal').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            playUiClick();
+            if (oracleCallbacks.onGoToMeal) {
+                oracleCallbacks.onGoToMeal();
+            }
+        });
+    });
 }
 
 function attachCardTiltEffects(container) {
@@ -563,7 +599,16 @@ function renderJournalEntries() {
         return;
     }
 
-    const entriesHtml = fortunes.map(f => {
+    const filteredFortunes = fortunes.filter(f => {
+        if (!journalSearchQuery) return true;
+        const q = journalSearchQuery.toLowerCase();
+        const matchesType = (f.spreadType || '').toLowerCase().includes(q);
+        const matchesMood = (f.mood || '').toLowerCase().includes(q);
+        const matchesDish = (f.cards || []).some(c => (c.dishName || '').toLowerCase().includes(q));
+        return matchesType || matchesMood || matchesDish;
+    });
+
+    const entriesHtml = filteredFortunes.map((f, idx) => {
         const dateFormatted = new Date(f.date).toLocaleDateString('vi-VN', {
             hour: '2-digit',
             minute: '2-digit',
@@ -582,7 +627,10 @@ function renderJournalEntries() {
       <div class="journal-entry-card">
         <div class="journal-entry-meta">
           <span style="color:#fbbf24; font-weight:700;">${f.spreadType} &bull; ${f.mood}</span>
-          <span>${dateFormatted}</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span>${dateFormatted}</span>
+            <button type="button" class="btn-copy-fortune-item" data-idx="${idx}" title="Sao chép quẻ này">📋</button>
+          </div>
         </div>
         <div class="journal-dishes-chips">
           ${chipsHtml}
@@ -592,24 +640,63 @@ function renderJournalEntries() {
     }).join('');
 
     container.innerHTML = `
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-      <span style="font-size:0.85rem; color:var(--text-muted);">Đã lưu ${fortunes.length} quẻ gần nhất</span>
-      <button class="btn-mystic-link" id="btn-clear-journal" style="font-size:0.78rem; padding:4px 10px;">
+    <div class="journal-toolbar">
+      <input type="text" id="journal-search-input" class="journal-search" placeholder="🔍 Tìm quẻ theo món, kiểu trải bài..." value="${escapeHTML(journalSearchQuery)}">
+      <button class="btn-mystic-link" id="btn-clear-journal" style="font-size:0.78rem; padding:4px 10px; white-space:nowrap;">
         🗑️ Xóa Lịch Sử
       </button>
     </div>
-    ${entriesHtml}
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:0.82rem; color:var(--text-muted);">
+      <span>Hiển thị ${filteredFortunes.length} / ${fortunes.length} quẻ đã lưu</span>
+    </div>
+    ${filteredFortunes.length > 0 ? entriesHtml : '<p style="text-align:center; color:var(--text-dim); padding:24px;">Không tìm thấy quẻ phù hợp với từ khóa.</p>'}
   `;
+
+    const searchInput = container.querySelector('#journal-search-input');
+    if (searchInput) {
+        searchInput.oninput = (e) => {
+            journalSearchQuery = e.target.value;
+            renderJournalEntries();
+            const reInput = container.querySelector('#journal-search-input');
+            if (reInput) {
+                reInput.focus();
+                reInput.setSelectionRange(reInput.value.length, reInput.value.length);
+            }
+        };
+    }
+
+    container.querySelectorAll('.btn-copy-fortune-item').forEach(btn => {
+        btn.onclick = () => {
+            const idx = Number(btn.dataset.idx);
+            const fortune = filteredFortunes[idx];
+            if (!fortune) return;
+            const summary = (fortune.cards || []).map(c => `• ${c.slotLabel}: ${c.dishName}`).join('\n');
+            const text = `🔮 [QUẺ CHIÊM TINH: ${fortune.spreadType} - ${fortune.mood}]\n${summary}\n👉 BungOiAnGi Food Tarot`;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    btn.textContent = '✅';
+                    setTimeout(() => { btn.textContent = '📋'; }, 1500);
+                });
+            } else {
+                prompt('Sao chép quẻ:', text);
+            }
+        };
+    });
 
     const clearBtn = container.querySelector('#btn-clear-journal');
     if (clearBtn) {
         clearBtn.addEventListener('click', () => {
             if (confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử trong sổ chiêm tinh?')) {
                 clearFortuneHistory();
+                journalSearchQuery = '';
                 renderJournalEntries();
             }
         });
     }
+}
+
+function escapeHTML(str) {
+    return String(str || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 }
 
 /* ==========================================================================

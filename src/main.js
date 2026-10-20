@@ -130,7 +130,19 @@ function initializeArenaPage() {
   if (!ritualContainer || !altarContainer) return;
 
   void initCulinaryOracle({
-    dishes: getMealFeatureDishes()
+    dishes: getMealFeatureDishes(),
+    onToggleFav: (dishId) => {
+      const id = Number(dishId);
+      toggleFav(id);
+      updateFavBadge();
+      if (state.favorites.includes(id)) {
+        burst(window.innerWidth / 2, window.innerHeight / 2, 25);
+      }
+    },
+    isFav: (dishId) => state.favorites.includes(Number(dishId)),
+    onGoToMeal: () => {
+      navigateTo('meal');
+    }
   });
 }
 
