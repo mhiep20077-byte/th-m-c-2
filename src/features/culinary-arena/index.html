@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chiêm Tinh Ẩm Thực | Food Tarot & Bói Quẻ Bữa Ăn</title>
+  <meta name="description" content="Chiêm tinh ẩm thực Tarot 3D giải cứu chiếc bụng đói. Bắt mạch cảm xúc, gieo quẻ tìm món ăn chân ái và lưu vào sổ tay chiêm tinh." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔮</text></svg>" />
+  
+  <!-- Google Fonts: Cinzel, Outfit, Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="./arena.css" />
+</head>
+
+<body>
+  <!-- Header chính Chiêm Tinh -->
+  <header class="oracle-header">
+    <a href="#" class="oracle-brand">
+      <div class="oracle-logo-badge">🔮</div>
+      <div class="oracle-brand-text">
+        <h1>CULINARY ORACLE</h1>
+        <span>Chiêm Tinh Ẩm Thực & Food Tarot</span>
+      </div>
+    </a>
+
+    <div class="oracle-nav-actions">
+      <!-- Nút mở Sổ Quẻ (Lịch sử) -->
+      <button id="open-journal-btn" class="btn-mystic-link" title="Xem các quẻ chiêm tinh đã lưu">
+        📖 Sổ Quẻ Đã Gieo
+      </button>
+
+      <!-- Nút Âm Thanh Bật/Tắt -->
+      <button id="sound-toggle-btn" class="btn-sound-toggle" aria-label="Bật/Tắt âm thanh" title="Bật/Tắt âm thanh">
+        🔊
+      </button>
+
+      <!-- Nút quay lại chức năng Dựng Bữa Cơm -->
+      <a href="../index.html" class="btn-mystic-link">
+        🍽️ Sang Dựng Bữa Cơm
+      </a>
+    </div>
+  </header>
+
+  <!-- Khung Hiển Thị Chính -->
+  <main class="oracle-wrapper">
+    <div class="oracle-hero">
+      <div class="hero-pill">🔮 Chiêm Tinh Bữa Ăn & Food Tarot</div>
+      <h2>Gieo Quẻ Vị Giác Hôm Nay</h2>
+      <p>Hít một hơi thật sâu, kết nối với cảm giác của chiếc bụng đói và lật từng lá bài Tarot để lắng nghe định mệnh ẩm thực dành riêng cho bạn.</p>
+    </div>
+
+    <!-- Khung chọn Kiểu trải bài & Bắt mạch cảm xúc -->
+    <div id="ritual-panel-container"></div>
+
+    <!-- Bàn thờ hiển thị các lá bài Tarot 3D -->
+    <div id="altar-container"></div>
+  </main>
+
+  <!-- Modal Sổ Tay Quẻ Chiêm Tinh (Lịch Sử) -->
+  <div id="journal-modal-backdrop" class="journal-modal-backdrop">
+    <div class="journal-modal">
+      <div class="journal-header">
+        <h3>📖 SỔ TAY QUẺ CHIÊM TINH</h3>
+        <button id="journal-close-btn" class="journal-close-btn" aria-label="Đóng">&times;</button>
+      </div>
+      <div id="journal-entries-container" class="journal-body">
+        <!-- Danh sách quẻ đã lưu sẽ được nạp vào đây -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer style="text-align: center; padding: 30px 16px; color: var(--text-dim); font-size: 0.85rem; border-top: 1px solid var(--border-mystic); margin-top: 50px;">
+    Chiêm Tinh Ẩm Thực (Culinary Oracle) &bull; Module tính năng Tarot ẩm thực độc lập dành cho <strong>BUNGOIANGI</strong>
+  </footer>
+
+  <script type="module" src="./arena.js"></script>
+</body>
+
+</html>
