@@ -14,3 +14,30 @@ export function findDishById(dishes, id) {
     const dishId = Number(id);
     return dishes.find(dish => dish.id === dishId) || null;
 }
+/**
+ * Xếp hạng các món ăn tương tự với một món cho trước
+ * Điểm = số tag chung (ưu tiên cao nhất) + cùng danh mục + cùng loại chay/mặn
+ * @param {Array} dishes - Danh sách món ăn
+ * @param {Object} dish - Món đang xem
+ * @param {Array<number>} excludedIds - Các ID cần loại (món bị loại theo BR02)
+ * @returns {Array<{dish: Object, score: number}>} Danh sách đã sắp xếp giảm dần
+ */
+function rankSimilarDishes(dishes, dish, excludedIds = []) {
+    if (!dishes || !Array.isArray(dishes) || !dish) return [];
+
+    const skipIds = new Set([dish.id, ...excludedIds.map(Number)]);
+    const dishTags = new Set(dish.tags || []);
+
+    return dishes
+        .filter(candidate => !skipIds.has(candidate.id))
+        .map(candidate => {
+            const sharedTags = (candidate.tags || []).filter(tag => dishTags.has(tag)).length;
+            const score =
+                sharedTags * 2 +
+                (candidate.category === dish.category ? 1 : 0) +
+                (candidate.type === dish.type ? 0.5 : 0);
+            return { dish: candidate, score };
+        })
+        .filter(item => item.score > 0)
+        .sort((a, b) => b.score - a.score);
+}
