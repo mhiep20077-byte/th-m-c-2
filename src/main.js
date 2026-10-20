@@ -24,7 +24,6 @@ import {
 } from './features/nearby/nearbyPlaces.js';
 import { AUTH_SESSION_EXPIRED_EVENT, apiRegister, apiLogin, apiForgotPassword, getAuthSession, initializeAuth, isAuthenticated, logout, updateProfileName } from './utils/auth.js';
 import { requestApi, uploadImageToCloudinary } from './utils/apiClient.js';
-import { initMealFeature } from './features/meal-feature/main.js';
 
 // ============================================================
 // STATE QUẢN LÝ ỨNG DỤNG
@@ -64,7 +63,6 @@ const PAGE_PATHS = {
   explore: '/explore',
   quiz: '/quiz',
   airdrop: '/airdrop',
-  meal: '/meal',
   auth: '/auth',
   favs: '/favs',
   profile: '/profile',
@@ -85,38 +83,6 @@ function renderApp() {
     ${renderModal()}
   `;
   bindAll();
-  if (state.activePage === 'meal') initializeMealPage();
-}
-
-const MEAL_CATEGORY_MAP = {
-  nuoc: 'mon-nuoc',
-  com: 'mon-com',
-  'xao-kho': 'mon-kho',
-  anvat: 'an-vat',
-  ngot: 'mon-ngot',
-  uong: 'do-uong'
-};
-
-function getMealFeatureDishes() {
-  return dishes.map(dish => ({
-    ...dish,
-    category: MEAL_CATEGORY_MAP[dish.category] || dish.category,
-    description: dish.description || dish.desc || '',
-    image: dish.image || dish.img || '',
-    type: dish.type || dish.diet || ((dish.tags || []).includes('chay') ? 'chay' : 'man')
-  }));
-}
-
-function initializeMealPage() {
-  const container = document.getElementById('meal-container');
-  const detailModalContainer = document.getElementById('dish-detail-container');
-  if (!container || !detailModalContainer) return;
-
-  void initMealFeature({
-    container,
-    detailModalContainer,
-    dishes: getMealFeatureDishes()
-  });
 }
 
 function renderHeader() {
@@ -140,7 +106,6 @@ function renderHeader() {
         <button class="nav-btn ${state.activePage === 'home' ? 'active' : ''}" data-page="home" id="nav-home">🏠 Trang chủ</button>
         <button class="nav-btn ${state.activePage === 'explore' ? 'active' : ''}" data-page="explore" id="nav-explore">🔍 Khám phá</button>
         <button class="nav-btn ${state.activePage === 'quiz' ? 'active' : ''}" data-page="quiz" id="nav-quiz">🤔 Hôm nay ăn gì?</button>
-        <button class="nav-btn ${state.activePage === 'meal' ? 'active' : ''}" data-page="meal" id="nav-meal">🍽️ Dựng bữa</button>
         <button class="nav-btn ${state.activePage === 'airdrop' ? 'active' : ''}" data-page="airdrop" id="nav-airdrop">🎁 Hòm thính</button>
       </nav>
       <div class="header-actions">
@@ -186,12 +151,6 @@ function renderPages() {
       <div id="page-home" class="page ${state.activePage === 'home' ? 'active' : ''}">${renderHome()}</div>
       <div id="page-explore" class="page ${state.activePage === 'explore' ? 'active' : ''}">${renderExplore()}</div>
       <div id="page-quiz" class="page ${state.activePage === 'quiz' ? 'active' : ''}">${renderQuiz()}</div>
-      <div id="page-meal" class="page ${state.activePage === 'meal' ? 'active' : ''}">
-        <div class="meal-feature-page">
-          <div id="meal-container"></div>
-          <div id="dish-detail-container"></div>
-        </div>
-      </div>
       <div id="page-airdrop" class="page ${state.activePage === 'airdrop' ? 'active' : ''}"><div id="airdrop-container"></div></div>
       <div id="page-auth" class="page ${state.activePage === 'auth' ? 'active' : ''}">${renderAuthPage()}</div>
       <div id="page-favs" class="page ${state.activePage === 'favs' ? 'active' : ''}">${renderFavs()}</div>
@@ -985,8 +944,6 @@ function navigateTo(page, { updateUrl = true } = {}) {
       );
     }
   }
-
-  if (page === 'meal') initializeMealPage();
 
   if (page === 'favs') {
     const favPage = document.getElementById('page-favs');

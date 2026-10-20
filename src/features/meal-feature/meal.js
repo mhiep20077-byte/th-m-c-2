@@ -543,44 +543,11 @@ function renderBookHTML(meals) {
         ${meals.slice(0, 6).map(meal => `
           <li class="meal-book-item">
             <span class="meal-book-time">${new Date(meal.at).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}</span>
-            <span class="meal-book-names">${meal.dishes.map(dish => escapeHTML(dish.name)).join(' · ')}</span>
+            <span class="meal-book-names">${meal.dishes.map(dish => dish.name).join(' · ')}</span>
             <span class="meal-book-total">${formatCurrency(meal.total)}</span>
           </li>
         `).join('')}
       </ul>
-    </section>
-  `;
-}
-
-function escapeHTML(value) {
-  return String(value ?? '').replace(/[&<>"']/g, character => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-  })[character]);
-}
-
-function renderDishHistoryHTML(history) {
-  const entries = Array.isArray(history) ? history.slice(0, 10) : [];
-
-  return `
-    <section class="meal-history" aria-label="Lịch sử món ăn">
-      <h3 class="meal-book-title">🕘 Món đã xem gần đây</h3>
-      ${entries.length
-        ? `<ul class="meal-history-list">
-            ${entries.map(item => {
-              const timestamp = Number.isFinite(Number(item.timestamp)) ? Number(item.timestamp) : 0;
-              return `
-                  <li class="meal-history-item">
-                    <button type="button" class="meal-history-dish" data-action="detail" data-id="${Number(item.id)}">${escapeHTML(item.name)}</button>
-                    <time datetime="${new Date(timestamp).toISOString()}">${new Date(timestamp).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}</time>
-                  </li>
-                `;
-            }).join('')}
-          </ul>`
-        : '<p class="meal-history-empty">Các món bạn xem sẽ xuất hiện tại đây.</p>'}
     </section>
   `;
 }
@@ -701,17 +668,15 @@ function renderBudgetHTML(budget) {
  * Mã định danh một khung hình của khay. Chỉ khi mã này đổi thì mới dựng lại DOM,
  * nhờ vậy animation đang chạy không bị cắt, còn lần lọc không đổi gì thì không vẽ lại.
  */
-function getFrameSignature(meal, dishes, spinningCourseId, revealedCourseId, dishHistory) {
-  const historySignature = dishHistory.map(item => `${item.id}-${item.timestamp}`).join('_');
-  if (meal.phase === MEAL_PHASE.SERVED) return `served-${meal.servedMeal?.at ?? 0}|${historySignature}`;
+function getFrameSignature(meal, dishes, spinningCourseId, revealedCourseId) {
+  if (meal.phase === MEAL_PHASE.SERVED) return `served-${meal.servedMeal?.at ?? 0}`;
   return [
     meal.phase,
     spinningCourseId,
     revealedCourseId,
     meal.preference,
     meal.budget,
-    dishes.map(dish => dish?.id ?? '-').join('_'),
-    historySignature
+    dishes.map(dish => dish?.id ?? '-').join('_')
   ].join('|');
 }
 
@@ -728,14 +693,13 @@ export function renderMealPanel(container, state, handlers = {}) {
     meal = createMealState(),
     pool = [],
     history = [],
-    dishHistory = [],
     spinningCourseId = null,
     revealedCourseId = null
   } = state;
 
   const dishes = meal.slots.map(slot => slot.dish);
   const total = getMealTotal(dishes);
-  const signature = getFrameSignature(meal, dishes, spinningCourseId, revealedCourseId, dishHistory);
+  const signature = getFrameSignature(meal, dishes, spinningCourseId, revealedCourseId);
 
   activeMealHandlers = handlers;
   bindMealActions(container);
@@ -746,7 +710,7 @@ export function renderMealPanel(container, state, handlers = {}) {
   const previousTotal = Number(container.dataset.mealTotal || 0);
   container.dataset.mealTotal = String(total);
 
-  container.innerHTML = buildPanelHTML(meal, pool, history, dishHistory, dishes, total, spinningCourseId, revealedCourseId);
+  container.innerHTML = buildPanelHTML(meal, pool, history, dishes, total, spinningCourseId, revealedCourseId);
 
   const totalEl = container.querySelector('[data-role="total"]');
   if (totalEl) animateTotal(totalEl, previousTotal, total);
@@ -757,7 +721,7 @@ export function renderMealPanel(container, state, handlers = {}) {
   }
 }
 
-function buildPanelHTML(meal, pool, history, dishHistory, dishes, total, spinningCourseId, revealedCourseId) {
+function buildPanelHTML(meal, pool, history, dishes, total, spinningCourseId, revealedCourseId) {
   const isServing = meal.phase === MEAL_PHASE.SERVING;
   const isServed = meal.phase === MEAL_PHASE.SERVED;
   const filled = dishes.filter(Boolean).length;
@@ -824,7 +788,6 @@ function buildPanelHTML(meal, pool, history, dishHistory, dishes, total, spinnin
       </div>
 
       ${renderBookHTML(history)}
-      ${renderDishHistoryHTML(dishHistory)}
 
       ${isServed && meal.servedMeal ? renderServedHTML(meal.servedMeal) : ''}
     </section>
