@@ -91,12 +91,13 @@ export function getHistory() {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
+
     return parsed
       .filter(item => item && Number.isFinite(Number(item.id)))
       .map(item => ({
         id: Number(item.id),
         name: String(item.name || ''),
-        timestamp: Number(item.timestamp) || 0
+        timestamp: Number.isFinite(Number(item.timestamp)) ? Number(item.timestamp) : 0
       }))
       .slice(0, MAX_HISTORY);
   } catch (error) {
