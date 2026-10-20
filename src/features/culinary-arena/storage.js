@@ -51,3 +51,12 @@ export function saveFortune(fortuneData) {
         return [];
     }
 }
+
+/**
+ * Xóa toàn bộ lịch sử quẻ
+ */
+export function clearFortuneHistory() {
+    try {
+        localStorage.removeItem(STORAGE_KEY_ORACLE_HISTORY);
+    } catch (_) { }
+}
