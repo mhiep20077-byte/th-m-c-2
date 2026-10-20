@@ -3,6 +3,7 @@
    Tách độc lập từ BungOiAnGi
    ========================================================== */
 
+@import "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap";
 .meal-feature-page,
 .meal-feature-standalone {
 --primary:#ff5722;
@@ -55,42 +56,52 @@
 --transition-spring:.4s cubic-bezier(.175, .885, .32, 1.275)
 }
 
+.meal-feature-standalone {
+font-family:var(--font-sans);
+background-color:var(--bg-page);
+color:var(--text-body);
+line-height:var(--line-height-normal);
+min-height:100vh;
+font-size:15px;
+margin:0
+}
 body.modal-open {
 overflow:hidden
 }
-
-.meal-feature-standalone {
-  font-family: var(--font-sans);
-  background: var(--bg-page);
-  color: var(--text-body);
-  line-height: var(--line-height-normal);
-  min-height: 100vh;
-  font-size: 15px;
-}
-
 .meal-feature-standalone *,
 .meal-feature-standalone *::before,
 .meal-feature-standalone *::after {
-  box-sizing: border-box;
+box-sizing:border-box;
+margin:0;
+padding:0
 }
-
 .meal-feature-standalone img {
-  object-fit: cover;
-  max-width: 100%;
-  display: block;
+object-fit:cover;
+max-width:100%;
+display:block
 }
-
 .meal-feature-standalone button {
-  cursor: pointer;
-  font-family: inherit;
+cursor:pointer;
+background:0 0;
+border:none;
+outline:none;
+font-family:inherit
 }
-
 .meal-feature-standalone button:focus-visible,
 .meal-feature-standalone a:focus-visible,
 .meal-feature-standalone input:focus-visible,
 .meal-feature-standalone select:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 3px;
+outline:2px solid var(--primary);
+outline-offset:3px
+}
+.meal-feature-standalone input,
+.meal-feature-standalone select {
+font-family:inherit;
+font-size:inherit
+}
+.meal-feature-standalone a {
+color:inherit;
+text-decoration:none
 }
 
 /* ============ STYLES DỰNG BỮA CƠM ============ */
@@ -873,6 +884,50 @@ color:var(--meal-accent);
 white-space:nowrap;
 font-weight:800
 }
+.meal-history {
+background:var(--bg-card-alt);
+border:1px solid var(--border-light);
+border-radius:var(--radius-lg);
+padding:20px 22px
+}
+.meal-history-list {
+display:grid;
+gap:6px;
+list-style:none;
+margin:0;
+padding:0
+}
+.meal-history-item {
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+background:var(--bg-card);
+border-radius:var(--radius-sm);
+padding:9px 12px;
+font-size:.84rem
+}
+.meal-history-dish {
+min-width:0;
+overflow:hidden;
+color:var(--text-body);
+font-weight:700;
+text-align:left;
+text-overflow:ellipsis;
+white-space:nowrap
+}
+.meal-history-dish:hover {
+color:var(--meal-accent)
+}
+.meal-history-item time {
+flex:none;
+color:var(--text-subtle);
+font-variant-numeric:tabular-nums
+}
+.meal-history-empty {
+color:var(--text-muted);
+font-size:.9rem
+}
 /* Màu phủ đổi theo kiểu bữa vừa dọn */
 .meal-served {
   --served-accent: #ff5722;
@@ -1281,7 +1336,7 @@ transform:scale(1)
 
 /* ============ CHI TIẾT MÓN ĂN & MODAL ============ */
 .meal-feature-page .modal-overlay,
-.meal-standalone-page .modal-overlay {
+.meal-feature-standalone .modal-overlay {
 z-index:1000;
 -webkit-backdrop-filter:blur(10px);
 background:#1c1917a6;
@@ -1317,7 +1372,7 @@ overflow:hidden;
 box-shadow:0 25px 60px -12px #00000059
 }
 .meal-feature-page .modal-overlay.is-celebrate .modal-card,
-.meal-standalone-page .modal-overlay.is-celebrate .modal-card {
+.meal-feature-standalone .modal-overlay.is-celebrate .modal-card {
 animation:.4s cubic-bezier(.16,1,.3,1) both modal-slide-up,.62s cubic-bezier(.2,.9,.25,1.25) .32s both modal-card-jolt
 }
 @keyframes modal-card-jolt {
@@ -1332,7 +1387,7 @@ transform:scale(1)rotate(0)
   }
 }
 .meal-feature-page .modal-overlay.is-celebrate .modal-card:after,
-.meal-standalone-page .modal-overlay.is-celebrate .modal-card:after {
+.meal-feature-standalone .modal-overlay.is-celebrate .modal-card:after {
 content:"";
 z-index:6;
 border-radius:inherit;
@@ -1366,10 +1421,11 @@ inset:0;
 overflow:hidden
 }
 .meal-feature-page .modal-overlay.is-celebrate,
-.meal-standalone-page .modal-overlay.is-celebrate {
+.meal-feature-standalone .modal-overlay.is-celebrate {
 background:radial-gradient(70% 60%,#ff8a4c4d 0%,#1c1917b8 70%,#1c1917d1 100%)
 }
-.modal-celebrate-badge {
+.meal-feature-page .modal-celebrate-badge,
+.meal-feature-standalone .modal-celebrate-badge {
 z-index:8;
 border-radius:var(--radius-full);
 color:#fff;
@@ -1455,12 +1511,14 @@ padding:36px 32px;
 display:flex;
 overflow-y:auto
 }
-.detail-badges {
+.meal-feature-page .detail-badges,
+.meal-feature-standalone .detail-badges {
 flex-wrap:wrap;
 gap:8px;
 display:flex
 }
-.detail-badge {
+.meal-feature-page .detail-badge,
+.meal-feature-standalone .detail-badge {
 border-radius:var(--radius-full);
 background:var(--bg-subtle);
 color:var(--text-body);
@@ -1468,41 +1526,48 @@ padding:5px 12px;
 font-size:.78rem;
 font-weight:700
 }
-.detail-badge-chay {
+.meal-feature-page .detail-badge-chay,
+.meal-feature-standalone .detail-badge-chay {
 color:#047857;
 background:#ecfdf5;
 border:1px solid #a7f3d0
 }
-.detail-badge-man {
+.meal-feature-page .detail-badge-man,
+.meal-feature-standalone .detail-badge-man {
 color:#be123c;
 background:#fff1f2;
 border:1px solid #fecdd3
 }
-.detail-name {
+.meal-feature-page .detail-name,
+.meal-feature-standalone .detail-name {
 color:var(--text-main);
 letter-spacing:-.025em;
 font-size:1.85rem;
 font-weight:800;
 line-height:var(--line-height-tight)
 }
-.detail-price {
+.meal-feature-page .detail-price,
+.meal-feature-standalone .detail-price {
 color:var(--primary);
 letter-spacing:-.02em;
 font-size:1.55rem;
 font-weight:800
 }
-.detail-desc {
+.meal-feature-page .detail-desc,
+.meal-feature-standalone .detail-desc {
 color:var(--text-muted);
 font-size:.95rem;
 line-height:1.6
 }
-.detail-tags {
+.meal-feature-page .detail-tags,
+.meal-feature-standalone .detail-tags {
 flex-wrap:wrap;
 gap:6px;
 margin-top:4px;
 display:flex
 }
-.detail-notice {
+.meal-feature-page .detail-notice,
+.meal-feature-standalone .detail-notice {
 border-radius:var(--radius-sm);
 color:#92400e;
 background:#fffbeb;
@@ -1511,14 +1576,20 @@ padding:10px 14px;
 font-size:.85rem;
 font-weight:600
 }
-.detail-actions {
+.meal-feature-page .detail-actions,
+.meal-feature-standalone .detail-actions {
 flex-direction:column;
 gap:10px;
 margin-top:auto;
 padding-top:18px;
 display:flex
 }
-.btn-detail-fav,.btn-detail-exclude,.btn-detail-similar {
+.meal-feature-page .btn-detail-fav,
+.meal-feature-page .btn-detail-exclude,
+.meal-feature-page .btn-detail-similar,
+.meal-feature-standalone .btn-detail-fav,
+.meal-feature-standalone .btn-detail-exclude,
+.meal-feature-standalone .btn-detail-similar {
 border-radius:var(--radius-md);
 width:100%;
 transition:all var(--transition-fast);
@@ -1530,37 +1601,46 @@ font-size:.92rem;
 font-weight:700;
 display:inline-flex
 }
-.btn-detail-fav {
+.meal-feature-page .btn-detail-fav,
+.meal-feature-standalone .btn-detail-fav {
 border:1.5px solid var(--border-light);
 color:var(--text-main);
 background:#fff
 }
-.btn-detail-fav:hover,.btn-detail-fav.active {
+.meal-feature-page .btn-detail-fav:hover,
+.meal-feature-page .btn-detail-fav.active,
+.meal-feature-standalone .btn-detail-fav:hover,
+.meal-feature-standalone .btn-detail-fav.active {
 color:#f43f5e;
 background:#fff1f2;
 border-color:#f43f5e
 }
-.btn-detail-exclude {
+.meal-feature-page .btn-detail-exclude,
+.meal-feature-standalone .btn-detail-exclude {
 background:var(--bg-subtle);
 border:1.5px solid var(--border-subtle);
 color:var(--text-body)
 }
-.btn-detail-exclude:hover {
+.meal-feature-page .btn-detail-exclude:hover,
+.meal-feature-standalone .btn-detail-exclude:hover {
 color:#b91c1c;
 background:#fee2e2;
 border-color:#ef4444
 }
-.btn-detail-exclude.active {
+.meal-feature-page .btn-detail-exclude.active,
+.meal-feature-standalone .btn-detail-exclude.active {
 color:#dc2626;
 background:#fef2f2;
 border-color:#ef4444
 }
-.btn-detail-similar {
+.meal-feature-page .btn-detail-similar,
+.meal-feature-standalone .btn-detail-similar {
 background:var(--primary-gradient);
 color:#fff;
 box-shadow:0 4px 14px var(--primary-glow)
 }
-.btn-detail-similar:hover {
+.meal-feature-page .btn-detail-similar:hover,
+.meal-feature-standalone .btn-detail-similar:hover {
 box-shadow:0 8px 20px var(--primary-glow);
 transform:translateY(-2px)
 }
@@ -1625,6 +1705,11 @@ transform:translateY(-2px)
   }
   .meal-book-time {
     grid-column: 1 / -1;
+  }
+  .meal-history-item {
+    align-items:flex-start;
+    flex-direction:column;
+    gap:2px
   }
   .meal-actions {
     flex-direction: column;
