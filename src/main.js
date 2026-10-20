@@ -155,9 +155,9 @@ function renderHeader() {
         <button class="nav-btn ${state.activePage === 'home' ? 'active' : ''}" data-page="home" id="nav-home">🏠 Trang chủ</button>
         <button class="nav-btn ${state.activePage === 'explore' ? 'active' : ''}" data-page="explore" id="nav-explore">🔍 Khám phá</button>
         <button class="nav-btn ${state.activePage === 'quiz' ? 'active' : ''}" data-page="quiz" id="nav-quiz">🤔 Hôm nay ăn gì?</button>
-        <button class="nav-btn ${state.activePage === 'meal' ? 'active' : ''}" data-page="meal" id="nav-meal">🍽️ Dựng bữa</button>
-        <button class="nav-btn ${state.activePage === 'airdrop' ? 'active' : ''}" data-page="airdrop" id="nav-airdrop">🎁 Hòm thính</button>
-        <button class="nav-btn ${state.activePage === 'arena' ? 'active' : ''}" data-page="arena" id="nav-arena" title="Chiêm tinh ẩm thực & Food Tarot (Culinary Arena)">🔮 Chiêm tinh ẩm thực</button>
+        <button class="nav-btn ${state.activePage === 'meal' ? 'active' : ''}" data-page="meal" id="nav-meal" title="Dựng mâm cơm 4 món chuẩn vị">🍽️ Dựng bữa <span class="nav-badge-pill">Mâm cơm</span></button>
+        <button class="nav-btn ${state.activePage === 'airdrop' ? 'active' : ''}" data-page="airdrop" id="nav-airdrop" title="Thả hòm thính cứu đói">🎁 Hòm thính <span class="nav-badge-pill">Loot</span></button>
+        <button class="nav-btn ${state.activePage === 'arena' ? 'active' : ''}" data-page="arena" id="nav-arena" title="Chiêm tinh ẩm thực & Food Tarot (Culinary Arena)">🔮 Chiêm tinh ẩm thực <span class="nav-badge-pill">Tarot 3D</span></button>
       </nav>
       <div class="header-actions">
         <button class="fav-btn" id="fav-nav-btn">
