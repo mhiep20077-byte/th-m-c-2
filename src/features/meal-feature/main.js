@@ -33,6 +33,7 @@ import {
   addExcluded,
   addHistory,
   getExcludedIds,
+  getHistory,
   getMealRecords,
   isExcluded,
   isFavorite,
@@ -258,6 +259,7 @@ export function renderMealState() {
     meal: mealState,
     pool: mealPool,
     history: mealRecords,
+    dishHistory: getHistory(),
     spinningCourseId: mealRollingCourseId,
     revealedCourseId: mealRevealedCourseId
   }, {
