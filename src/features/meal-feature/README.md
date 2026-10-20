@@ -1,13 +1,13 @@
-# 🍽️ Bản sao độc lập: Chức năng Dựng bữa cơm hoàn chỉnh (Meal Feature)
+# 🍽️ Dựng bữa cơm hoàn chỉnh (Meal Feature)
 
-Module này được tách riêng hoàn chỉnh từ ứng dụng **BUNGOIANGI**, bao gồm toàn bộ mã nguồn, logic điều phối, giao diện (CSS), âm thanh (Web Audio API), dữ liệu mẫu và cơ chế lưu trữ (LocalStorage) liên quan đến chức năng **F11 - Dựng bữa cơm hoàn chỉnh**.
+Tính năng **F11 - Dựng bữa cơm hoàn chỉnh** được tích hợp trên website chính tại đường dẫn `/meal`. Module vẫn có thể chạy độc lập để thử giao diện; khi chạy trong website, tính năng sử dụng danh sách món của ứng dụng thay vì dữ liệu mẫu.
 
 ---
 
-## 📁 Cấu trúc thư mục `src/meal-feature`
+## 📁 Cấu trúc thư mục `src/features/meal-feature`
 
 ```text
-src/meal-feature/
+src/features/meal-feature/
 ├── data/
 │   └── dishes.json       # Cơ sở dữ liệu món ăn đầy đủ cho module
 ├── dishDetail.js         # Modal xem chi tiết món ăn (F04) tích hợp
@@ -60,7 +60,9 @@ src/meal-feature/
    - Tự động lưu vào **Sổ bữa đã dọn** (tối đa 20 bữa gần nhất) trong LocalStorage.
 
 6. **Chi tiết món ăn (Dish Detail Modal):**
-   - Bấm vào tên món hoặc nút "Chi tiết" ở từng ô để mở modal xem ảnh to, mô tả, thẻ tag, giá, và nút yêu thích/bỏ qua.
+   - Bấm vào tên món hoặc nút "Chi tiết" ở từng ô để mở modal xem ảnh, mô tả, thẻ tag, giá, và nút thêm/bỏ yêu thích, đánh dấu/bỏ đánh dấu không thích.
+   - Lịch sử món đã xem được lưu trong LocalStorage; sổ bữa đã dọn giữ tối đa 20 bữa gần nhất.
+   - Danh sách món yêu thích, món không thích, lịch sử xem và sổ bữa được lưu cục bộ trên trình duyệt.
 
 ---
 
@@ -69,14 +71,14 @@ src/meal-feature/
 ### Cách 1: Chạy trực tiếp qua máy chủ Vite đang có
 Mở trình duyệt truy cập đường dẫn:
 ```
-http://localhost:5173/src/meal-feature/index.html
+http://localhost:5173/src/features/meal-feature/index.html
 ```
 (hoặc cổng dev server hiện tại của Vite)
 
 ### Cách 2: Nhúng vào một trang HTML bất kỳ
 ```html
 <!-- 1. Thêm CSS -->
-<link rel="stylesheet" href="/src/meal-feature/meal.css">
+<link rel="stylesheet" href="/src/features/meal-feature/meal.css">
 
 <!-- 2. Thêm các container -->
 <div id="meal-container"></div>
@@ -84,7 +86,7 @@ http://localhost:5173/src/meal-feature/index.html
 
 <!-- 3. Nhập module điều phối -->
 <script type="module">
-  import { initMealFeature } from '/src/meal-feature/main.js';
+  import { initMealFeature } from '/src/features/meal-feature/main.js';
   
   // Khởi động với dữ liệu mặc định
   initMealFeature();
