@@ -19,9 +19,26 @@ import { getSavedFortunes, saveFortune, clearFortuneHistory } from './storage.js
 
 // Danh sách các kiểu trải bài
 const SPREAD_CONFIGS = {
+    single: {
+        id: 'single',
+        name: 'Quẻ Một Chạm (1 Lá Thần Tốc)',
+        count: 1,
+        slots: [
+            { label: 'Chân Ái Định Mệnh', icon: '⚡', desc: 'Lựa chọn vũ trụ dành riêng cho bạn lúc này' }
+        ]
+    },
+    pair: {
+        id: 'pair',
+        name: 'Song Hỷ Ẩm Thực (2 Lá Cặp Đôi)',
+        count: 2,
+        slots: [
+            { label: 'Món Chính Ấm Lòng', icon: '🍲', desc: 'Trọng tâm thỏa mãn cơn đói của bạn' },
+            { label: 'Thanh Mát Giải Ngấy', icon: '🧋', desc: 'Thức uống hoặc món ngọt điểm xuyết hoàn hảo' }
+        ]
+    },
     three: {
         id: 'three',
-        name: 'Tam Hợp Ẩm Thực (3 Lá)',
+        name: 'Tam Hợp Ẩm Thực (3 Lá Truyền Thống)',
         count: 3,
         slots: [
             { label: 'Thực Tại Bao Tử', icon: '🔮', desc: 'Tiếng gọi từ chiếc bụng đói hiện tại' },
@@ -29,12 +46,16 @@ const SPREAD_CONFIGS = {
             { label: 'Chân Ái Cứu Rỗi', icon: '🌟', desc: 'Món ăn định mệnh mang lại bình yên hôm nay' }
         ]
     },
-    single: {
-        id: 'single',
-        name: 'Quẻ Một Chạm (1 Lá Thần Tốc)',
-        count: 1,
+    elemental: {
+        id: 'elemental',
+        name: 'Ngũ Hành Vị Giác (5 Lá Thịnh Soạn)',
+        count: 5,
         slots: [
-            { label: 'Chân Ái Định Mệnh', icon: '⚡', desc: 'Lựa chọn vũ trụ dành riêng cho bạn lúc này' }
+            { label: 'Kim • Giòn Tan', icon: '🪙', desc: 'Khai vị giòn rụm kích thích vị giác' },
+            { label: 'Mộc • Tươi Xanh', icon: '🌿', desc: 'Rau củ tươi mát, cân bằng dinh dưỡng' },
+            { label: 'Thủy • Đậm Đà', icon: '🌊', desc: 'Món nước ngọt lành xoa dịu tâm hồn' },
+            { label: 'Hỏa • Bùng Cháy', icon: '🔥', desc: 'Món cay nồng đánh thức năng lượng' },
+            { label: 'Thổ • No Đủ', icon: '🌾', desc: 'Cơm xôi chắc dạ, nền tảng bình an' }
         ]
     }
 };
@@ -68,6 +89,15 @@ const PROPHECIES_BY_SLOT = {
         'Không còn nghi ngờ gì nữa, lựa chọn này sẽ đem lại sự no đủ và may mắn trọn vẹn.',
         'Hương vị này được sinh ra để xoa dịu tâm hồn bạn sau những giờ tập trung cao độ.',
         'Chốt đơn ngay và tận hưởng từng miếng ngon với lòng biết ơn nhé!'
+    ],
+    3: [
+        'Ngọn lửa nhiệt huyết và đam mê ẩm thực bùng cháy trong từng miếng ngon!',
+        'Một chút nồng nàn và mãnh liệt sẽ xua tan đi tất cả mệt mỏi trong ngày.',
+        'Đậm đà hương vị cuộc sống, tiếp thêm sinh khí và may mắn cho bạn.'
+    ],
+    4: [
+        'Vững chãi và no ấm trọn vẹn, chiếc bụng no sẽ đem lại tâm an lành.',
+        'Một bữa ăn trọn vẹn như đất mẹ bao dung, nuôi dưỡng cả thể xác lẫn tinh thần.'
     ]
 };
 
@@ -192,11 +222,17 @@ function renderRitualPanel() {
           <span>✨</span> Kiểu Trải Bài:
         </div>
         <div class="spread-type-selector">
-          <button class="spread-btn ${currentSpread === 'three' ? 'active' : ''}" data-spread="three">
-            🌟 Tam Hợp Ẩm Thực (3 Lá)
-          </button>
           <button class="spread-btn ${currentSpread === 'single' ? 'active' : ''}" data-spread="single">
-            ⚡ Quẻ Một Chạm (1 Lá)
+            ⚡ 1 Lá (Một Chạm)
+          </button>
+          <button class="spread-btn ${currentSpread === 'pair' ? 'active' : ''}" data-spread="pair">
+            🍲 2 Lá (Song Hỷ)
+          </button>
+          <button class="spread-btn ${currentSpread === 'three' ? 'active' : ''}" data-spread="three">
+            🌟 3 Lá (Tam Hợp)
+          </button>
+          <button class="spread-btn ${currentSpread === 'elemental' ? 'active' : ''}" data-spread="elemental">
+            👑 5 Lá (Ngũ Hành)
           </button>
         </div>
       </div>
@@ -282,7 +318,7 @@ function renderAltar() {
     if (!container) return;
 
     const config = SPREAD_CONFIGS[currentSpread];
-    const cardsClass = currentSpread === 'single' ? 'cards-1' : 'cards-3';
+    const cardsClass = `cards-${config.count}`;
 
     const cardsHtml = altarCards.map((card, idx) => {
         const priceFormatted = Number(card.dish.price).toLocaleString('vi-VN') + ' đ';

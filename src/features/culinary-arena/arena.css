@@ -401,13 +401,23 @@ body.culinary-arena-standalone {
 }
 
 /* Bố cục theo số lượng thẻ */
+.tarot-cards-container.cards-1 {
+  grid-template-columns: minmax(280px, 420px);
+  justify-content: center;
+}
+
+.tarot-cards-container.cards-2 {
+  grid-template-columns: repeat(2, minmax(280px, 420px));
+  justify-content: center;
+}
+
 .tarot-cards-container.cards-3 {
   grid-template-columns: repeat(3, 1fr);
 }
 
-.tarot-cards-container.cards-1 {
-  grid-template-columns: minmax(280px, 420px);
-  justify-content: center;
+.tarot-cards-container.cards-5 {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  max-width: 1240px;
 }
 
 /* Khung từng vị trí lá bài */
@@ -812,7 +822,10 @@ body.culinary-arena-standalone {
 
 /* Responsive */
 @media (max-width: 860px) {
-  .tarot-cards-container.cards-3 {
+  .tarot-cards-container.cards-5,
+  .tarot-cards-container.cards-3,
+  .tarot-cards-container.cards-2,
+  .tarot-cards-container.cards-1 {
     grid-template-columns: 1fr;
     max-width: 360px;
     margin: 0 auto;
