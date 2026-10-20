@@ -249,6 +249,104 @@ export function handleMealShareMenu() {
   }
 }
 
+/**
+ * Dựng mâm cơm ngay lập tức từ một hoặc nhiều món được truyền vào (từ Chiêm tinh hoặc trang khác)
+ * @param {Array<Object>|Object} incomingDishes - Món hoặc danh sách món
+ * @param {boolean} autoFillOthers - Có tự động bốc các suất còn lại cho tròn mâm 4 món không
+ */
+export function populateMealFromDishes(incomingDishes = [], autoFillOthers = true) {
+  clearMealTimers();
+  window.clearTimeout(mealRevealTimer);
+
+  if (!mealContainer) {
+    mealContainer = document.getElementById('meal-container');
+  }
+  if (!detailContainer) {
+    detailContainer = document.getElementById('dish-detail-container');
+  }
+
+  if (allDishes.length === 0) {
+    allDishes = applyFoodImages(bundledDishes.map(d => ({ ...d })));
+  }
+
+  const dishesList = Array.isArray(incomingDishes)
+    ? incomingDishes.filter(Boolean)
+    : (incomingDishes ? [incomingDishes] : []);
+
+  if (dishesList.length === 0) return;
+
+  const keepPreference = mealState.preference;
+  const keepBudget = mealState.budget;
+
+  mealState = createMealState();
+  mealState.preference = keepPreference;
+  mealState.budget = keepBudget;
+  mealRollingCourseId = null;
+  mealRevealedCourseId = null;
+
+  const assignedCourseIds = new Set();
+
+  function assignDishToCourse(rawDish) {
+    const dish = allDishes.find(d => d.id === rawDish.id) || rawDish;
+    let targetCourseId = null;
+
+    if (dish.category === 'do-uong') {
+      targetCourseId = 'drink';
+    } else if (dish.category === 'mon-ngot' || (dish.tags || []).includes('ngot-ngao')) {
+      targetCourseId = 'sweet';
+    } else if (dish.category === 'an-vat') {
+      targetCourseId = 'side';
+    } else if (dish.category === 'mon-com' || dish.category === 'mon-nuoc') {
+      targetCourseId = 'main';
+    } else if (dish.category === 'mon-kho') {
+      targetCourseId = !assignedCourseIds.has('main') ? 'main' : 'side';
+    }
+
+    if (!targetCourseId || assignedCourseIds.has(targetCourseId)) {
+      const altCourse = MEAL_COURSES.find(c =>
+        !assignedCourseIds.has(c.id) &&
+        (c.categories || []).includes(dish.category) &&
+        !(c.excludeCategories || []).includes(dish.category)
+      );
+      if (altCourse) targetCourseId = altCourse.id;
+    }
+
+    if (!targetCourseId || assignedCourseIds.has(targetCourseId)) {
+      const anyEmpty = MEAL_COURSES.find(c => !assignedCourseIds.has(c.id));
+      if (anyEmpty) targetCourseId = anyEmpty.id;
+    }
+
+    if (targetCourseId) {
+      const slotIndex = mealState.slots.findIndex(s => s.courseId === targetCourseId);
+      if (slotIndex !== -1) {
+        mealState.slots[slotIndex].dish = dish;
+        mealState.slots[slotIndex].fromOracle = true;
+        assignedCourseIds.add(targetCourseId);
+      }
+    }
+  }
+
+  dishesList.forEach(d => assignDishToCourse(d));
+
+  if (autoFillOthers) {
+    const pool = getMealPool();
+    mealState.slots.forEach((slot, index) => {
+      if (!slot.dish) {
+        const course = MEAL_COURSES.find(c => c.id === slot.courseId);
+        const currentDishes = getFilledDishes(mealState);
+        const candidate = pickCourseDish(pool, course, currentDishes, mealState.preference);
+        if (candidate) {
+          mealState.slots[index].dish = candidate;
+        }
+      }
+    });
+  }
+
+  mealState.phase = MEAL_PHASE.BUILDING;
+  renderMealState();
+  playUiSound('plate');
+}
+
 /** Đổi chế độ bữa ăn: Tất cả / Bữa chay / Bữa mặn */
 export function handleMealSetPreference(preference) {
   if (!Object.values(MEAL_PREFERENCE).includes(preference)) return;

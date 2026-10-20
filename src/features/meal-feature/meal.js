@@ -402,7 +402,7 @@ function renderSlotHTML(slot, state, index = 0) {
 
   return `
     <article
-      class="meal-slot meal-slot--filled${state.revealedCourseId === course.id ? ' meal-slot--pop' : ''}"
+      class="meal-slot meal-slot--filled${slot.fromOracle ? ' meal-slot--from-oracle' : ''}${state.revealedCourseId === course.id ? ' meal-slot--pop' : ''}"
       data-course="${course.id}"
       style="--i:${index}"
     >
@@ -410,6 +410,7 @@ function renderSlotHTML(slot, state, index = 0) {
       <div class="meal-slot-media">
         <img src="${dish.image}" alt="${dish.name}" loading="lazy" onerror="this.onerror=null;this.src='${foodImageFallback(dish.name)}';" />
         ${getTypeBadge(dish)}
+        ${slot.fromOracle ? '<span class="meal-oracle-badge" title="Món chọn từ quẻ Chiêm tinh">🔮 Từ Tarot</span>' : ''}
       </div>
       <h3 class="meal-slot-name">${dish.name}</h3>
       <p class="meal-slot-meta">${getCategoryName(dish.category)}</p>
@@ -715,6 +716,7 @@ function getFrameSignature(meal, dishes, spinningCourseId, revealedCourseId, dis
     meal.preference,
     meal.budget,
     dishes.map(dish => dish?.id ?? '-').join('_'),
+    meal.slots.map(s => s.fromOracle ? '1' : '0').join(''),
     historySignature
   ].join('|');
 }
@@ -806,6 +808,12 @@ function buildPanelHTML(meal, pool, history, dishHistory, dishes, total, spinnin
       </header>
 
       ${warnings.map(text => `<p class="meal-warning" role="alert">${text}</p>`).join('')}
+
+      ${meal.slots.some(s => s.fromOracle) ? `
+        <div class="meal-oracle-notice">
+          🔮 <b>Mâm cơm đã được dựng từ quẻ Chiêm Tinh!</b> Món định mệnh từ Tarot đã được đặt sẵn vào mâm và phối cùng các món tròn vị.
+        </div>
+      ` : ''}
 
       <div class="meal-tray${isBusy || isServed ? ' is-served' : ''}">
         <div class="meal-tray-glow" aria-hidden="true"></div>

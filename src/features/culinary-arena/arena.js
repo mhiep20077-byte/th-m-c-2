@@ -371,7 +371,7 @@ function renderAltar() {
                 <button type="button" class="btn-tarot-action btn-tarot-fav ${oracleCallbacks.isFav?.(card.dish.id) ? 'active' : ''}" data-dish-id="${card.dish.id}" title="Lưu vào Gu của tôi">
                   ${oracleCallbacks.isFav?.(card.dish.id) ? '❤️ Đã lưu gu' : '🤍 Lưu gu'}
                 </button>
-                <button type="button" class="btn-tarot-action btn-tarot-meal" data-dish-name="${card.dish.name}" title="Chuyển sang Dựng bữa">
+                <button type="button" class="btn-tarot-action btn-tarot-meal" data-dish-id="${card.dish.id}" title="Dựng mâm cơm ngay với món này">
                   🍽️ Dựng bữa
                 </button>
               </div>
@@ -399,6 +399,9 @@ function renderAltar() {
         ` : `
           <button class="btn-mystic-primary" id="btn-save-fortune">
             📖 Lưu Quẻ Vào Sổ Chiêm Tinh
+          </button>
+          <button class="btn-mystic-secondary" id="btn-altar-build-meal" style="background:linear-gradient(135deg, rgba(234,88,12,0.35), rgba(245,158,11,0.25)); border-color:rgba(245,158,11,0.6); color:#ffedd5; font-weight:700;">
+            🍽️ Dựng Mâm Cơm Từ Quẻ
           </button>
         `}
         <button class="btn-mystic-secondary" id="btn-redraw">
@@ -472,12 +475,27 @@ function renderAltar() {
         });
     });
 
+    // Nút Dựng mâm cơm từ quẻ trên Altar
+    const altarBuildMealBtn = container.querySelector('#btn-altar-build-meal');
+    if (altarBuildMealBtn) {
+        altarBuildMealBtn.addEventListener('click', () => {
+            playUiClick();
+            const dishesToBuild = altarCards.map(c => c.dish).filter(Boolean);
+            if (oracleCallbacks.onGoToMeal) {
+                oracleCallbacks.onGoToMeal(dishesToBuild);
+            }
+        });
+    }
+
     container.querySelectorAll('.btn-tarot-meal').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             playUiClick();
+            const dishId = Number(btn.dataset.dishId);
+            const foundCard = altarCards.find(c => c.dish && c.dish.id === dishId);
+            const dish = foundCard ? foundCard.dish : allDishes.find(d => d.id === dishId);
             if (oracleCallbacks.onGoToMeal) {
-                oracleCallbacks.onGoToMeal();
+                oracleCallbacks.onGoToMeal(dish ? [dish] : []);
             }
         });
     });

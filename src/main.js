@@ -25,7 +25,7 @@ import {
 } from './features/nearby/nearbyPlaces.js';
 import { AUTH_SESSION_EXPIRED_EVENT, apiRegister, apiLogin, apiForgotPassword, getAuthSession, initializeAuth, isAuthenticated, logout, updateProfileName } from './utils/auth.js';
 import { requestApi, uploadImageToCloudinary } from './utils/apiClient.js';
-import { initMealFeature } from './features/meal-feature/main.js';
+import { initMealFeature, populateMealFromDishes } from './features/meal-feature/main.js';
 import { initCulinaryOracle } from './features/culinary-arena/arena.js';
 
 // ============================================================
@@ -140,8 +140,12 @@ function initializeArenaPage() {
       }
     },
     isFav: (dishId) => state.favorites.includes(Number(dishId)),
-    onGoToMeal: () => {
+    onGoToMeal: (dishesFromOracle) => {
       navigateTo('meal');
+      if (Array.isArray(dishesFromOracle) && dishesFromOracle.length > 0) {
+        populateMealFromDishes(dishesFromOracle, true);
+        burst(window.innerWidth / 2, window.innerHeight / 3, 35);
+      }
     }
   });
 }
