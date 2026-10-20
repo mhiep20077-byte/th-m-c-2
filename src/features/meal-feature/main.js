@@ -33,7 +33,6 @@ import {
   addExcluded,
   addHistory,
   getExcludedIds,
-  getFavoriteIds,
   getMealRecords,
   isExcluded,
   isFavorite,
@@ -49,6 +48,7 @@ import {
 } from './dishDetail.js';
 
 import { applyFoodImages } from './foodImages.js';
+import bundledDishes from './data/dishes.json';
 
 // Trạng thái cục bộ của bữa cơm
 let allDishes = [];
@@ -357,34 +357,13 @@ export async function initMealFeature(options = {}) {
   mealContainer = container;
   detailContainer = detailModalContainer;
 
-  if (dishes && Array.isArray(dishes) && dishes.length > 0) {
-    allDishes = applyFoodImages(dishes);
-    renderMealState();
-    return;
+  const sourceDishes = Array.isArray(dishes) && dishes.length > 0 ? dishes : bundledDishes;
+  if (!Array.isArray(sourceDishes) || sourceDishes.length === 0) {
+    throw new Error('Không có dữ liệu món ăn để khởi động chức năng dựng bữa.');
   }
 
-  try {
-    // Thử nạp từ file JSON cục bộ của feature hoặc public
-    let data = null;
-    try {
-      const res = await fetch('/src/meal-feature/data/dishes.json');
-      if (res.ok) data = await res.json();
-    } catch (_) {}
-
-    if (!data) {
-      const resFallback = await fetch('/data/dishes.json');
-      if (resFallback.ok) data = await resFallback.json();
-    }
-
-    if (data) {
-      allDishes = applyFoodImages(data);
-      renderMealState();
-    } else {
-      console.error('Không tìm thấy dữ liệu món ăn cho Meal Feature.');
-    }
-  } catch (error) {
-    console.error('Lỗi khi nạp dữ liệu món ăn:', error);
-  }
+  allDishes = applyFoodImages(sourceDishes.map(dish => ({ ...dish })));
+  renderMealState();
 }
 
 // Lắng nghe sự kiện phím Escape để đóng modal chi tiết
@@ -397,7 +376,7 @@ document.addEventListener('keydown', (e) => {
 // Tự động khởi động nếu chạy trong trang HTML có container tương ứng
 if (typeof window !== 'undefined') {
   window.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('meal-container')) {
+    if (document.body.classList.contains('meal-feature-standalone')) {
       initMealFeature();
     }
   });
