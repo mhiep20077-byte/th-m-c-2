@@ -132,7 +132,17 @@ export function getMealRecords() {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
 
-    return parsed.filter(item => item && Array.isArray(item.dishes) && item.dishes.length > 0);
+    const records = parsed
+      .filter(item => item && Array.isArray(item.dishes) && item.dishes.length > 0)
+      .slice(0, MAX_MEAL_RECORDS);
+    if (records.length !== parsed.length) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.MEALS, JSON.stringify(records));
+      } catch (error) {
+        console.warn(`Không thể giới hạn "${STORAGE_KEYS.MEALS}" trong localStorage:`, error);
+      }
+    }
+    return records;
   } catch (error) {
     console.warn(`Không đọc được "${STORAGE_KEYS.MEALS}" từ localStorage:`, error);
     return [];
