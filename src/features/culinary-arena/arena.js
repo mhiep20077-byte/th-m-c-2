@@ -81,8 +81,12 @@ let isRevealingAll = false;
 /* ==========================================================================
    KHỞI TẠO ỨNG DỤNG
    ========================================================================== */
-export async function initCulinaryOracle() {
-    await loadDishDatabase();
+export async function initCulinaryOracle(options = {}) {
+    if (options.dishes && Array.isArray(options.dishes) && options.dishes.length > 0) {
+        allDishes = options.dishes;
+    } else {
+        await loadDishDatabase();
+    }
     setupHeaderEvents();
     renderRitualPanel();
     drawTarotCards();
@@ -90,7 +94,7 @@ export async function initCulinaryOracle() {
 
 async function loadDishDatabase() {
     const candidatePaths = [
-        new URL('../data/dishes.json', import.meta.url).href,
+        new URL(/* @vite-ignore */ '../data/dishes.json', import.meta.url).href,
         './data/dishes.json',
         '../data/dishes.json',
         '/data/dishes.json',
@@ -132,28 +136,39 @@ function getFallbackDishes() {
    CÀI ĐẶT SỰ KIỆN THANH ĐIỀU HƯỚNG
    ========================================================================== */
 function setupHeaderEvents() {
-    const soundBtn = document.getElementById('sound-toggle-btn');
-    if (soundBtn) {
-        function updateIcon() {
-            soundBtn.textContent = isSoundEnabled() ? '🔊' : '🔇';
-            soundBtn.title = isSoundEnabled() ? 'Tắt âm thanh' : 'Bật âm thanh';
-        }
-        soundBtn.addEventListener('click', () => {
-            toggleSound();
-            playUiClick();
-            updateIcon();
+    const soundBtns = [
+        document.getElementById('sound-toggle-btn'),
+        document.getElementById('arena-sound-toggle-btn')
+    ].filter(Boolean);
+
+    function updateIcons() {
+        soundBtns.forEach(btn => {
+            btn.textContent = isSoundEnabled() ? '🔊' : '🔇';
+            btn.title = isSoundEnabled() ? 'Tắt âm thanh' : 'Bật âm thanh';
         });
-        updateIcon();
     }
 
+    soundBtns.forEach(btn => {
+        btn.onclick = () => {
+            toggleSound();
+            playUiClick();
+            updateIcons();
+        };
+    });
+    updateIcons();
+
     // Nút mở Sổ Quẻ (Lịch sử)
-    const journalBtn = document.getElementById('open-journal-btn');
-    if (journalBtn) {
-        journalBtn.addEventListener('click', () => {
+    const journalBtns = [
+        document.getElementById('open-journal-btn'),
+        document.getElementById('arena-journal-btn')
+    ].filter(Boolean);
+
+    journalBtns.forEach(btn => {
+        btn.onclick = () => {
             playUiClick();
             openJournalModal();
-        });
-    }
+        };
+    });
 }
 
 /* ==========================================================================
@@ -548,9 +563,11 @@ function shuffleArray(array) {
     return result;
 }
 
-// Tự khởi chạy khi DOM sẵn sàng
+// Tự khởi chạy khi DOM sẵn sàng nếu chạy độc lập
 if (typeof window !== 'undefined') {
     window.addEventListener('DOMContentLoaded', () => {
-        initCulinaryOracle();
+        if (document.body.classList.contains('culinary-arena-standalone')) {
+            initCulinaryOracle();
+        }
     });
 }

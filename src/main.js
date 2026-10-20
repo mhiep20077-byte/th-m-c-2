@@ -6,6 +6,7 @@ import './styles/main.css';
 import './features/airdrop/airdrop.css';
 import './features/auth/auth.css';
 import './features/portals/portals.css';
+import './features/culinary-arena/arena.css';
 
 import { dishes, MOODS, BUDGETS, CATEGORIES, replaceDishes } from './data/dishes.js';
 import { filterDishes, sortDishes, getRandomDish, getCategoryLabel, removeVietnameseTones } from './features/filters/dishFilters.js';
@@ -25,6 +26,7 @@ import {
 import { AUTH_SESSION_EXPIRED_EVENT, apiRegister, apiLogin, apiForgotPassword, getAuthSession, initializeAuth, isAuthenticated, logout, updateProfileName } from './utils/auth.js';
 import { requestApi, uploadImageToCloudinary } from './utils/apiClient.js';
 import { initMealFeature } from './features/meal-feature/main.js';
+import { initCulinaryOracle } from './features/culinary-arena/arena.js';
 
 // ============================================================
 // STATE QUẢN LÝ ỨNG DỤNG
@@ -63,8 +65,10 @@ const PAGE_PATHS = {
   home: '/',
   explore: '/explore',
   quiz: '/quiz',
-  airdrop: '/airdrop',
   meal: '/meal',
+  airdrop: '/airdrop',
+  arena: '/arena',
+  'culinary-arena': '/culinary-arena',
   auth: '/auth',
   favs: '/favs',
   profile: '/profile',
@@ -86,6 +90,7 @@ function renderApp() {
   `;
   bindAll();
   if (state.activePage === 'meal') initializeMealPage();
+  if (state.activePage === 'arena' || state.activePage === 'culinary-arena') initializeArenaPage();
 }
 
 const MEAL_CATEGORY_MAP = {
@@ -119,6 +124,16 @@ function initializeMealPage() {
   });
 }
 
+function initializeArenaPage() {
+  const ritualContainer = document.getElementById('ritual-panel-container');
+  const altarContainer = document.getElementById('altar-container');
+  if (!ritualContainer || !altarContainer) return;
+
+  void initCulinaryOracle({
+    dishes: getMealFeatureDishes()
+  });
+}
+
 function renderHeader() {
   const favCount = state.favorites.length;
   const session = getAuthSession();
@@ -142,6 +157,7 @@ function renderHeader() {
         <button class="nav-btn ${state.activePage === 'quiz' ? 'active' : ''}" data-page="quiz" id="nav-quiz">🤔 Hôm nay ăn gì?</button>
         <button class="nav-btn ${state.activePage === 'meal' ? 'active' : ''}" data-page="meal" id="nav-meal">🍽️ Dựng bữa</button>
         <button class="nav-btn ${state.activePage === 'airdrop' ? 'active' : ''}" data-page="airdrop" id="nav-airdrop">🎁 Hòm thính</button>
+        <button class="nav-btn ${state.activePage === 'arena' ? 'active' : ''}" data-page="arena" id="nav-arena" title="Chiêm tinh ẩm thực & Food Tarot (Culinary Arena)">🔮 Chiêm tinh ẩm thực</button>
       </nav>
       <div class="header-actions">
         <button class="fav-btn" id="fav-nav-btn">
@@ -193,6 +209,54 @@ function renderPages() {
         </div>
       </div>
       <div id="page-airdrop" class="page ${state.activePage === 'airdrop' ? 'active' : ''}"><div id="airdrop-container"></div></div>
+      <div id="page-arena" class="page ${state.activePage === 'arena' ? 'active' : ''}">
+        <div class="culinary-arena-page">
+          <div class="oracle-sub-header">
+            <div class="oracle-sub-brand">
+              <span class="oracle-logo-badge">🔮</span>
+              <div>
+                <h2 class="oracle-sub-title">CULINARY ORACLE</h2>
+                <span class="oracle-sub-desc">Chiêm Tinh Ẩm Thực & Food Tarot</span>
+              </div>
+            </div>
+            <div class="oracle-nav-actions">
+              <button id="arena-journal-btn" class="btn-mystic-link" type="button" title="Xem các quẻ chiêm tinh đã lưu">
+                📖 Sổ Quẻ Đã Gieo
+              </button>
+              <button id="arena-sound-toggle-btn" class="btn-sound-toggle" type="button" aria-label="Bật/Tắt âm thanh" title="Bật/Tắt âm thanh">
+                🔊
+              </button>
+            </div>
+          </div>
+
+          <div class="oracle-wrapper">
+            <div class="oracle-hero">
+              <div class="hero-pill">🔮 Chiêm Tinh Bữa Ăn & Food Tarot</div>
+              <h2>Gieo Quẻ Vị Giác Hôm Nay</h2>
+              <p>Hít một hơi thật sâu, kết nối với cảm giác của chiếc bụng đói và lật từng lá bài Tarot để lắng nghe định mệnh ẩm thực dành riêng cho bạn.</p>
+            </div>
+
+            <!-- Khung chọn Kiểu trải bài & Bắt mạch cảm xúc -->
+            <div id="ritual-panel-container"></div>
+
+            <!-- Bàn thờ hiển thị các lá bài Tarot 3D -->
+            <div id="altar-container"></div>
+          </div>
+
+          <!-- Modal Sổ Tay Quẻ Chiêm Tinh (Lịch Sử) -->
+          <div id="journal-modal-backdrop" class="journal-modal-backdrop">
+            <div class="journal-modal">
+              <div class="journal-header">
+                <h3>📖 SỔ TAY QUẺ CHIÊM TINH</h3>
+                <button id="journal-close-btn" class="journal-close-btn" aria-label="Đóng">&times;</button>
+              </div>
+              <div id="journal-entries-container" class="journal-body">
+                <!-- Danh sách quẻ đã lưu sẽ được nạp vào đây -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div id="page-auth" class="page ${state.activePage === 'auth' ? 'active' : ''}">${renderAuthPage()}</div>
       <div id="page-favs" class="page ${state.activePage === 'favs' ? 'active' : ''}">${renderFavs()}</div>
       <div id="page-profile" class="page ${state.activePage === 'profile' ? 'active' : ''}">${renderProfilePage()}</div>
@@ -944,6 +1008,8 @@ function updateAdminDishSearch() {
 function navigateTo(page, { updateUrl = true } = {}) {
   closeModal();
 
+  if (page === 'culinary-arena') page = 'arena';
+
   if (['favs', 'profile', 'admin'].includes(page) && !isAuthenticated()) {
     requireAuthentication('Vui lòng đăng nhập hoặc đăng ký để tiếp tục.', page);
     return;
@@ -987,6 +1053,7 @@ function navigateTo(page, { updateUrl = true } = {}) {
   }
 
   if (page === 'meal') initializeMealPage();
+  if (page === 'arena') initializeArenaPage();
 
   if (page === 'favs') {
     const favPage = document.getElementById('page-favs');
