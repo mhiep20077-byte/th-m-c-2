@@ -71,6 +71,16 @@ test('keeps only the ten most recently viewed dishes', () => {
   assert.equal(history[9].id, 3);
 });
 
+test('moves a viewed dish to the front without duplicating its history entry', () => {
+  addHistory(1, 'Món cũ');
+  addHistory(2, 'Món 2');
+  addHistory(1, 'Món mới');
+
+  const history = getHistory();
+  assert.deepEqual(history.map(item => item.id), [1, 2]);
+  assert.equal(history[0].name, 'Món mới');
+});
+
 test('normalizes invalid dish history records from LocalStorage', () => {
   globalThis.localStorage.setItem('bungoi-history', JSON.stringify([
     null,
