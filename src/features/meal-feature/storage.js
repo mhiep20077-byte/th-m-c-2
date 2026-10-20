@@ -57,8 +57,7 @@ export function toggleFavorite(id) {
     list.push(dishId);
   }
 
-  writeIdList(STORAGE_KEYS.FAVORITES, list);
-  return !exists;
+  return writeIdList(STORAGE_KEYS.FAVORITES, list) && !exists;
 }
 
 export function getExcludedIds() {
@@ -75,8 +74,7 @@ export function addExcluded(id) {
   const list = getExcludedIds();
   if (list.includes(dishId)) return false;
   list.push(dishId);
-  writeIdList(STORAGE_KEYS.EXCLUDED, list);
-  return true;
+  return writeIdList(STORAGE_KEYS.EXCLUDED, list);
 }
 
 export function removeExcluded(id) {
@@ -84,8 +82,7 @@ export function removeExcluded(id) {
   const list = getExcludedIds();
   const next = list.filter(item => item !== dishId);
   if (next.length === list.length) return false;
-  writeIdList(STORAGE_KEYS.EXCLUDED, next);
-  return true;
+  return writeIdList(STORAGE_KEYS.EXCLUDED, next);
 }
 
 export function getHistory() {
@@ -93,8 +90,17 @@ export function getHistory() {
     const raw = localStorage.getItem(STORAGE_KEYS.HISTORY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(item => item && Number.isFinite(Number(item.id)))
+      .map(item => ({
+        id: Number(item.id),
+        name: String(item.name || ''),
+        timestamp: Number(item.timestamp) || 0
+      }))
+      .slice(0, MAX_HISTORY);
+  } catch (error) {
+    console.warn(`Không đọc được "${STORAGE_KEYS.HISTORY}" từ localStorage:`, error);
     return [];
   }
 }
@@ -106,8 +112,8 @@ export function addHistory(id, name) {
   const next = [{ id: dishId, name: String(name || ''), timestamp: Date.now() }, ...list].slice(0, MAX_HISTORY);
   try {
     localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(next));
-  } catch (e) {
-    console.warn('Lỗi ghi history:', e);
+  } catch (error) {
+    console.warn(`Không ghi được "${STORAGE_KEYS.HISTORY}" vào localStorage:`, error);
   }
 }
 
