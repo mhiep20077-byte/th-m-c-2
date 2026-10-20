@@ -290,18 +290,21 @@ export function openDishDetail(id, triggerEl) {
   selectedDishId = dish.id;
   detailNotice = '';
   addHistory(dish.id, dish.name);
+  renderMealState();
   renderSelectedDetail();
 }
 
 export function closeDishDetail() {
+  const dishId = selectedDishId;
+  const returnFocus = detailReturnFocus;
   selectedDishId = null;
   detailNotice = '';
   if (detailContainer) detailContainer.innerHTML = '';
   document.body.classList.remove('modal-open');
 
-  if (detailReturnFocus && document.contains(detailReturnFocus)) {
-    detailReturnFocus.focus();
-  }
+  const fallbackFocus = mealContainer?.querySelector(`[data-action="detail"][data-id="${dishId}"]`);
+  const focusTarget = returnFocus && document.contains(returnFocus) ? returnFocus : fallbackFocus;
+  focusTarget?.focus();
   detailReturnFocus = null;
 }
 
