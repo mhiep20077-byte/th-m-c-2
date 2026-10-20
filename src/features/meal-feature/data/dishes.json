@@ -1,0 +1,772 @@
+[
+  {
+    "id": 1,
+    "name": "Mì cay Hải Sản",
+    "price": 45000,
+    "category": "mon-nuoc",
+    "type": "man",
+    "description": "Mì cay Hàn Quốc với tôm, mực, chả cá và 7 cấp độ cay xé lưỡi",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["cay", "no", "an-vui"]
+  },
+  {
+    "id": 2,
+    "name": "Cơm Tấm Sườn Bì Chả",
+    "price": 40000,
+    "category": "mon-com",
+    "type": "man",
+    "description": "Cơm tấm nóng hổi kèm sườn nướng mật ong thơm lừng, bì và chả chưng",
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80",
+    "tags": ["no", "phobien", "tiet-kiem"]
+  },
+  {
+    "id": 3,
+    "name": "Bún Bò Huế Đặc Biệt",
+    "price": 50000,
+    "category": "mon-nuoc",
+    "type": "man",
+    "description": "Nước dùng đậm đà hương sả mắm ruốc, bò nạm, giò heo và huyết",
+    "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=900&q=80",
+    "tags": ["cay", "no", "dam-da"]
+  },
+  {
+    "id": 4,
+    "name": "Bún Thịt Nướng Chả Giò",
+    "price": 38000,
+    "category": "mon-kho",
+    "type": "man",
+    "description": "Bún tươi ăn kèm thịt nướng xiên, chả giòn rụm và nước mắm chua ngọt",
+    "image": "https://images.unsplash.com/photo-1526318896980-cf78c088247c?auto=format&fit=crop&w=900&q=80",
+    "tags": ["tiet-kiem", "ngon-lanh", "phobien"]
+  },
+  {
+    "id": 5,
+    "name": "Cơm Gà Xối Mỡ",
+    "price": 45000,
+    "category": "mon-com",
+    "type": "man",
+    "description": "Đùi gà chiên giòn rụm da vàng ươm ăn kèm cơm đỏ sốt cà chua",
+    "image": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=900&q=80",
+    "tags": ["no", "gion-rum"]
+  },
+  {
+    "id": 6,
+    "name": "Bánh Bột Lọc Huế",
+    "price": 25000,
+    "category": "an-vat",
+    "type": "man",
+    "description": "Bánh bột lọc nhân tôm thịt dai giòn sần sật châm nước mắm cay",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["an-vui", "tiet-kiem", "cay"]
+  },
+  {
+    "id": 7,
+    "name": "Tokbokki Phô Mai",
+    "price": 35000,
+    "category": "an-vat",
+    "type": "man",
+    "description": "Bánh gạo Hàn Quốc sốt cay phủ phô mai kéo sợi thơm béo",
+    "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=900&q=80",
+    "tags": ["cay", "beo-bap", "an-vui"]
+  },
+  {
+    "id": 8,
+    "name": "Trà Sữa Trân Châu Đường Đen",
+    "price": 30000,
+    "category": "do-uong",
+    "type": "chay",
+    "description": "Trà sữa đậm vị kèm trân châu đường đen dẻo thơm ngạt ngào",
+    "image": "https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=900&q=80",
+    "tags": ["giai-khat", "ngot-ngao"]
+  },
+  {
+    "id": 9,
+    "name": "Trà Đào Cam Sả",
+    "price": 28000,
+    "category": "do-uong",
+    "type": "chay",
+    "description": "Vị chua thanh của cam kết hợp hương sả thơm lừng và miếng đào giòn tan",
+    "image": "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=80",
+    "tags": ["giai-khat", "thanh-mat"]
+  },
+  {
+    "id": 10,
+    "name": "Mì Xào Bò Rau Củ",
+    "price": 42000,
+    "category": "mon-kho",
+    "type": "man",
+    "description": "Mì trứng xào thịt bò mềm ngọt cùng rau cải cúc, cà rốt và hành tây",
+    "image": "https://images.unsplash.com/photo-1534939561126-855b8675edd7?auto=format&fit=crop&w=900&q=80",
+    "tags": ["no", "dinh-duong"]
+  },
+  {
+    "id": 11,
+    "name": "Phở Bò Tái Nạm",
+    "price": 55000,
+    "category": "mon-nuoc",
+    "type": "man",
+    "description": "Phở truyền thống Hà Nội với nước dùng ninh xương ngọt thanh đậm đà",
+    "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80",
+    "tags": ["no", "truyen-thong"]
+  },
+  {
+    "id": 12,
+    "name": "Cơm Chiên Dương Châu",
+    "price": 35000,
+    "category": "mon-com",
+    "type": "man",
+    "description": "Cơm chiên hạt vàng ươm tơi xốp phối cùng lạp xưởng, đậu hà lan và tôm",
+    "image": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=900&q=80",
+    "tags": ["no", "tiet-kiem"]
+  },
+  {
+    "id": 13,
+    "name": "Gỏi Cuốn Tôm Thịt",
+    "price": 32000,
+    "category": "an-vat",
+    "type": "man",
+    "description": "Gỏi cuốn tươi mát với tôm, thịt, rau sống và nước chấm chua ngọt",
+    "image": "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=80",
+    "tags": ["sang", "moi", "tiet-kiem"]
+  },
+  {
+    "id": 14,
+    "name": "Bánh Tráng Trộn",
+    "price": 26000,
+    "category": "an-vat",
+    "type": "chay",
+    "description": "Bánh tráng trộn nóng hổi, mứt dưa, khô bò, hành phi và xoài xanh",
+    "image": "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=900&q=80",
+    "tags": ["vui", "an-vui", "moi"]
+  },
+  {
+    "id": 15,
+    "name": "Súp Bắp Cà Chua",
+    "price": 24000,
+    "category": "mon-kho",
+    "type": "chay",
+    "description": "Súp bắp mềm mịn, ngọt thanh cùng cà chua và hành phi thơm lừng",
+    "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=900&q=80",
+    "tags": ["dinh-duong", "thu-gian"]
+  },
+  {
+    "id": 16,
+    "name": "Sinh Tố Xoài Chanh Dây",
+    "price": 29000,
+    "category": "do-uong",
+    "type": "chay",
+    "description": "Sinh tố xoài mát lạnh, sánh mịn và thơm vị trái cây tươi",
+    "image": "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?auto=format&fit=crop&w=900&q=80",
+    "tags": ["mat", "thanh-mat", "giai-khat"]
+  },
+  {
+    "id": 17,
+    "name": "Bún Bò Bà Lệ Thốt Nốt",
+    "price": 18000,
+    "category": "mon-nuoc",
+    "type": "man",
+    "description": "Bún bò Sài Gòn giá rẻ với nước dùng ngọt, thịt bò và nước mắm chua cay",
+    "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=900&q=80",
+    "tags": ["tiet-kiem", "phobien", "ngon-lanh"]
+  },
+  {
+    "id": 18,
+    "name": "Bánh Mì Chả Cá",
+    "price": 15000,
+    "category": "an-vat",
+    "type": "man",
+    "description": "Ổ bánh mì đặc ruột, chả cá chiên giòn chan nước mắm chua ngọt và rau thơm",
+    "image": "https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=900&q=80",
+    "tags": ["tiet-kiem", "phobien", "sang"]
+  },
+  {
+    "id": 19,
+    "name": "Cơm Tấm Trứng Ốp La",
+    "price": 19000,
+    "category": "mon-com",
+    "type": "man",
+    "description": "Cơm tấm dẻo ăn kèm trứng ốp lòng đào lòng đào và nước mắm chua ngọt",
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80",
+    "tags": ["tiet-kiem", "dinh-duong", "an-sang"]
+  },
+  {
+    "id": 20,
+    "name": "Bánh Cuốn Nhân Thịt Nấm",
+    "price": 12000,
+    "category": "an-vat",
+    "type": "chay",
+    "description": "Bánh cuốn mỏng mịn cuộn nhân thịt nấm thơm dứt, chấm nước mắm sen",
+    "image": "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=900&q=80",
+    "tags": ["chay", "truyen-thong", "an-vui"]
+  },
+  {
+    "id": 21,
+    "name": "Bún Chả Cá Lã Vọng",
+    "price": 17000,
+    "category": "mon-nuoc",
+    "type": "man",
+    "description": "Bún trắng quen thuộc ăn kèm chả cá Lã Vọng nướng thơm và nước mắm chua",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["tiet-kiem", "phobien", "ngon-lanh"]
+  },
+  {
+    "id": 22,
+    "name": "Nước Đậu Xanh Nóng Sả",
+    "price": 8000,
+    "category": "do-uong",
+    "type": "chay",
+    "description": "Nước đậu xanh nóng giàu chất xơ, thơm miếng sả và lá bạc hà tươi",
+    "image": "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=80",
+    "tags": ["mat", "thanh-mat", "giai-khat"]
+  },
+  {
+    "id": 23,
+    "name": "Bánh Đa Nướng Giòn",
+    "price": 13000,
+    "category": "an-vat",
+    "type": "chay",
+    "description": "Bánh đa nướng giòn rụm rắc hành phi, mè rang và nước mắm chấm",
+    "image": "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=80",
+    "tags": ["chay", "tiet-kiem", "an-vui"]
+  },
+  {
+    "id": 24,
+    "name": "Cơm Gạo Lứt Bò Kho Dưa",
+    "price": 18000,
+    "category": "mon-com",
+    "type": "man",
+    "description": "Cơm gạo lứt thơm dẻo ăn cùng bò kho dưa cải chua nước dừa mặn ngọt",
+    "image": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=900&q=80",
+    "tags": ["dinh-duong", "tiet-kiem", "an-sang"]
+  },
+  {
+    "id": 25,
+    "name": "Chả Giò Nem Lụi Chấm Mắm",
+    "price": 14000,
+    "category": "an-vat",
+    "type": "man",
+    "description": "Chả giò cuộn lá bánh tráng giòn rụm ăn kèm chấm mắm tôm và đuôi tôm",
+    "image": "https://images.unsplash.com/photo-1526318896980-cf78c088247c?auto=format&fit=crop&w=900&q=80",
+    "tags": ["phobien", "an-vui", "tiet-kiem"]
+  },
+  {
+    "id": 26,
+    "name": "Trà Tắc Nóng",
+    "price": 10000,
+    "category": "do-uong",
+    "type": "chay",
+    "description": "Trà tắc nóng giải khát, ấm bụng với vị chua dứa tươi mát cổ",
+    "image": "https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=900&q=80",
+    "tags": ["giai-khat", "thu-gian", "mat"]
+  },
+  {
+    "id": 27,
+    "name": "Mì Quảng Tôm Thịt",
+    "price": 19000,
+    "category": "mon-nuoc",
+    "type": "man",
+    "description": "Mì Quảng vàng ươm đặc trưng miền Trung, tôm thịt và rau thơm",
+    "image": "https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&w=900&q=80",
+    "tags": ["truyen-thong", "tiet-kiem", "phobien"]
+  },
+  {
+    "id": 28,
+    "name": "Bánh Khoai Mì Nướng",
+    "price": 9000,
+    "category": "an-vat",
+    "type": "chay",
+    "description": "Khoai mì nướng xù xình, vỏ nạnh lòng dẻo ăn kèm muối tôm và dầu mè",
+    "image": "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?auto=format&fit=crop&w=900&q=80",
+    "tags": ["chay", "tiet-kiem", "vui"]
+  },
+  {
+    "id": 29,
+    "name": "Hủ Tiếu Nam Bò Tươi",
+    "price": 32000,
+    "category": "mon-nuoc",
+    "type": "man",
+    "description": "Hủ tiếu Nam bò tươi, nước dùng ninh xương trong và thơm tiêu",
+    "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80",
+    "tags": ["no", "thu-gian", "tiet-kiem"]
+  },
+  {
+    "id": 30,
+    "name": "Bánh Xèo Giò Chả",
+    "price": 35000,
+    "category": "an-vat",
+    "type": "man",
+    "description": "Bánh xèo giòn rụm nhân giò heo, tôm chua và đậu xanh, ăn kèm nước chấm",
+    "image": "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=900&q=80",
+    "tags": ["phobien", "truyen-thong", "moi"]
+  },
+  {
+    "id": 31,
+    "name": "Lẩu Thái Chua Cay Nóng",
+    "price": 58000,
+    "category": "mon-nuoc",
+    "type": "man",
+    "description": "Lẩu Thái chua cay chua chát, tôm cua và rau nhúng đầy sức sống",
+    "image": "https://images.unsplash.com/photo-1541014741259-de529411b96a?auto=format&fit=crop&w=900&q=80",
+    "tags": ["cay", "dam-da", "sang"]
+  },
+  {
+    "id": 32,
+    "name": "Gà Kho Sả Nướng Mật",
+    "price": 62000,
+    "category": "mon-com",
+    "type": "man",
+    "description": "Đùi gà kho sả nướng mật ong, da vàng bóng, thịt ngọt mềm thơm sả",
+    "image": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=900&q=80",
+    "tags": ["no", "sang", "gion-rum"]
+  },
+  {
+    "id": 33,
+    "name": "Cá Chỉ Vàng Sốt Mè Tôm",
+    "price": 55000,
+    "category": "mon-kho",
+    "type": "man",
+    "description": "Cá chỉ vàng chiên giòn sốt mè tôm dào vị, ăn cùng cơm nóng",
+    "image": "https://images.unsplash.com/photo-1534939561126-855b8675edd7?auto=format&fit=crop&w=900&q=80",
+    "tags": ["no", "dinh-duong", "phobien"]
+  },
+  {
+    "id": 34,
+    "name": "Chè Hạt Sen Nha Đà",
+    "price": 42000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Chè hạt sen nha đà nấu nhừ, giòn ngon thanh mát và dịu ngọt",
+    "image": "https://images.unsplash.com/photo-1488900128323-21503983a07e?auto=format&fit=crop&w=900&q=80",
+    "tags": ["chay", "thanh-mat", "ngot-ngao"]
+  },
+  {
+    "id": 35,
+    "name": "Bún Bò Thái Lan Hải Sản",
+    "price": 65000,
+    "category": "mon-nuoc",
+    "type": "man",
+    "description": "Bún bò Thái trộn mắm tôm cay nồng, lòng bò thái lát mỏng và rau nhúng",
+    "image": "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=900&q=80",
+    "tags": ["cay", "dam-da", "sang"]
+  },
+  {
+    "id": 36,
+    "name": "Lẩu Hải Sản Dây Chuyền",
+    "price": 120000,
+    "category": "mon-nuoc",
+    "type": "man",
+    "description": "Lẩu hải sản dây chuyền cuốn tôm, mực, hành và rau, quay vòng ăn cùng nhau",
+    "image": "https://images.unsplash.com/photo-1592194996308-7b43878e84a6?auto=format&fit=crop&w=900&q=80",
+    "tags": ["sang", "dam-da", "noi-gia-dinhinh"]
+  },
+  {
+    "id": 37,
+    "name": "Gà Hấp Mè Sả",
+    "price": 95000,
+    "category": "mon-com",
+    "type": "man",
+    "description": "Gà ta hấp mè sả, da vàng óng, thịt ngọt mềm thơm nồng mùi dứa",
+    "image": "https://images.unsplash.com/photo-1587593810167-a84920ea2781?auto=format&fit=crop&w=900&q=80",
+    "tags": ["no", "dinh-duong", "thu-gian"]
+  },
+  {
+    "id": 38,
+    "name": "Lẩu Thắt Cốt Truyền Thống",
+    "price": 78000,
+    "category": "mon-nuoc",
+    "type": "man",
+    "description": "Lẩu thắt cốt truyền thống Hà Nội, nước dùng ngọt thanh và bắp ngọt",
+    "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=900&q=80",
+    "tags": ["truyen-thong", "thu-gian", "dam-da"]
+  },
+  {
+    "id": 39,
+    "name": "Bò Sốt Vang Mật Ong",
+    "price": 110000,
+    "category": "mon-kho",
+    "type": "man",
+    "description": "Bò sốt vang mật ong đậm đà, thịt mềm tan thớt nhúng rau cuốn",
+    "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=80",
+    "tags": ["no", "sang", "dinh-duong"]
+  },
+  {
+    "id": 40,
+    "name": "Gà Nướng Mật Ong Cưỡi Lửa",
+    "price": 140000,
+    "category": "mon-com",
+    "type": "man",
+    "description": "Cả gà nướng cưỡi lửa mọng nước, da giòn tan, mật ong thơm ngọt",
+    "image": "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=900&q=80",
+    "tags": ["sang", "gion-rum", "noi-gia-dinhinh"]
+  },
+  {
+    "id": 41,
+    "name": "Mực Nướng Muối Ớt",
+    "price": 125000,
+    "category": "mon-kho",
+    "type": "man",
+    "description": "Mực lá nướng muối ớt dẻo dai, thơm lừng và ăn cùng dưa leo muối",
+    "image": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=900&q=80",
+    "tags": ["cay", "no", "sang"]
+  },
+  {
+    "id": 42,
+    "name": "Lẩu Dê Thái Lạc",
+    "price": 150000,
+    "category": "mon-nuoc",
+    "type": "man",
+    "description": "Lẩu dê Thái thơm nồng với lá lạc, nấm và rau nhúng đậm chất miền Tây",
+    "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=900&q=80",
+    "tags": ["cay", "sang", "noi-gia-dinhinh"]
+  },
+  {
+    "id": 43,
+    "name": "Set Lẩu Nướng BBQ Mini",
+    "price": 130000,
+    "category": "mon-kho",
+    "type": "man",
+    "description": "Set mini gồm thịt bò lẩu cuộn mỏng, mực nướng và rau nhúng đa dạng",
+    "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=900&q=80",
+    "tags": ["sang", "noi-gia-dinhinh", "dam-da"]
+  },
+  {
+    "id": 44,
+    "name": "Chè Bánh Bột Lọc Sơn Hồng",
+    "price": 85000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Chè bánh bột lọc sơn hồng truyền thống, đậu đỏ hầm mềm trong nước đường",
+    "image": "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=900&q=80",
+    "tags": ["chay", "truyen-thong", "ngot-ngao"]
+  },
+  {
+    "id": 45,
+    "name": "Combo Hải Sản Nướng",
+    "price": 190000,
+    "category": "mon-kho",
+    "type": "man",
+    "description": "Combo hải sản nướng tỉ phú gồm tôm, mực, nghêu và sòa nướng thơm phức",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["sang", "noi-gia-dinhinh", "phobien"]
+  },
+  {
+    "id": 46,
+    "name": "Dừa Xiêm Tươi",
+    "price": 70000,
+    "category": "do-uong",
+    "type": "chay",
+    "description": "Dừa xiêm bổ mạch ăn trong tại chỗ, nước dừa ngọt lịm và phần dừa non giòn",
+    "image": "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=80",
+    "tags": ["mat", "thanh-mat", "giai-khat"]
+  },
+  {
+    "id": 47,
+    "name": "Phở Chay Rau Nấm",
+    "price": 38000,
+    "category": "mon-nuoc",
+    "type": "chay",
+    "description": "Nước phở nấu từ nấm rơm và củ cả muối ngọt, chan bằng rau củ tươi và bánh phở cuốn",
+    "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80",
+    "tags": ["chay", "thanh-mat", "dinh-duong"]
+  },
+  {
+    "id": 48,
+    "name": "Bún Chay Nấm",
+    "price": 42000,
+    "category": "mon-nuoc",
+    "type": "chay",
+    "description": "Bún trộn nấm vàng sáp, đậu hũ chiên giòn và rau sống, chấm nước mắm chay",
+    "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=900&q=80",
+    "tags": ["chay", "noi-gia-dinhinh", "tiet-kiem"]
+  },
+  {
+    "id": 49,
+    "name": "Bánh Canh Chay Rau Củ",
+    "price": 35000,
+    "category": "mon-nuoc",
+    "type": "chay",
+    "description": "Bánh canh giọt thịt chay nấu ngọt nước dừa cùng bí đỏ, nấm và đậu hũ",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["chay", "tiet-kiem", "an-sang"]
+  },
+  {
+    "id": 50,
+    "name": "Canh Chua Bắp Chay",
+    "price": 30000,
+    "category": "mon-nuoc",
+    "type": "chay",
+    "description": "Canh bắp ngọt với đậu bắp non, đậu xanh và chút me chua chanh giải ngon",
+    "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=900&q=80",
+    "tags": ["chay", "thanh-mat", "giai-khat"]
+  },
+  {
+    "id": 51,
+    "name": "Cơm Chiên Chay Thập Cẩm",
+    "price": 39000,
+    "category": "mon-com",
+    "type": "chay",
+    "description": "Cơm chiên trộn rau củ giòn, đậu hũ, nấm và chà bông chay giòn tan",
+    "image": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=900&q=80",
+    "tags": ["chay", "tiet-kiem", "dinh-duong"]
+  },
+  {
+    "id": 52,
+    "name": "Chay Địa Phương",
+    "price": 45000,
+    "category": "mon-com",
+    "type": "chay",
+    "description": "Mâm cơm chay đầy màu: đậu hũ kho nấm, canh bí đao, rau xào và cơm gạo lứt",
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80",
+    "tags": ["chay", "truyen-thong", "noi-gia-dinhinh"]
+  },
+  {
+    "id": 53,
+    "name": "Rau Xào Chay Củ",
+    "price": 28000,
+    "category": "mon-kho",
+    "type": "chay",
+    "description": "Rau xào thập cẩm giòn mềm, tô đầy màu cho bữa chay đỡ ngán",
+    "image": "https://images.unsplash.com/photo-1534939561126-855b8675edd7?auto=format&fit=crop&w=900&q=80",
+    "tags": ["chay", "dinh-duong", "tiet-kiem"]
+  },
+  {
+    "id": 54,
+    "name": "Gỏi Cuốn Chay Tôm Nứa",
+    "price": 32000,
+    "category": "an-vat",
+    "type": "chay",
+    "description": "Bánh tráng cuốn tôm nứa, rau củ giòn, chấm mắm tôm chay tươi mát",
+    "image": "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=900&q=80",
+    "tags": ["chay", "mat", "an-vui"]
+  },
+  {
+    "id": 55,
+    "name": "Chè Đậu Xanh Nấu Gừng",
+    "price": 25000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Đậu xanh nấu nhừ với nước dừa và lát gừng cay ấm, ăn nguội cùng đá lạnh",
+    "image": "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=900&q=80",
+    "tags": ["chay", "ngot-ngao", "truyen-thong"]
+  },
+  {
+    "id": 56,
+    "name": "Chè Đậu Đỏ Nấu Gừng",
+    "price": 26000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Đậu đỏ nấu bong dừa béo ngậy, gừng ấm bụng cho bữa ăn nhẹ nhàng",
+    "image": "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=80",
+    "tags": ["chay", "ngot-ngao", "dinh-duong"]
+  },
+  {
+    "id": 57,
+    "name": "Bánh Cam Nhân Đậu Xanh",
+    "price": 32000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Bánh cam nhân đậu xanh bùi tan trong miệng, vỏ mềm và trắng ngần",
+    "image": "https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=900&q=80",
+    "tags": ["chay", "ngot-ngao", "vui"]
+  },
+  {
+    "id": 58,
+    "name": "Bánh Chuối Nướng",
+    "price": 24000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Bánh chuối xiên que nướng giòn thơm mùi caramel, ăn kèm một ly trà",
+    "image": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=900&q=80",
+    "tags": ["chay", "ngot-ngao", "an-sang"]
+  },
+  {
+    "id": 59,
+    "name": "Trà Sữa Thái Trà Xanh",
+    "price": 45000,
+    "category": "do-uong",
+    "type": "chay",
+    "description": "Trà xanh Thái đậm chát quyện sữa đặc, thêm chút muối để đậm đà hơn",
+    "image": "https://images.unsplash.com/photo-1558857563-b371033873b8?auto=format&fit=crop&w=900&q=80",
+    "tags": ["giai-khat", "ngot-ngao", "vui"]
+  },
+  {
+    "id": 60,
+    "name": "Sữa Tươi Quế Đông",
+    "price": 55000,
+    "category": "do-uong",
+    "type": "chay",
+    "description": "Sữa tươi hồng quế thơm nồng, pha thêm chút bột quế để rõ vị",
+    "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=900&q=80",
+    "tags": ["giai-khat", "thu-gian", "dinh-duong"]
+  },
+  {
+    "id": 61,
+    "name": "Bánh Bò Hấp Đường",
+    "price": 8000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Bánh bò hấp đường vừa ăn vừa còn ấm, mềm thơm vị đường mía.",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ngot-ngao", "tiet-kiem", "chay", "truyen-thong"]
+  },
+  {
+    "id": 62,
+    "name": "Kẹo Dừa Lọc Nước Cốt",
+    "price": 10000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Kẹo dừa non lọc nước cốt ngọt dịu, tan ngay trên đầu lưỡi.",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ngot-ngao", "tiet-kiem", "chay", "vui"]
+  },
+  {
+    "id": 63,
+    "name": "Chè Đậu Xanh Giãn Thôi",
+    "price": 12000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Chè đậu xanh giãn thôi tự nhiên, nước đậu sánh đặc và béo thơm.",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ngot-ngao", "tiet-kiem", "chay", "thanh-mat"]
+  },
+  {
+    "id": 64,
+    "name": "Bánh Bao Chiên Mật Ong",
+    "price": 15000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Bánh bao chiên giòn sơn mật ong, chín ở giữa và dẻo ngoài.",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ngot-ngao", "tiet-kiem", "chay", "moi"]
+  },
+  {
+    "id": 65,
+    "name": "Kem Đá Bào Dừa",
+    "price": 16000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Kem đá bào dừa giòn lạnh, rải dừa nạo và mật ong lên trên.",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ngot-ngao", "tiet-kiem", "chay", "thanh-mat", "vui"]
+  },
+  {
+    "id": 66,
+    "name": "Bánh Pudding Caramel",
+    "price": 22000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Pudding trứng mịn nước caramel đắng nhẹ, tan trong miệng.",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ngot-ngao", "tiet-kiem", "chay", "moi"]
+  },
+  {
+    "id": 67,
+    "name": "Bánh Mochi Nhân Đậu Đỏ",
+    "price": 28000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Bánh mochi dẻo nhân đậu đỏ ngọt bùa, ăn một cái là đủ.",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ngot-ngao", "chay", "vui", "moi"]
+  },
+  {
+    "id": 68,
+    "name": "Chè Bánh Chung Nhân Đậu Xanh",
+    "price": 30000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Chè bánh chung nấu nhừ với đậu xanh đã xay, quen thuộc ngày Tết.",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ngot-ngao", "chay", "truyen-thong"]
+  },
+  {
+    "id": 69,
+    "name": "Chè Thái Sữa Trân Châu",
+    "price": 32000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Chè thái sữa trân châu trắng giòn, vị béo ngọt hợp khẩu vị.",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ngot-ngao", "chay", "vui", "moi"]
+  },
+  {
+    "id": 70,
+    "name": "Bánh Bông Lan Trứng Muối",
+    "price": 35000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Bánh bông lan mềm xốp kèm trứng muối mặn ngọt cân bằng.",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ngot-ngao", "chay", "sang", "an-vui"]
+  },
+  {
+    "id": 71,
+    "name": "Chè Hạt Dẻ Nước Cốt Dừa",
+    "price": 45000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Chè hạt dẻ trong nước cốt dừa, dẻo bột và thơm dừa.",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ngot-ngao", "chay", "dinh-duong", "thanh-mat"]
+  },
+  {
+    "id": 72,
+    "name": "Kem Socola Dừa Ốc Quế",
+    "price": 55000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Kem socola đen nhúng dừa ốc quế giòn rụm, vị đậm và béo.",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ngot-ngao", "chay", "sang", "vui"]
+  },
+  {
+    "id": 73,
+    "name": "Bánh Tart Trái Cây",
+    "price": 60000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Tart bánh mì giòn xốc kem và xếp trái cây tươi theo mùa.",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ngot-ngao", "chay", "sang", "vui"]
+  },
+  {
+    "id": 74,
+    "name": "Bánh Tiramisu Phô Mai",
+    "price": 65000,
+    "category": "mon-ngot",
+    "type": "man",
+    "description": "Tiramisu phô mai mềm, thơm cà phê và ca ca trên mỗi miếng bánh.",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ngot-ngao", "man", "sang", "moi"]
+  },
+  {
+    "id": 75,
+    "name": "Chè Thái Phong Hạt Nổ",
+    "price": 75000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Chè thái hạt nổ giòn tanh tách cùng nước cốt dừa béo ngậy.",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ngot-ngao", "chay", "sang", "vui"]
+  },
+  {
+    "id": 76,
+    "name": "Bánh Chocolate Lava Bạc Xu",
+    "price": 110000,
+    "category": "mon-ngot",
+    "type": "chay",
+    "description": "Bánh chocolate lava nhân bạc xu chảy ra khi cắt, ăn nóng còn ấm tận miệng.",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ngot-ngao", "chay", "sang", "moi"]
+  },
+  {
+    "id": 77,
+    "name": "Bánh Tiramisu Bỏ Rượu Nhật",
+    "price": 120000,
+    "category": "mon-ngot",
+    "type": "man",
+    "description": "Tiramisu bỏ rượu Nhật đi vị cà phê, kem mascarpone lạnh và bột cacao.",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ngot-ngao", "man", "sang", "moi"]
+  }
+]
