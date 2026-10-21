@@ -16,11 +16,24 @@ JSON Server Auth phu hop cho chay local/offline; no khong duoc Vercel static hos
 
 Luong "Tim quan gan toi" gui truy van OpenStreetMap Overpass qua backend da xac thuc de tranh loi CORS khi trinh duyet goi truc tiep dich vu ban do. Sau khi cap nhat code, can deploy ca backend va frontend.
 
-## Deploy Vercel
+## Deploy Backend len Render (Mien phi)
 
-1. Import repository vao Vercel. Vercel tu nhan Vite; file `vercel.json` khai bao lenh build va thu muc output. Vercel chi phuc vu giao dien; can host JSON Server API rieng de dang nhap/dang ky hoat dong.
-2. Cau hinh `VITE_API_URL` den dia chi backend va gioi han `CORS_ORIGINS` o backend.
-3. Neu muon chon file anh trong Admin, dat `VITE_CLOUDINARY_CLOUD_NAME` va `VITE_CLOUDINARY_UPLOAD_PRESET`.
+File cấu hình [`render.yaml`](file:///c:/Users/Admin/Downloads/nangcapv2/render.yaml) đã được thiết lập sẵn:
+
+1. Đăng nhập [render.com](https://render.com), chọn **New** -> **Blueprint**.
+2. Chọn repository này. Render sẽ tự động phát hiện `render.yaml` và tạo web service `bungoiangi-backend`.
+3. Render sẽ tự động sinh `JWT_SECRET`, `ADMIN_PASSWORD` và mở CORS (`*` và các tên miền `*.vercel.app`).
+4. Endpoint kiểm tra sức khỏe hệ thống: `GET /health` (trả về `{ "ok": true }`).
+5. Sau khi Render deploy xong, sao chép URL backend (ví dụ: `https://bungoiangi-backend.onrender.com`).
+
+## Deploy Frontend len Vercel
+
+1. Import repository vào Vercel (file [`vercel.json`](file:///c:/Users/Admin/Downloads/nangcapv2/vercel.json) đã có sẵn cấu hình Vite SPA).
+2. Trong mục **Settings** -> **Environment Variables** trên Vercel, cấu hình:
+   - `VITE_API_URL`: URL của backend Render vừa tạo ở trên (ví dụ: `https://bungoiangi-backend.onrender.com`).
+   - `VITE_CLOUDINARY_CLOUD_NAME`: (tùy chọn) Cloudinary cloud name.
+   - `VITE_CLOUDINARY_UPLOAD_PRESET`: (tùy chọn) Cloudinary upload preset.
+3. Bấm **Deploy**. Giao diện và API sẽ kết nối hoàn chỉnh.
 
 ## Kiem thu cac luong bao mat va lien ket
 

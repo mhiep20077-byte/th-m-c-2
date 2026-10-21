@@ -420,7 +420,9 @@ export function openDishDetail(id, triggerEl) {
   selectedDishId = dish.id;
   detailNotice = '';
   addHistory(dish.id, dish.name);
-  renderMealState();
+  if (mealState.phase !== MEAL_PHASE.SERVED) {
+    renderMealState();
+  }
   renderSelectedDetail();
 }
 
@@ -436,6 +438,7 @@ export function closeDishDetail() {
   const focusTarget = returnFocus && document.contains(returnFocus) ? returnFocus : fallbackFocus;
   focusTarget?.focus();
   detailReturnFocus = null;
+  renderMealState();
 }
 
 function renderSelectedDetail() {

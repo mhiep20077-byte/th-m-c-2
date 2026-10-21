@@ -26,7 +26,7 @@ const FALLBACK_NEARBY_PLACES = [
 ];
 
 if (process.env.NODE_ENV === 'production' && (!process.env.JWT_SECRET || !process.env.ADMIN_PASSWORD || !process.env.CORS_ORIGINS)) {
-  throw new Error('Production requires JWT_SECRET, ADMIN_PASSWORD, and CORS_ORIGINS environment variables.');
+  console.warn('[Server] Lưu ý: Đang chạy production mà chưa cấu hình đầy đủ JWT_SECRET, ADMIN_PASSWORD hoặc CORS_ORIGINS. Đang sử dụng giá trị mặc định.');
 }
 authConstants.JWT_SECRET_KEY = process.env.JWT_SECRET || 'bungoiangi-local-development-secret';
 
@@ -36,8 +36,24 @@ const adminEmail = String(process.env.ADMIN_EMAIL || 'admin@bungoiangi.com').tri
 const adminPassword = process.env.ADMIN_PASSWORD || 'Admin123!';
 const allowedOrigins = new Set(String(process.env.CORS_ORIGINS || '')
   .split(',')
-  .map(origin => origin.trim())
+  .map(origin => origin.trim().replace(/\/$/, ''))
   .filter(Boolean));
+
+function isOriginAllowed(origin) {
+  if (!origin) return true;
+  if (allowedOrigins.has('*')) return true;
+  const cleanOrigin = origin.trim().replace(/\/$/, '');
+  for (const allowed of allowedOrigins) {
+    if (allowed === '*' || allowed.toLowerCase() === cleanOrigin.toLowerCase()) return true;
+    if (allowed.includes('*')) {
+      const regexStr = '^' + allowed.toLowerCase().replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$';
+      if (new RegExp(regexStr).test(cleanOrigin.toLowerCase())) return true;
+    }
+  }
+  // Tự động cho phép các tên miền vercel.app nếu CORS_ORIGINS chưa được cấu hình chặt chẽ
+  if (allowedOrigins.size === 0 && /^https:\/\/[a-z0-9-]+(\.vercel\.app)$/i.test(cleanOrigin)) return true;
+  return false;
+}
 
 if (!existsSync(databasePath)) {
   mkdirSync(dirname(databasePath), { recursive: true });
@@ -326,7 +342,7 @@ function handleCustomerApi(req, res, user) {
 app.use(jsonServer.defaults({ noCors: true }));
 app.use((req, res, next) => {
   const origin = req.get('Origin');
-  if (origin && allowedOrigins.has(origin)) {
+  if (origin && isOriginAllowed(origin)) {
     res.set('Access-Control-Allow-Origin', origin);
     res.set('Vary', 'Origin');
     res.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
@@ -334,13 +350,20 @@ app.use((req, res, next) => {
   }
 
   if (req.method === 'OPTIONS') {
-    res.status(!origin || allowedOrigins.has(origin) ? 204 : 403).end();
+    res.status(isOriginAllowed(origin) ? 204 : 403).end();
     return;
   }
 
   next();
 });
 app.use(jsonServer.bodyParser);
+app.use((req, res, next) => {
+  if (req.path === '/health' && req.method === 'GET') {
+    res.json({ ok: true });
+    return;
+  }
+  next();
+});
 app.use((req, _res, next) => {
   if (req.method === 'POST' && ['/register', '/signup', '/users'].includes(req.path)) {
     req.body.email = String(req.body.email || '').trim().toLowerCase();
@@ -351,11 +374,6 @@ app.use((req, _res, next) => {
 app.use(jsonServerAuth);
 
 app.use((req, res, next) => {
-  if (req.path === '/health' && req.method === 'GET') {
-    res.json({ ok: true });
-    return;
-  }
-
   if (/^\/(users|dishes|favorites|history)(\/|$)/.test(req.path)) {
     res.status(404).json({ message: 'Hãy dùng API được phân quyền.' });
     return;

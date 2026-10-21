@@ -1347,16 +1347,19 @@ transform:scale(1)
 /* ============ CHI TIẾT MÓN ĂN & MODAL ============ */
 .meal-feature-page .modal-overlay,
 .meal-feature-standalone .modal-overlay {
-z-index:1000;
+z-index:2000;
 -webkit-backdrop-filter:blur(10px);
+backdrop-filter:blur(10px);
 background:#1c1917a6;
 justify-content:center;
 align-items:center;
 padding:24px;
-animation:.25s ease-out modal-fade-in;
+animation:.25s ease-out modal-fade-in forwards;
 display:flex;
 position:fixed;
-inset:0
+inset:0;
+opacity:1 !important;
+pointer-events:auto !important;
 }
 @keyframes modal-fade-in {
   0% {

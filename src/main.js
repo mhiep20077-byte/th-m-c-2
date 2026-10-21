@@ -25,7 +25,7 @@ import {
 } from './features/nearby/nearbyPlaces.js';
 import { AUTH_SESSION_EXPIRED_EVENT, apiRegister, apiLogin, apiForgotPassword, getAuthSession, initializeAuth, isAuthenticated, logout, updateProfileName } from './utils/auth.js';
 import { requestApi, uploadImageToCloudinary } from './utils/apiClient.js';
-import { initMealFeature, populateMealFromDishes } from './features/meal-feature/main.js';
+import { initMealFeature, populateMealFromDishes, closeDishDetail } from './features/meal-feature/main.js';
 import { initCulinaryOracle } from './features/culinary-arena/arena.js';
 
 // ============================================================
@@ -812,6 +812,8 @@ function openModal(dish, onRoll) {
 
 function closeModal() {
   document.getElementById('dish-modal')?.classList.remove('open');
+  closeDishDetail();
+  document.body.classList.remove('modal-open');
 }
 
 let nearbyPanelSequence = 0;
@@ -1023,6 +1025,8 @@ function updateAdminDishSearch() {
 
 function navigateTo(page, { updateUrl = true } = {}) {
   closeModal();
+  closeDishDetail();
+  document.body.classList.remove('modal-open');
 
   if (page === 'culinary-arena') page = 'arena';
 

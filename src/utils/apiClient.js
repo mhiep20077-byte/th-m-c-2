@@ -67,7 +67,10 @@ export async function requestApi(path, { method = 'GET', body, auth = true, sign
       }
       globalThis.window?.dispatchEvent(new Event(AUTH_SESSION_EXPIRED_EVENT));
     }
-    const message = typeof result === 'string' ? result : result?.message;
+    let message = typeof result === 'string' ? result : result?.message;
+    if (typeof message === 'string' && message.trim().startsWith('<')) {
+      message = 'Không thể kết nối máy chủ API backend. Hãy kiểm tra cấu hình VITE_API_URL.';
+    }
     throw new Error(message || `Yêu cầu thất bại (${response.status}).`);
   }
 
