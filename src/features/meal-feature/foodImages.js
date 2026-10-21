@@ -28,7 +28,7 @@ export function applyFoodImages(dishes) {
         const categoryId = dish.category;
         const index = counters.get(categoryId) ?? 0;
         counters.set(categoryId, index + 1);
-        dish.image = pickFoodImage(categoryId, index);
+        dish.image = dish.image || dish.img || pickFoodImage(categoryId, index);
     });
 
     return dishes;

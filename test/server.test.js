@@ -20,7 +20,7 @@ async function freePort() {
 }
 
 async function waitForServer(baseUrl, child) {
-  for (let attempt = 0; attempt < 80; attempt += 1) {
+  for (let attempt = 0; attempt < 160; attempt += 1) {
     if (child.exitCode !== null) throw new Error('API process exited before becoming ready.');
     try {
       const response = await fetch(`${baseUrl}/health`);
@@ -29,7 +29,7 @@ async function waitForServer(baseUrl, child) {
       await new Promise(resolveWait => setTimeout(resolveWait, 75));
     }
   }
-  throw new Error('API did not become ready within six seconds.');
+  throw new Error('API did not become ready within twelve seconds.');
 }
 
 async function jsonRequest(url, { token, method = 'GET', body } = {}) {

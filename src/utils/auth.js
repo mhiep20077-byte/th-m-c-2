@@ -165,7 +165,10 @@ function getRequestFailureMessage(error, fallback = 'Thao tác không thành cô
   }
 
   if (/failed to fetch|network|load failed|fetch failed|connection|timeout|api.*unavailable|not connected/i.test(lower)) {
-    return 'Không thể kết nối JSON Server. Hãy chạy API local bằng lệnh npm run api.';
+    const isLocal = typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    return isLocal
+      ? 'Không thể kết nối JSON Server. Hãy chạy API local bằng lệnh npm run api.'
+      : 'Không thể kết nối máy chủ API backend. Hãy kiểm tra biến VITE_API_URL hoặc dịch vụ backend.';
   }
 
   return message;

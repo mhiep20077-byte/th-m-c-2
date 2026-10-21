@@ -19,9 +19,26 @@ import { getSavedFortunes, saveFortune, clearFortuneHistory } from './storage.js
 
 // Danh sách các kiểu trải bài
 const SPREAD_CONFIGS = {
+    single: {
+        id: 'single',
+        name: 'Quẻ Một Chạm (1 Lá Thần Tốc)',
+        count: 1,
+        slots: [
+            { label: 'Chân Ái Định Mệnh', icon: '⚡', desc: 'Lựa chọn vũ trụ dành riêng cho bạn lúc này' }
+        ]
+    },
+    pair: {
+        id: 'pair',
+        name: 'Song Hỷ Ẩm Thực (2 Lá Cặp Đôi)',
+        count: 2,
+        slots: [
+            { label: 'Món Chính Ấm Lòng', icon: '🍲', desc: 'Trọng tâm thỏa mãn cơn đói của bạn' },
+            { label: 'Thanh Mát Giải Ngấy', icon: '🧋', desc: 'Thức uống hoặc món ngọt điểm xuyết hoàn hảo' }
+        ]
+    },
     three: {
         id: 'three',
-        name: 'Tam Hợp Ẩm Thực (3 Lá)',
+        name: 'Tam Hợp Ẩm Thực (3 Lá Truyền Thống)',
         count: 3,
         slots: [
             { label: 'Thực Tại Bao Tử', icon: '🔮', desc: 'Tiếng gọi từ chiếc bụng đói hiện tại' },
@@ -29,12 +46,16 @@ const SPREAD_CONFIGS = {
             { label: 'Chân Ái Cứu Rỗi', icon: '🌟', desc: 'Món ăn định mệnh mang lại bình yên hôm nay' }
         ]
     },
-    single: {
-        id: 'single',
-        name: 'Quẻ Một Chạm (1 Lá Thần Tốc)',
-        count: 1,
+    elemental: {
+        id: 'elemental',
+        name: 'Ngũ Hành Vị Giác (5 Lá Thịnh Soạn)',
+        count: 5,
         slots: [
-            { label: 'Chân Ái Định Mệnh', icon: '⚡', desc: 'Lựa chọn vũ trụ dành riêng cho bạn lúc này' }
+            { label: 'Kim • Giòn Tan', icon: '🪙', desc: 'Khai vị giòn rụm kích thích vị giác' },
+            { label: 'Mộc • Tươi Xanh', icon: '🌿', desc: 'Rau củ tươi mát, cân bằng dinh dưỡng' },
+            { label: 'Thủy • Đậm Đà', icon: '🌊', desc: 'Món nước ngọt lành xoa dịu tâm hồn' },
+            { label: 'Hỏa • Bùng Cháy', icon: '🔥', desc: 'Món cay nồng đánh thức năng lượng' },
+            { label: 'Thổ • No Đủ', icon: '🌾', desc: 'Cơm xôi chắc dạ, nền tảng bình an' }
         ]
     }
 };
@@ -68,21 +89,37 @@ const PROPHECIES_BY_SLOT = {
         'Không còn nghi ngờ gì nữa, lựa chọn này sẽ đem lại sự no đủ và may mắn trọn vẹn.',
         'Hương vị này được sinh ra để xoa dịu tâm hồn bạn sau những giờ tập trung cao độ.',
         'Chốt đơn ngay và tận hưởng từng miếng ngon với lòng biết ơn nhé!'
+    ],
+    3: [
+        'Ngọn lửa nhiệt huyết và đam mê ẩm thực bùng cháy trong từng miếng ngon!',
+        'Một chút nồng nàn và mãnh liệt sẽ xua tan đi tất cả mệt mỏi trong ngày.',
+        'Đậm đà hương vị cuộc sống, tiếp thêm sinh khí và may mắn cho bạn.'
+    ],
+    4: [
+        'Vững chãi và no ấm trọn vẹn, chiếc bụng no sẽ đem lại tâm an lành.',
+        'Một bữa ăn trọn vẹn như đất mẹ bao dung, nuôi dưỡng cả thể xác lẫn tinh thần.'
     ]
 };
 
 // Trạng thái cục bộ của Chiêm Tinh
 let allDishes = [];
-let currentSpread = 'three'; // 'three' | 'single'
+let currentSpread = 'three'; // 'single' | 'pair' | 'three' | 'elemental'
 let currentMood = 'all';
 let altarCards = []; // Mảng chứa các lá bài hiện tại trên bàn thờ
 let isRevealingAll = false;
+let oracleCallbacks = {};
+let journalSearchQuery = '';
 
 /* ==========================================================================
    KHỞI TẠO ỨNG DỤNG
    ========================================================================== */
-export async function initCulinaryOracle() {
-    await loadDishDatabase();
+export async function initCulinaryOracle(options = {}) {
+    oracleCallbacks = options;
+    if (options.dishes && Array.isArray(options.dishes) && options.dishes.length > 0) {
+        allDishes = options.dishes;
+    } else {
+        await loadDishDatabase();
+    }
     setupHeaderEvents();
     renderRitualPanel();
     drawTarotCards();
@@ -90,7 +127,7 @@ export async function initCulinaryOracle() {
 
 async function loadDishDatabase() {
     const candidatePaths = [
-        new URL('../data/dishes.json', import.meta.url).href,
+        new URL(/* @vite-ignore */ '../data/dishes.json', import.meta.url).href,
         './data/dishes.json',
         '../data/dishes.json',
         '/data/dishes.json',
@@ -132,28 +169,39 @@ function getFallbackDishes() {
    CÀI ĐẶT SỰ KIỆN THANH ĐIỀU HƯỚNG
    ========================================================================== */
 function setupHeaderEvents() {
-    const soundBtn = document.getElementById('sound-toggle-btn');
-    if (soundBtn) {
-        function updateIcon() {
-            soundBtn.textContent = isSoundEnabled() ? '🔊' : '🔇';
-            soundBtn.title = isSoundEnabled() ? 'Tắt âm thanh' : 'Bật âm thanh';
-        }
-        soundBtn.addEventListener('click', () => {
-            toggleSound();
-            playUiClick();
-            updateIcon();
+    const soundBtns = [
+        document.getElementById('sound-toggle-btn'),
+        document.getElementById('arena-sound-toggle-btn')
+    ].filter(Boolean);
+
+    function updateIcons() {
+        soundBtns.forEach(btn => {
+            btn.textContent = isSoundEnabled() ? '🔊' : '🔇';
+            btn.title = isSoundEnabled() ? 'Tắt âm thanh' : 'Bật âm thanh';
         });
-        updateIcon();
     }
 
+    soundBtns.forEach(btn => {
+        btn.onclick = () => {
+            toggleSound();
+            playUiClick();
+            updateIcons();
+        };
+    });
+    updateIcons();
+
     // Nút mở Sổ Quẻ (Lịch sử)
-    const journalBtn = document.getElementById('open-journal-btn');
-    if (journalBtn) {
-        journalBtn.addEventListener('click', () => {
+    const journalBtns = [
+        document.getElementById('open-journal-btn'),
+        document.getElementById('arena-journal-btn')
+    ].filter(Boolean);
+
+    journalBtns.forEach(btn => {
+        btn.onclick = () => {
             playUiClick();
             openJournalModal();
-        });
-    }
+        };
+    });
 }
 
 /* ==========================================================================
@@ -177,11 +225,17 @@ function renderRitualPanel() {
           <span>✨</span> Kiểu Trải Bài:
         </div>
         <div class="spread-type-selector">
-          <button class="spread-btn ${currentSpread === 'three' ? 'active' : ''}" data-spread="three">
-            🌟 Tam Hợp Ẩm Thực (3 Lá)
-          </button>
           <button class="spread-btn ${currentSpread === 'single' ? 'active' : ''}" data-spread="single">
-            ⚡ Quẻ Một Chạm (1 Lá)
+            ⚡ 1 Lá (Một Chạm)
+          </button>
+          <button class="spread-btn ${currentSpread === 'pair' ? 'active' : ''}" data-spread="pair">
+            🍲 2 Lá (Song Hỷ)
+          </button>
+          <button class="spread-btn ${currentSpread === 'three' ? 'active' : ''}" data-spread="three">
+            🌟 3 Lá (Tam Hợp)
+          </button>
+          <button class="spread-btn ${currentSpread === 'elemental' ? 'active' : ''}" data-spread="elemental">
+            👑 5 Lá (Ngũ Hành)
           </button>
         </div>
       </div>
@@ -267,7 +321,7 @@ function renderAltar() {
     if (!container) return;
 
     const config = SPREAD_CONFIGS[currentSpread];
-    const cardsClass = currentSpread === 'single' ? 'cards-1' : 'cards-3';
+    const cardsClass = `cards-${config.count}`;
 
     const cardsHtml = altarCards.map((card, idx) => {
         const priceFormatted = Number(card.dish.price).toLocaleString('vi-VN') + ' đ';
@@ -284,6 +338,7 @@ function renderAltar() {
         <div class="tarot-card ${card.flipped ? 'flipped' : ''}" data-index="${idx}">
           <!-- MẶT SAU THẦN BÍ (BACK FACE) -->
           <div class="tarot-face tarot-back">
+            <div class="tarot-shimmer-layer"></div>
             <div class="tarot-back-top">★ ✦ ✦ ★</div>
             <div class="tarot-mandala">
               <div class="tarot-cosmic-glyph">🔯</div>
@@ -294,6 +349,7 @@ function renderAltar() {
 
           <!-- MẶT TRƯỚC TIẾT LỘ MÓN ĂN (FRONT FACE) -->
           <div class="tarot-face tarot-front">
+            <div class="tarot-shimmer-layer"></div>
             <div class="tarot-dish-img-wrap">
               <img class="tarot-dish-img" src="${card.dish.image || fallbackImg}" alt="${card.dish.name}" onerror="this.src='${fallbackImg}'" />
               <div class="tarot-dish-gradient"></div>
@@ -310,6 +366,14 @@ function renderAltar() {
               </div>
               <div class="tarot-prophecy-quote">
                 "${card.prophecy}"
+              </div>
+              <div class="tarot-card-actions">
+                <button type="button" class="btn-tarot-action btn-tarot-fav ${oracleCallbacks.isFav?.(card.dish.id) ? 'active' : ''}" data-dish-id="${card.dish.id}" title="Lưu vào Gu của tôi">
+                  ${oracleCallbacks.isFav?.(card.dish.id) ? '❤️ Đã lưu gu' : '🤍 Lưu gu'}
+                </button>
+                <button type="button" class="btn-tarot-action btn-tarot-meal" data-dish-id="${card.dish.id}" title="Dựng mâm cơm ngay với món này">
+                  🍽️ Dựng bữa
+                </button>
               </div>
             </div>
           </div>
@@ -335,6 +399,9 @@ function renderAltar() {
         ` : `
           <button class="btn-mystic-primary" id="btn-save-fortune">
             📖 Lưu Quẻ Vào Sổ Chiêm Tinh
+          </button>
+          <button class="btn-mystic-secondary" id="btn-altar-build-meal" style="background:linear-gradient(135deg, rgba(234,88,12,0.35), rgba(245,158,11,0.25)); border-color:rgba(245,158,11,0.6); color:#ffedd5; font-weight:700;">
+            🍽️ Dựng Mâm Cơm Từ Quẻ
           </button>
         `}
         <button class="btn-mystic-secondary" id="btn-redraw">
@@ -389,6 +456,69 @@ function renderAltar() {
     if (shareBtn) {
         shareBtn.addEventListener('click', shareFortune);
     }
+
+    // Hiệu ứng nghiêng 3D Hologram theo vị trí chuột
+    attachCardTiltEffects(container);
+
+    // Gắn sự kiện các nút tương tác trên mặt thẻ bài
+    container.querySelectorAll('.btn-tarot-fav').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            playUiClick();
+            const dishId = Number(btn.dataset.dishId);
+            if (oracleCallbacks.onToggleFav) {
+                oracleCallbacks.onToggleFav(dishId);
+                const isNowFav = oracleCallbacks.isFav ? oracleCallbacks.isFav(dishId) : false;
+                btn.classList.toggle('active', isNowFav);
+                btn.textContent = isNowFav ? '❤️ Đã lưu gu' : '🤍 Lưu gu';
+            }
+        });
+    });
+
+    // Nút Dựng mâm cơm từ quẻ trên Altar
+    const altarBuildMealBtn = container.querySelector('#btn-altar-build-meal');
+    if (altarBuildMealBtn) {
+        altarBuildMealBtn.addEventListener('click', () => {
+            playUiClick();
+            const dishesToBuild = altarCards.map(c => c.dish).filter(Boolean);
+            if (oracleCallbacks.onGoToMeal) {
+                oracleCallbacks.onGoToMeal(dishesToBuild);
+            }
+        });
+    }
+
+    container.querySelectorAll('.btn-tarot-meal').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            playUiClick();
+            const dishId = Number(btn.dataset.dishId);
+            const foundCard = altarCards.find(c => c.dish && c.dish.id === dishId);
+            const dish = foundCard ? foundCard.dish : allDishes.find(d => d.id === dishId);
+            if (oracleCallbacks.onGoToMeal) {
+                oracleCallbacks.onGoToMeal(dish ? [dish] : []);
+            }
+        });
+    });
+}
+
+function attachCardTiltEffects(container) {
+    container.querySelectorAll('.tarot-card').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+            const isFlipped = card.classList.contains('flipped');
+            const baseRotateY = isFlipped ? 180 : 0;
+            const tiltX = -y * 14;
+            const tiltY = baseRotateY + x * (isFlipped ? -14 : 14);
+            card.style.transform = `perspective(1000px) translateY(-8px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg)`;
+        });
+
+        card.addEventListener('mouseleave', () => {
+            const isFlipped = card.classList.contains('flipped');
+            card.style.transform = isFlipped ? 'rotateY(180deg)' : '';
+        });
+    });
 }
 
 function flipCard(idx, cardEl) {
@@ -487,7 +617,16 @@ function renderJournalEntries() {
         return;
     }
 
-    const entriesHtml = fortunes.map(f => {
+    const filteredFortunes = fortunes.filter(f => {
+        if (!journalSearchQuery) return true;
+        const q = journalSearchQuery.toLowerCase();
+        const matchesType = (f.spreadType || '').toLowerCase().includes(q);
+        const matchesMood = (f.mood || '').toLowerCase().includes(q);
+        const matchesDish = (f.cards || []).some(c => (c.dishName || '').toLowerCase().includes(q));
+        return matchesType || matchesMood || matchesDish;
+    });
+
+    const entriesHtml = filteredFortunes.map((f, idx) => {
         const dateFormatted = new Date(f.date).toLocaleDateString('vi-VN', {
             hour: '2-digit',
             minute: '2-digit',
@@ -506,7 +645,10 @@ function renderJournalEntries() {
       <div class="journal-entry-card">
         <div class="journal-entry-meta">
           <span style="color:#fbbf24; font-weight:700;">${f.spreadType} &bull; ${f.mood}</span>
-          <span>${dateFormatted}</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span>${dateFormatted}</span>
+            <button type="button" class="btn-copy-fortune-item" data-idx="${idx}" title="Sao chép quẻ này">📋</button>
+          </div>
         </div>
         <div class="journal-dishes-chips">
           ${chipsHtml}
@@ -516,24 +658,63 @@ function renderJournalEntries() {
     }).join('');
 
     container.innerHTML = `
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-      <span style="font-size:0.85rem; color:var(--text-muted);">Đã lưu ${fortunes.length} quẻ gần nhất</span>
-      <button class="btn-mystic-link" id="btn-clear-journal" style="font-size:0.78rem; padding:4px 10px;">
+    <div class="journal-toolbar">
+      <input type="text" id="journal-search-input" class="journal-search" placeholder="🔍 Tìm quẻ theo món, kiểu trải bài..." value="${escapeHTML(journalSearchQuery)}">
+      <button class="btn-mystic-link" id="btn-clear-journal" style="font-size:0.78rem; padding:4px 10px; white-space:nowrap;">
         🗑️ Xóa Lịch Sử
       </button>
     </div>
-    ${entriesHtml}
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:0.82rem; color:var(--text-muted);">
+      <span>Hiển thị ${filteredFortunes.length} / ${fortunes.length} quẻ đã lưu</span>
+    </div>
+    ${filteredFortunes.length > 0 ? entriesHtml : '<p style="text-align:center; color:var(--text-dim); padding:24px;">Không tìm thấy quẻ phù hợp với từ khóa.</p>'}
   `;
+
+    const searchInput = container.querySelector('#journal-search-input');
+    if (searchInput) {
+        searchInput.oninput = (e) => {
+            journalSearchQuery = e.target.value;
+            renderJournalEntries();
+            const reInput = container.querySelector('#journal-search-input');
+            if (reInput) {
+                reInput.focus();
+                reInput.setSelectionRange(reInput.value.length, reInput.value.length);
+            }
+        };
+    }
+
+    container.querySelectorAll('.btn-copy-fortune-item').forEach(btn => {
+        btn.onclick = () => {
+            const idx = Number(btn.dataset.idx);
+            const fortune = filteredFortunes[idx];
+            if (!fortune) return;
+            const summary = (fortune.cards || []).map(c => `• ${c.slotLabel}: ${c.dishName}`).join('\n');
+            const text = `🔮 [QUẺ CHIÊM TINH: ${fortune.spreadType} - ${fortune.mood}]\n${summary}\n👉 BungOiAnGi Food Tarot`;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    btn.textContent = '✅';
+                    setTimeout(() => { btn.textContent = '📋'; }, 1500);
+                });
+            } else {
+                prompt('Sao chép quẻ:', text);
+            }
+        };
+    });
 
     const clearBtn = container.querySelector('#btn-clear-journal');
     if (clearBtn) {
         clearBtn.addEventListener('click', () => {
             if (confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử trong sổ chiêm tinh?')) {
                 clearFortuneHistory();
+                journalSearchQuery = '';
                 renderJournalEntries();
             }
         });
     }
+}
+
+function escapeHTML(str) {
+    return String(str || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 }
 
 /* ==========================================================================
@@ -548,9 +729,11 @@ function shuffleArray(array) {
     return result;
 }
 
-// Tự khởi chạy khi DOM sẵn sàng
+// Tự khởi chạy khi DOM sẵn sàng nếu chạy độc lập
 if (typeof window !== 'undefined') {
     window.addEventListener('DOMContentLoaded', () => {
-        initCulinaryOracle();
+        if (document.body.classList.contains('culinary-arena-standalone')) {
+            initCulinaryOracle();
+        }
     });
 }

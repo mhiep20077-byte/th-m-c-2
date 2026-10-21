@@ -180,7 +180,7 @@ export function renderDishDetail(containerEl, dish, handlers = {}) {
     } = handlers;
 
     containerEl.innerHTML = `
-    <div class="modal-overlay active${celebrate ? ' is-celebrate' : ''}" id="dish-detail-overlay">
+    <div class="modal-overlay open active${celebrate ? ' is-celebrate' : ''}" id="dish-detail-overlay">
       ${celebrate ? buildCelebrationHTML() : ''}
       <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dish-detail-name">
         ${celebrate ? '<span class="modal-celebrate-badge">🎉 VỪA BỐC TRÚNG</span>' : ''}
