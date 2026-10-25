@@ -128,10 +128,11 @@ export function pickWeightedDish(pool, customSettings = null) {
   const settings = customSettings || getDynamicSettings();
   const rules = settings?.gameRules || {};
 
-  // Nếu bật chế độ ép ra món tài trợ và pool có món tài trợ
+  // Nếu bật chế độ ép ra món tài trợ và pool có món tài trợ:
+  // Ưu tiên cực cao (75% bốc từ món tài trợ), nhưng vẫn chừa 25% cho các món khác để web không bị biến thành chỉ ra 1 món duy nhất
   if (rules.guaranteeSponsored) {
     const sponsored = candidates.filter(d => d.isSponsored);
-    if (sponsored.length > 0) {
+    if (sponsored.length > 0 && Math.random() < 0.75) {
       return pickWeightedDish(sponsored, { ...settings, gameRules: { ...rules, guaranteeSponsored: false } });
     }
   }

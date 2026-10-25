@@ -1521,3 +1521,128 @@ textarea:disabled {
   filter: brightness(1.08);
 }
 
+/* Dish card prominent highlights */
+.dish-card.is-sponsored {
+  border: 2px solid #f59e0b !important;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.25) !important;
+  transform: translateY(-2px);
+  position: relative;
+}
+
+.dish-card.is-sponsored::before {
+  content: '👑 ĐỐI TÁC NỔI BẬT';
+  position: absolute;
+  top: -11px;
+  left: 12px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+  z-index: 3;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.dish-card.is-bestseller:not(.is-sponsored) {
+  border: 1.5px solid #f87171 !important;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.15) !important;
+}
+
+.dish-card-badges {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.dish-card-badges .dish-sponsor-badge,
+.dish-card-badges .dish-bestseller-badge {
+  position: static;
+}
+
+/* Rarity badge on dish cards */
+.dish-rarity-badge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  z-index: 2;
+  padding: 0.18rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.dish-rarity-badge.badge-ancient {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.dish-rarity-badge.badge-legendary {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #fff;
+}
+
+.dish-rarity-badge.badge-mythical {
+  background: linear-gradient(135deg, #0284c7, #2563eb);
+  color: #fff;
+}
+
+.dish-rarity-badge.badge-rare {
+  background: linear-gradient(135deg, #0d9488, #059669);
+  color: #fff;
+}
+
+.dish-rarity-badge.badge-common {
+  background: rgba(30, 41, 59, 0.75);
+  color: #e2e8f0;
+}
+
+/* Admin table rarity badges */
+.admin-badge.badge-rarity {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.18rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.admin-badge.badge-rarity-ancient {
+  background: #ede9fe;
+  color: #5b21b6;
+  border: 1px solid #c4b5fd;
+}
+
+.admin-badge.badge-rarity-legendary {
+  background: #ffedd5;
+  color: #9a3412;
+  border: 1px solid #fed7aa;
+}
+
+.admin-badge.badge-rarity-mythical {
+  background: #e0f2fe;
+  color: #075985;
+  border: 1px solid #bae6fd;
+}
+
+.admin-badge.badge-rarity-rare {
+  background: #ccfbf1;
+  color: #115e59;
+  border: 1px solid #99f6e4;
+}
+
+.admin-badge.badge-rarity-common {
+  background: #f1f5f9;
+  color: #475569;
+}
+

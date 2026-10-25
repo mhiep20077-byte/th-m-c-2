@@ -180,26 +180,53 @@ export function sortDishes(list, sortMode = 'default') {
     case 'calo':
       return result.sort((a, b) => (a.calo || 0) - (b.calo || 0));
     default:
-      return result;
+      return result.sort((a, b) => {
+        // 1. Món tài trợ (Sponsored) luôn nổi bật ghim lên đầu tiên
+        if (Boolean(b.isSponsored) !== Boolean(a.isSponsored)) return b.isSponsored ? 1 : -1;
+        // 2. Món Bestseller (Hot) lên tiếp theo
+        if (Boolean(b.isBestseller) !== Boolean(a.isBestseller)) return b.isBestseller ? 1 : -1;
+        // 3. Trọng số rơi cao hơn lên trước
+        const weightDiff = (b.dropWeight || 1) - (a.dropWeight || 1);
+        if (weightDiff !== 0) return weightDiff;
+        // 4. Món phổ biến (popular)
+        if (Boolean(b.popular) !== Boolean(a.popular)) return b.popular ? 1 : -1;
+        return Number(b.id) - Number(a.id);
+      });
   }
 }
 
 /**
- * Chọn ngẫu nhiên 1 món ăn từ danh sách đã lọc
+ * Chọn ngẫu nhiên 1 món ăn từ danh sách đã lọc (có hỗ trợ chống lặp liên tiếp)
  */
-export function getRandomDish(targetOrMood, maybeBudgetId) {
+export function getRandomDish(targetOrMood, maybeMoodOrBudget, maybeBudget, excludeDishId = null) {
   let pool = [];
+  let moodId = null;
+  let budgetId = 'all';
+
   if (Array.isArray(targetOrMood)) {
-    pool = filterDishes(targetOrMood, {
-      moodId: maybeBudgetId?.moodId || (typeof maybeBudgetId === 'string' ? maybeBudgetId : null),
-      budgetId: maybeBudgetId?.budgetId || 'all'
-    });
+    if (typeof maybeMoodOrBudget === 'object' && maybeMoodOrBudget !== null) {
+      moodId = maybeMoodOrBudget.moodId || null;
+      budgetId = maybeMoodOrBudget.budgetId || 'all';
+    } else {
+      moodId = typeof maybeMoodOrBudget === 'string' ? maybeMoodOrBudget : null;
+      budgetId = typeof maybeBudget === 'string' ? maybeBudget : (maybeMoodOrBudget?.budgetId || 'all');
+    }
+    pool = filterDishes(targetOrMood, { moodId, budgetId });
   } else {
-    pool = filterDishes(defaultDishes, { moodId: targetOrMood, budgetId: maybeBudgetId });
+    moodId = targetOrMood;
+    budgetId = maybeMoodOrBudget;
+    pool = filterDishes(defaultDishes, { moodId, budgetId });
   }
 
-  if (pool.length > 0) {
-    return pickWeightedDish(pool);
+  const baseCandidates = pool.length > 0 ? pool : (Array.isArray(targetOrMood) ? targetOrMood : defaultDishes);
+
+  // Anti-repeat: nếu pool có nhiều hơn 1 món, loại bỏ món vừa ra ở lượt trước để người dùng quay liên tục không bị kẹt 1 món
+  if (excludeDishId && baseCandidates.length > 1) {
+    const candidatesWithoutPrev = baseCandidates.filter(d => Number(d.id) !== Number(excludeDishId));
+    if (candidatesWithoutPrev.length > 0) {
+      return pickWeightedDish(candidatesWithoutPrev) || candidatesWithoutPrev[0];
+    }
   }
-  return pickWeightedDish(defaultDishes) || defaultDishes[0];
+
+  return pickWeightedDish(baseCandidates) || baseCandidates[0];
 }

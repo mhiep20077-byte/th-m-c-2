@@ -570,6 +570,7 @@ function validateDish(input, previous = {}) {
     sponsorLink: String(input.sponsorLink ?? previous.sponsorLink ?? '').trim(),
     sponsorBadge: String(input.sponsorBadge ?? previous.sponsorBadge ?? 'Tài trợ').trim(),
     isBestseller: Boolean(input.isBestseller ?? previous.isBestseller ?? false),
+    rarity: ['ancient', 'legendary', 'mythical', 'rare', 'common'].includes(String(input.rarity)) ? String(input.rarity) : (previous.rarity || undefined),
     dropWeight: Math.max(0.1, Math.min(100, Number(input.dropWeight ?? previous.dropWeight ?? 1) || 1)),
     active: input.active !== undefined ? Boolean(input.active) : (previous.active !== undefined ? Boolean(previous.active) : true),
   };

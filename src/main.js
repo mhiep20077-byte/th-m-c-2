@@ -10,6 +10,7 @@ import './features/culinary-arena/arena.css';
 
 import { dishes, MOODS, BUDGETS, CATEGORIES, replaceDishes } from './data/dishes.js';
 import { filterDishes, sortDishes, getRandomDish, getCategoryLabel, removeVietnameseTones } from './features/filters/dishFilters.js';
+import { rarityOf, rarityLabel, RARITY_TIERS } from './features/meal-feature/foodRarity.js';
 import { QUIZ_QUESTIONS, resolveQuizMood } from './features/quiz/quizData.js';
 import { initAirdropManager } from './features/airdrop/airdropManager.js';
 import { playClick, playSelect, playBup, playWin } from './utils/uiAudio.js';
@@ -586,6 +587,7 @@ function renderAdminPage() {
     : null;
   const selectedCategory = draftValues?.category ?? editingDish?.category;
   const selectedType = draftValues?.type ?? editingDish?.type ?? 'man';
+  const selectedRarity = draftValues?.rarity ?? editingDish?.rarity ?? '';
 
   const isEditingSponsored = draftValues?.isSponsored !== undefined
     ? (draftValues.isSponsored === 'true' || draftValues.isSponsored === true || draftValues.isSponsored === 'on')
@@ -703,6 +705,17 @@ function renderAdminPage() {
               <label for="admin-dish-weight">Trọng số rơi cơ bản (Drop Weight: 1 - 50)</label>
               <input id="admin-dish-weight" name="dropWeight" type="number" step="0.5" min="0.1" max="50" value="${draftValues?.dropWeight ?? editingDish?.dropWeight ?? 1}" title="Trọng số càng cao món càng dễ ra" />
             </div>
+            <div class="portal-field">
+              <label for="admin-dish-rarity">Độ Hiếm Minigame (Rarity Tier)</label>
+              <select id="admin-dish-rarity" name="rarity">
+                <option value="" ${!selectedRarity ? 'selected' : ''}>⚡ Tự động theo giá (${editingDish ? rarityLabel(editingDish) : '>=100k là Cổ đại 💎, 55k-99k là Huyền thoại 🔶'})</option>
+                <option value="ancient" ${selectedRarity === 'ancient' ? 'selected' : ''}>💎 Cổ đại (Ancient - Giá >100k, mâm cơm hoàng kim)</option>
+                <option value="legendary" ${selectedRarity === 'legendary' ? 'selected' : ''}>🔶 Huyền thoại (Legendary - Giá 55k-99k)</option>
+                <option value="mythical" ${selectedRarity === 'mythical' ? 'selected' : ''}>💠 Huyền thoại nhẹ (Mythical - Giá 35k-54k)</option>
+                <option value="rare" ${selectedRarity === 'rare' ? 'selected' : ''}>🔹 Hiếm (Rare - Giá 20k-34k)</option>
+                <option value="common" ${selectedRarity === 'common' ? 'selected' : ''}>🥄 Phổ thông (Common - Bình dân)</option>
+              </select>
+            </div>
             <div class="portal-field portal-field--wide">
               <label for="admin-dish-img">Ảnh món ăn (URL hoặc Tải lên từ máy)</label>
               <input id="admin-dish-img" name="img" value="${escapeHTML(draftValues?.img ?? editingDish?.img ?? '')}" placeholder="https://..." />
@@ -771,21 +784,23 @@ function renderAdminPage() {
                 <tr>
                   <th>Món Ăn</th>
                   <th>Danh Mục</th>
-                  <th>Giá</th>
+                  <th>Giá & Độ Hiếm</th>
                   <th>Trọng Số</th>
                   <th>Bật/Tắt Nhanh</th>
                   <th>Thao Tác</th>
                 </tr>
               </thead>
               <tbody>
-                ${filteredAdminDishes.map(dish => `
+                ${filteredAdminDishes.map(dish => {
+                  const rarity = rarityOf(dish);
+                  return `
                   <tr data-admin-dish-row data-search="${escapeHTML(removeVietnameseTones(dish.name))}" class="${dish.isSponsored ? 'row-sponsored' : ''}">
                     <td>
                       <div class="portal-dish-cell">
                         ${dish.img ? `<img src="${escapeHTML(dish.img)}" alt="" loading="lazy" />` : ''}
                         <div>
                           <strong>${escapeHTML(dish.name)}</strong>
-                          <div style="display:flex;gap:0.3rem;margin-top:0.2rem">
+                          <div style="display:flex;gap:0.3rem;margin-top:0.2rem;flex-wrap:wrap">
                             ${dish.isSponsored ? `<span class="admin-badge badge-sponsored">📢 ${escapeHTML(dish.sponsorName || 'Tài trợ')}</span>` : ''}
                             ${dish.isBestseller ? `<span class="admin-badge badge-bestseller">⭐ Hot</span>` : ''}
                             ${dish.active === false ? `<span class="admin-badge badge-hidden">Ẩn</span>` : ''}
@@ -794,7 +809,14 @@ function renderAdminPage() {
                       </div>
                     </td>
                     <td>${escapeHTML(getCategoryLabel(dish.category))}</td>
-                    <td>${formatCurrency(dish.price)}</td>
+                    <td>
+                      <div style="font-weight:700">${formatCurrency(dish.price)}</div>
+                      <div style="margin-top:0.25rem">
+                        <span class="admin-badge badge-rarity badge-rarity-${rarity.id}" title="Độ hiếm minigame: ${rarity.label}">
+                          ${rarity.icon} ${rarity.label}
+                        </span>
+                      </div>
+                    </td>
                     <td>
                       <div style="display:flex;align-items:center;gap:0.3rem">
                         <input type="number" step="0.5" min="0.1" max="50" style="width:60px;min-height:30px;padding:2px 4px" value="${dish.dropWeight || 1}" data-quick-weight="${dish.id}" title="Chỉnh trọng số rơi và Enter" />
@@ -822,7 +844,8 @@ function renderAdminPage() {
                       </div>
                     </td>
                   </tr>
-                `).join('')}
+                `;
+              }).join('')}
                 <tr id="admin-dish-search-empty" hidden><td colspan="6" class="portal-empty">Không tìm thấy món phù hợp.</td></tr>
               </tbody>
             </table>
@@ -1562,10 +1585,21 @@ function renderHome() {
 }
 
 function getFilteredPopular() {
-  return filterDishes(dishes, { moodId: state.mood, budgetId: state.budget }).filter(d => d.popular);
+  const filtered = filterDishes(dishes, { moodId: state.mood, budgetId: state.budget });
+  const pool = filtered.filter(d => d.popular || d.isSponsored || d.isBestseller);
+  return pool.sort((a, b) => {
+    // 1. Món tài trợ (Sponsored) luôn lên hàng đầu
+    if (Boolean(b.isSponsored) !== Boolean(a.isSponsored)) return b.isSponsored ? 1 : -1;
+    // 2. Món Bestseller (Hot) lên tiếp theo
+    if (Boolean(b.isBestseller) !== Boolean(a.isBestseller)) return b.isBestseller ? 1 : -1;
+    // 3. Trọng số rơi
+    const weightDiff = (b.dropWeight || 1) - (a.dropWeight || 1);
+    if (weightDiff !== 0) return weightDiff;
+    return Number(b.id) - Number(a.id);
+  });
 }
 function getFilteredNew() {
-  return filterDishes(dishes, { moodId: state.mood, budgetId: state.budget }).filter(d => !d.popular).slice(0, 8);
+  return filterDishes(dishes, { moodId: state.mood, budgetId: state.budget }).filter(d => !d.popular && !d.isSponsored).slice(0, 8);
 }
 
 // ============================================================
@@ -1752,11 +1786,16 @@ function renderDishCards(list) {
   return list.map(d => {
     const saved = state.favorites.includes(d.id);
     const catLabel = getCategoryLabel(d.category);
+    const rarity = rarityOf(d);
     return `
-      <div class="dish-card ${d.isSponsored ? 'is-sponsored' : ''}" data-dish="${d.id}" id="dish-card-${d.id}">
+      <div class="dish-card ${d.isSponsored ? 'is-sponsored' : ''} ${d.isBestseller ? 'is-bestseller' : ''}" data-dish="${d.id}" id="dish-card-${d.id}">
         <div class="card-img-wrap">
           <img class="dish-img" src="${d.img}" alt="${d.name}" loading="lazy" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80';" />
-          ${d.isSponsored ? `<span class="dish-sponsor-badge">📢 ${escapeHTML(d.sponsorBadge || 'Tài trợ')}</span>` : (d.isBestseller ? `<span class="dish-bestseller-badge">⭐ Bestseller</span>` : '')}
+          <div class="dish-card-badges">
+            ${d.isSponsored ? `<span class="dish-sponsor-badge">📢 ${escapeHTML(d.sponsorBadge || 'Tài trợ')}</span>` : ''}
+            ${d.isBestseller ? `<span class="dish-bestseller-badge">⭐ Hot</span>` : ''}
+          </div>
+          <span class="dish-rarity-badge badge-${rarity.id}" title="Độ hiếm minigame: ${rarity.label}">${rarity.icon} ${rarity.label}</span>
           <button class="dish-fav-btn ${saved ? 'saved' : ''}" data-fav="${d.id}" id="fav-${d.id}" aria-label="Lưu vào Gu">
             ${saved ? '❤️' : '🤍'}
           </button>
@@ -2545,6 +2584,7 @@ function bindAll() {
       sponsorBadge: String(values.sponsorBadge || 'Tài trợ').trim(),
       sponsorLink: String(values.sponsorLink || '').trim(),
       isBestseller: values.isBestseller === 'on' || values.isBestseller === true || values.isBestseller === 'true',
+      rarity: String(values.rarity || '').trim(),
       active: values.active === 'on' || values.active === true || values.active === 'true',
     };
     const editingId = state.adminEditDishId;
@@ -3082,6 +3122,8 @@ function bindAll() {
     navigateTo('home');
   });
 
+let lastBupDishId = null;
+
   // Nút BỤP! ĂN GÌ — Mega explosion
   document.getElementById('bup-btn')?.addEventListener('click', (e) => {
     playBup();
@@ -3111,8 +3153,11 @@ function bindAll() {
 
     setTimeout(() => {
       btn.classList.remove('bup-shaking');
-      const dish = getRandomDish(dishes, state.mood, state.budget);
-      if (dish) openModal(dish, true);
+      const dish = getRandomDish(dishes, state.mood, state.budget, lastBupDishId);
+      if (dish) {
+        lastBupDishId = dish.id;
+        openModal(dish, true);
+      }
     }, 420);
   });
 
