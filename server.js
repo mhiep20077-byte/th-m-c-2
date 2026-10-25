@@ -99,6 +99,8 @@ if (!existsSync(databasePath)) {
     favorites: [],
     history: [],
     events: [],
+    vouchers: [],
+    user_vouchers: [],
     settings: DEFAULT_SETTINGS,
   }, null, 2));
 }
@@ -108,7 +110,7 @@ const router = jsonServer.router(databasePath);
 const db = router.db;
 app.db = db;
 
-for (const collection of ['users', 'dishes', 'favorites', 'history', 'events']) {
+for (const collection of ['users', 'dishes', 'favorites', 'history', 'events', 'vouchers', 'user_vouchers']) {
   if (!Array.isArray(db.get(collection).value())) db.set(collection, []).write();
 }
 if (!db.get('settings').value() || typeof db.get('settings').value() !== 'object') {
@@ -576,6 +578,131 @@ function validateDish(input, previous = {}) {
   };
 }
 
+const DEFAULT_VOUCHERS = [
+  {
+    id: 1,
+    code: 'BUNGNEW30',
+    title: 'Ưu Đãi Bạn Mới BungOiAnGi',
+    desc: 'Giảm ngay 30.000đ cho đơn từ 60.000đ khi đặt món lần đầu tiên',
+    discountType: 'fixed',
+    discountValue: 30000,
+    minOrder: 60000,
+    maxDiscount: 30000,
+    usageLimit: 150,
+    usedCount: 18,
+    expiryDate: '2026-12-31',
+    badge: '🎉 Bạn Mới',
+    category: 'all',
+    active: true,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 2,
+    code: 'FREESHIP20',
+    title: 'Miễn Phí Vận Chuyển Hỏa Tốc',
+    desc: 'Freeship tối đa 20.000đ cho đơn hàng đồ ăn từ 80.000đ',
+    discountType: 'fixed',
+    discountValue: 20000,
+    minOrder: 80000,
+    maxDiscount: 20000,
+    usageLimit: 200,
+    usedCount: 42,
+    expiryDate: '2026-11-30',
+    badge: '🛵 Freeship',
+    category: 'all',
+    active: true,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 3,
+    code: 'TIECVANG50',
+    title: 'Đại Tiệc Hoàng Kim VIP',
+    desc: 'Giảm 50.000đ cho đơn từ 150.000đ khi chọn các món Cổ Đại & Huyền Thoại',
+    discountType: 'fixed',
+    discountValue: 50000,
+    minOrder: 150000,
+    maxDiscount: 50000,
+    usageLimit: 100,
+    usedCount: 9,
+    expiryDate: '2026-12-31',
+    badge: '💎 Đại Tiệc VIP',
+    category: 'ancient',
+    active: true,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 4,
+    code: 'BUNGIAM20',
+    title: 'Siêu Deal Giảm 20% Trưa Nay',
+    desc: 'Giảm 20% tối đa 40.000đ cho mọi đơn đặt món từ 90.000đ',
+    discountType: 'percent',
+    discountValue: 20,
+    minOrder: 90000,
+    maxDiscount: 40000,
+    usageLimit: 300,
+    usedCount: 85,
+    expiryDate: '2026-11-15',
+    badge: '🔥 Hot Deal 20%',
+    category: 'all',
+    active: true,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 5,
+    code: 'DEMKHUYA15',
+    title: 'Cứu Đói Đêm Khuya 15K',
+    desc: 'Giảm 15.000đ cho đơn đồ ăn đêm từ 50.000đ',
+    discountType: 'fixed',
+    discountValue: 15000,
+    minOrder: 50000,
+    maxDiscount: 15000,
+    usageLimit: 250,
+    usedCount: 31,
+    expiryDate: '2026-12-31',
+    badge: '🌙 Ăn Đêm',
+    category: 'all',
+    active: true,
+    createdAt: new Date().toISOString(),
+  },
+];
+
+if (Array.isArray(db.get('vouchers').value()) && db.get('vouchers').value().length === 0) {
+  db.set('vouchers', DEFAULT_VOUCHERS).write();
+}
+
+function validateVoucher(input, previous = {}) {
+  const code = String(input.code ?? previous.code ?? '').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '');
+  const title = String(input.title ?? previous.title ?? '').trim();
+  if (code.length < 3 || title.length < 2) return null;
+
+  const discountType = ['percent', 'fixed'].includes(input.discountType) ? input.discountType : (previous.discountType || 'fixed');
+  const discountValue = Number(input.discountValue ?? previous.discountValue ?? 0);
+  if (!Number.isFinite(discountValue) || discountValue <= 0) return null;
+  if (discountType === 'percent' && (discountValue <= 0 || discountValue > 100)) return null;
+
+  const minOrder = Math.max(0, Number(input.minOrder ?? previous.minOrder ?? 0) || 0);
+  const maxDiscount = Math.max(0, Number(input.maxDiscount ?? previous.maxDiscount ?? (discountType === 'fixed' ? discountValue : 50000)) || 0);
+  const usageLimit = Math.max(1, Number(input.usageLimit ?? previous.usageLimit ?? 100) || 100);
+
+  return {
+    ...previous,
+    code,
+    title,
+    desc: String(input.desc ?? previous.desc ?? '').trim(),
+    discountType,
+    discountValue,
+    minOrder,
+    maxDiscount,
+    usageLimit,
+    usedCount: Number(previous.usedCount || 0),
+    expiryDate: String(input.expiryDate ?? previous.expiryDate ?? '').trim() || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+    badge: String(input.badge ?? previous.badge ?? 'Ưu Đãi').trim(),
+    category: String(input.category ?? previous.category ?? 'all').trim(),
+    active: input.active !== undefined ? Boolean(input.active) : (previous.active !== undefined ? Boolean(previous.active) : true),
+    createdAt: previous.createdAt || new Date().toISOString(),
+  };
+}
+
 function adminStats() {
   const allDishes = db.get('dishes').value();
   const favorites = db.get('favorites').value();
@@ -611,6 +738,9 @@ function adminStats() {
     };
   }).sort((left, right) => (right.favorites * 2 + right.views + right.rolls) - (left.favorites * 2 + left.views + left.rolls)).slice(0, 8);
 
+  const vouchers = db.get('vouchers').value() || [];
+  const userVouchers = db.get('user_vouchers').value() || [];
+
   return {
     userCount: db.get('users').size().value(),
     dishCount: allDishes.length,
@@ -621,6 +751,9 @@ function adminStats() {
     totalEvents: events.length,
     sponsoredCount: allDishes.filter(d => d.isSponsored).length,
     bestsellerCount: allDishes.filter(d => d.isBestseller).length,
+    voucherCount: vouchers.length,
+    activeVoucherCount: vouchers.filter(v => v.active !== false).length,
+    claimedVoucherCount: userVouchers.length,
     hotDishes,
   };
 }
@@ -1021,6 +1154,72 @@ function handleAdminApi(req, res, user) {
     }
   }
 
+  if (resource === 'vouchers') {
+    const voucherId = Number(idPart);
+    const vouchers = db.get('vouchers');
+    const userVouchers = db.get('user_vouchers');
+
+    if (!idPart && req.method === 'GET') {
+      const allVouchers = vouchers.value() || [];
+      const userClaims = userVouchers.value() || [];
+      const enriched = allVouchers.map(v => {
+        const claims = userClaims.filter(c => Number(c.voucherId) === Number(v.id)).length;
+        return {
+          ...v,
+          claimedCount: claims,
+        };
+      });
+      res.json(enriched);
+      return;
+    }
+
+    if (!idPart && req.method === 'POST') {
+      const voucher = validateVoucher(req.body || {});
+      if (!voucher) {
+        return res.status(400).json({ message: 'Mã voucher (tối thiểu 3 ký tự), tiêu đề và mức giảm giá hợp lệ là bắt buộc.' });
+      }
+      const duplicate = vouchers.find(item => item.code.toUpperCase() === voucher.code.toUpperCase()).value();
+      if (duplicate) {
+        return res.status(409).json({ message: `Mã voucher "${voucher.code}" đã tồn tại. Vui lòng chọn mã khác.` });
+      }
+      voucher.id = nextId('vouchers');
+      vouchers.push(voucher).write();
+      res.status(201).json(voucher);
+      return;
+    }
+
+    const existing = vouchers.find(v => Number(v.id) === voucherId).value();
+    if (!existing) return res.status(404).json({ message: 'Không tìm thấy voucher.' });
+
+    if (subAction === 'quick-toggle' && req.method === 'PATCH') {
+      const active = req.body.active !== undefined ? Boolean(req.body.active) : !existing.active;
+      const updated = vouchers.find({ id: voucherId }).assign({ active }).write();
+      res.json(updated);
+      return;
+    }
+
+    if (req.method === 'PATCH') {
+      const updated = validateVoucher(req.body || {}, existing);
+      if (!updated) {
+        return res.status(400).json({ message: 'Dữ liệu voucher không hợp lệ.' });
+      }
+      const duplicate = vouchers.find(item => Number(item.id) !== voucherId && item.code.toUpperCase() === updated.code.toUpperCase()).value();
+      if (duplicate) {
+        return res.status(409).json({ message: `Mã voucher "${updated.code}" đã được sử dụng bởi voucher khác.` });
+      }
+      vouchers.find({ id: voucherId }).assign(updated).write();
+      res.json(updated);
+      return;
+    }
+
+    if (req.method === 'DELETE') {
+      vouchers.remove({ id: voucherId }).write();
+      userVouchers.remove({ voucherId }).write();
+      res.status(204).end();
+      return;
+    }
+  }
+
   res.status(405).json({ message: 'Phương thức hoặc tài nguyên admin không được hỗ trợ.' });
 }
 
@@ -1064,6 +1263,77 @@ function handleCustomerApi(req, res, user) {
       const otherHistory = db.get('history').filter(item => Number(item.userId) !== userId).value();
       db.set('history', [...otherHistory, ...ownHistory.slice(-49), entry]).write();
       res.status(201).json({ ...entry, dish });
+      return;
+    }
+  }
+
+  if (resource === 'vouchers') {
+    const userVouchers = db.get('user_vouchers');
+    const vouchers = db.get('vouchers');
+
+    if (req.method === 'GET') {
+      const myClaims = userVouchers.filter({ userId }).value() || [];
+      const enriched = myClaims.map(claim => {
+        const voucherInfo = vouchers.find({ id: Number(claim.voucherId) }).value() || null;
+        return {
+          ...claim,
+          voucher: voucherInfo,
+        };
+      });
+      res.json(enriched);
+      return;
+    }
+
+    if (req.method === 'POST') {
+      const voucherId = Number(req.body?.voucherId);
+      const code = String(req.body?.code || '').trim().toUpperCase();
+
+      let targetVoucher = null;
+      if (voucherId) {
+        targetVoucher = vouchers.find({ id: voucherId }).value();
+      } else if (code) {
+        targetVoucher = vouchers.find(v => v.code.toUpperCase() === code).value();
+      }
+
+      if (!targetVoucher) {
+        return res.status(404).json({ message: 'Không tìm thấy mã voucher này hoặc voucher không tồn tại.' });
+      }
+
+      if (targetVoucher.active === false) {
+        return res.status(400).json({ message: 'Voucher này hiện đang tạm ngưng phát hành.' });
+      }
+
+      if (targetVoucher.expiryDate && new Date(targetVoucher.expiryDate + 'T23:59:59') < new Date()) {
+        return res.status(400).json({ message: 'Voucher này đã hết hạn sử dụng.' });
+      }
+
+      const alreadyClaimed = userVouchers.find({ userId, voucherId: Number(targetVoucher.id) }).value();
+      if (alreadyClaimed) {
+        return res.status(409).json({ message: 'Bạn đã lưu voucher này vào kho ưu đãi của mình rồi!' });
+      }
+
+      if (targetVoucher.usageLimit && targetVoucher.usedCount >= targetVoucher.usageLimit) {
+        return res.status(400).json({ message: 'Rất tiếc, voucher này đã hết lượt thu thập!' });
+      }
+
+      const newClaim = {
+        id: nextId('user_vouchers'),
+        userId,
+        voucherId: Number(targetVoucher.id),
+        code: targetVoucher.code,
+        claimedAt: new Date().toISOString(),
+        isUsed: false,
+        usedAt: null,
+      };
+
+      userVouchers.push(newClaim).write();
+      vouchers.find({ id: Number(targetVoucher.id) }).assign({ usedCount: (targetVoucher.usedCount || 0) + 1 }).write();
+
+      res.status(201).json({
+        ...newClaim,
+        voucher: targetVoucher,
+        message: `Lưu mã "${targetVoucher.code}" vào kho thành công!`,
+      });
       return;
     }
   }
@@ -1146,8 +1416,14 @@ app.use((req, res, next) => {
     return res.status(403).json({ message: 'Tài khoản của bạn đã bị vô hiệu hóa bởi quản trị viên.' });
   }
 
-  if (/^\/(users|dishes|favorites|history)(\/|$)/.test(req.path)) {
+  if (/^\/(users|dishes|favorites|history|vouchers|user_vouchers)(\/|$)/.test(req.path)) {
     res.status(404).json({ message: 'Hãy dùng API được phân quyền.' });
+    return;
+  }
+
+  if (req.path === '/api/vouchers' && req.method === 'GET') {
+    const all = db.get('vouchers').value() || [];
+    res.json(all.filter(v => v.active !== false));
     return;
   }
 

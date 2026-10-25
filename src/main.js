@@ -9,6 +9,7 @@ import './features/portals/portals.css';
 import './features/culinary-arena/arena.css';
 
 import { dishes, MOODS, BUDGETS, CATEGORIES, replaceDishes } from './data/dishes.js';
+import { DEFAULT_VOUCHERS, getLocalVouchers, saveLocalVouchers, getLocalClaimedVoucherIds, saveLocalClaimedVoucherIds } from './data/vouchers.js';
 import { filterDishes, sortDishes, getRandomDish, getCategoryLabel, removeVietnameseTones } from './features/filters/dishFilters.js';
 import { rarityOf, rarityLabel, RARITY_TIERS } from './features/meal-feature/foodRarity.js';
 import { QUIZ_QUESTIONS, resolveQuizMood } from './features/quiz/quizData.js';
@@ -62,9 +63,13 @@ const state = {
   profileHistory: [],
   profileMessage: '',
   profileMessageType: '',
+  vouchers: getLocalVouchers(),
+  claimedVoucherIds: getLocalClaimedVoucherIds(),
+  voucherFilter: 'all',
   adminTab: 'dishes',
   adminDishes: [],
   adminUsers: [],
+  adminVouchers: [],
   adminStats: null,
   adminAnalytics: null,
   adminSettings: null,
@@ -74,6 +79,8 @@ const state = {
   adminDishDraft: null,
   adminDishSearch: '',
   adminDishFilter: 'all',
+  adminEditVoucherId: null,
+  adminVoucherDraft: null,
   announcementDismissed: typeof sessionStorage !== 'undefined' && sessionStorage.getItem('bung_ann_dismissed') === 'true',
 };
 
@@ -87,6 +94,7 @@ const PAGE_PATHS = {
   'culinary-arena': '/culinary-arena',
   auth: '/auth',
   favs: '/favs',
+  vouchers: '/vouchers',
   profile: '/profile',
   admin: '/admin',
 };
@@ -291,6 +299,7 @@ function renderHeader() {
         ${feat.mealEnabled !== false ? `<button class="nav-btn ${state.activePage === 'meal' ? 'active' : ''}" data-page="meal" id="nav-meal" title="Dựng mâm cơm 4 món chuẩn vị">🍽️ Dựng bữa <span class="nav-badge-pill">Mâm cơm</span></button>` : ''}
         ${feat.airdropEnabled !== false ? `<button class="nav-btn ${state.activePage === 'airdrop' ? 'active' : ''}" data-page="airdrop" id="nav-airdrop" title="Thả hòm thính cứu đói">🎁 Hòm thính <span class="nav-badge-pill">Loot</span></button>` : ''}
         ${feat.arenaEnabled !== false ? `<button class="nav-btn ${state.activePage === 'arena' ? 'active' : ''}" data-page="arena" id="nav-arena" title="Chiêm tinh ẩm thực & Food Tarot (Culinary Arena)">🔮 Chiêm tinh ẩm thực <span class="nav-badge-pill">Tarot 3D</span></button>` : ''}
+        <button class="nav-btn ${state.activePage === 'vouchers' ? 'active' : ''}" data-page="vouchers" id="nav-vouchers" title="Kho Voucher & Ưu Đãi Độc Quyền">🎟️ Kho Voucher <span class="nav-badge-pill">Hot Deal</span></button>
       </nav>
       <div class="header-actions">
         <button class="fav-btn" id="fav-nav-btn">
@@ -312,6 +321,10 @@ function renderHeader() {
               <button type="button" class="header-menu-item" data-header-action="volume">
                 <span class="header-menu-icon">🔊</span>
                 <span class="header-menu-label">Âm lượng</span>
+              </button>
+              <button type="button" class="header-menu-item" data-header-action="vouchers">
+                <span class="header-menu-icon">🎟️</span>
+                <span class="header-menu-label">Kho Voucher</span>
               </button>
               ${isLoggedIn ? `<button type="button" class="header-menu-item" data-header-action="profile">
                 <span class="header-menu-icon">👤</span>
@@ -408,6 +421,7 @@ function renderPages() {
       </div>
       <div id="page-auth" class="page ${state.activePage === 'auth' ? 'active' : ''}">${renderAuthPage()}</div>
       <div id="page-favs" class="page ${state.activePage === 'favs' ? 'active' : ''}">${renderFavs()}</div>
+      <div id="page-vouchers" class="page ${state.activePage === 'vouchers' ? 'active' : ''}">${renderVouchersPage()}</div>
       <div id="page-profile" class="page ${state.activePage === 'profile' ? 'active' : ''}">${renderProfilePage()}</div>
       <div id="page-admin" class="page ${state.activePage === 'admin' ? 'active' : ''}">${renderAdminPage()}</div>
     </main>`;
@@ -517,9 +531,187 @@ function renderAuthPage() {
     </div>`;
 }
 
+function renderVouchersPage() {
+  const allVouchers = state.vouchers || [];
+  const claimedSet = new Set((state.claimedVoucherIds || []).map(Number));
+
+  // Counts for filter chips
+  const totalCount = allVouchers.length;
+  const claimedCount = allVouchers.filter(v => claimedSet.has(Number(v.id))).length;
+  const fixedCount = allVouchers.filter(v => v.discountType === 'fixed').length;
+  const percentCount = allVouchers.filter(v => v.discountType === 'percent').length;
+  const freeshipCount = allVouchers.filter(v => 
+    String(v.code).includes('SHIP') || 
+    String(v.title).toLowerCase().includes('vận chuyển') || 
+    String(v.badge).toLowerCase().includes('freeship')
+  ).length;
+
+  // Filtered list
+  const currentFilter = state.voucherFilter || 'all';
+  let filtered = allVouchers;
+  if (currentFilter === 'claimed') {
+    filtered = allVouchers.filter(v => claimedSet.has(Number(v.id)));
+  } else if (currentFilter === 'fixed') {
+    filtered = allVouchers.filter(v => v.discountType === 'fixed');
+  } else if (currentFilter === 'percent') {
+    filtered = allVouchers.filter(v => v.discountType === 'percent');
+  } else if (currentFilter === 'freeship') {
+    filtered = allVouchers.filter(v => 
+      String(v.code).includes('SHIP') || 
+      String(v.title).toLowerCase().includes('vận chuyển') || 
+      String(v.badge).toLowerCase().includes('freeship')
+    );
+  }
+
+  return `
+    <div class="voucher-page">
+      <section class="voucher-hero">
+        <div class="voucher-hero-badge">🎟️ BungOiAnGi Rewards & Deals</div>
+        <h1 class="voucher-hero-title">Kho Voucher & Ưu Đãi Độc Quyền</h1>
+        <p class="voucher-hero-sub">
+          Thu thập mã giảm giá và mã vận chuyển hỏa tốc để thưởng thức hàng trăm món ngon với mức giá tiết kiệm nhất mỗi ngày!
+        </p>
+      </section>
+
+      <div class="voucher-container">
+        <!-- BỘ LỌC VOUCHER -->
+        <div class="voucher-filter-bar" role="tablist" aria-label="Bộ lọc voucher">
+          <button type="button" class="voucher-chip ${currentFilter === 'all' ? 'active' : ''}" data-voucher-filter="all">
+            🎁 Tất Cả Ưu Đãi <span class="voucher-chip-count">${totalCount}</span>
+          </button>
+          <button type="button" class="voucher-chip ${currentFilter === 'claimed' ? 'active' : ''}" data-voucher-filter="claimed">
+            ⭐ Voucher Của Tôi <span class="voucher-chip-count">${claimedCount}</span>
+          </button>
+          <button type="button" class="voucher-chip ${currentFilter === 'fixed' ? 'active' : ''}" data-voucher-filter="fixed">
+            💵 Giảm Tiền Mặt <span class="voucher-chip-count">${fixedCount}</span>
+          </button>
+          <button type="button" class="voucher-chip ${currentFilter === 'percent' ? 'active' : ''}" data-voucher-filter="percent">
+            ⚡ Giảm % <span class="voucher-chip-count">${percentCount}</span>
+          </button>
+          <button type="button" class="voucher-chip ${currentFilter === 'freeship' ? 'active' : ''}" data-voucher-filter="freeship">
+            🛵 Freeship <span class="voucher-chip-count">${freeshipCount}</span>
+          </button>
+        </div>
+
+        <!-- DANH SÁCH THẺ VOUCHER -->
+        ${filtered.length > 0 ? `
+          <div class="vouchers-grid">
+            ${filtered.map(voucher => {
+              const isClaimed = claimedSet.has(Number(voucher.id));
+              const isPercent = voucher.discountType === 'percent';
+              const isFreeship = String(voucher.code).includes('SHIP') || String(voucher.badge).toLowerCase().includes('freeship');
+              const isAncient = voucher.category === 'ancient' || Number(voucher.discountValue) >= 50000;
+              
+              let typeClass = 'type-fixed';
+              if (isPercent) typeClass = 'type-percent';
+              else if (isFreeship) typeClass = 'type-freeship';
+              else if (isAncient) typeClass = 'type-ancient';
+
+              let discountDisplay = '';
+              let unitDisplay = 'GIẢM';
+              if (isPercent) {
+                discountDisplay = `${voucher.discountValue}%`;
+                unitDisplay = 'GIẢM GIÁ';
+              } else {
+                const kVal = voucher.discountValue >= 1000 ? Math.round(voucher.discountValue / 1000) : voucher.discountValue;
+                discountDisplay = `${kVal}K`;
+                unitDisplay = 'TIỀN MẶT';
+              }
+
+              const used = Number(voucher.usedCount || 0);
+              const limit = Number(voucher.usageLimit || 100);
+              const percentUsed = Math.min(100, Math.round((used / limit) * 100));
+
+              return `
+                <article class="voucher-card ${typeClass} ${isClaimed ? 'is-claimed' : ''}" data-voucher-card="${voucher.id}">
+                  <!-- PHẦN CUỐNG VÉ TRÁI -->
+                  <div class="voucher-stub">
+                    <div class="voucher-stub-icon">${isFreeship ? '🛵' : isPercent ? '⚡' : isAncient ? '💎' : '🎁'}</div>
+                    <div class="voucher-stub-val">${discountDisplay}</div>
+                    <div class="voucher-stub-unit">${unitDisplay}</div>
+                    <div class="voucher-stub-tag">${escapeHTML(voucher.badge || 'Deal Hot')}</div>
+                  </div>
+
+                  <!-- RÃNH XÉ RĂNG CƯA -->
+                  <div class="voucher-divider"></div>
+
+                  <!-- PHẦN NỘI DUNG PHẢI -->
+                  <div class="voucher-main">
+                    <div>
+                      <div class="voucher-header">
+                        <span class="voucher-badge">${escapeHTML(voucher.badge || 'Ưu đãi')}</span>
+                        ${isClaimed ? `<span class="voucher-status-tag">✓ Đã trong ví</span>` : ''}
+                      </div>
+
+                      <h3 class="voucher-title">${escapeHTML(voucher.title)}</h3>
+                      <p class="voucher-desc">${escapeHTML(voucher.desc)}</p>
+
+                      <div class="voucher-code-row">
+                        <div class="voucher-code-box">
+                          <span>🎟️</span>
+                          <strong>${escapeHTML(voucher.code)}</strong>
+                        </div>
+                        <button type="button" class="voucher-code-copy" data-copy-voucher="${escapeHTML(voucher.code)}" title="Sao chép mã vào khay nhớ tạm">
+                          <span>📋</span> Chép mã
+                        </button>
+                      </div>
+
+                      <div class="voucher-meta-row">
+                        <span>Đơn tối thiểu: <strong>${voucher.minOrder ? formatCurrency(voucher.minOrder) : '0đ'}</strong></span>
+                        <div class="voucher-expiry" title="Hạn sử dụng">
+                          <span>⏳</span>
+                          <span>HSD: ${escapeHTML(voucher.expiryDate || 'Vô thời hạn')}</span>
+                        </div>
+                      </div>
+
+                      <div class="voucher-progress-wrap">
+                        <div class="voucher-progress-label">
+                          <span>Đã dùng ${percentUsed}%</span>
+                          <span>${used}/${limit} lượt</span>
+                        </div>
+                        <div class="voucher-progress-track">
+                          <div class="voucher-progress-fill" style="width: ${percentUsed}%"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="voucher-actions">
+                      <button type="button" class="voucher-btn-claim ${isClaimed ? 'is-claimed' : ''}" data-claim-voucher="${voucher.id}" ${isClaimed ? 'disabled' : ''}>
+                        ${isClaimed ? '✓ Đã trong kho' : '＋ Lưu vào kho'}
+                      </button>
+                      <button type="button" class="voucher-btn-use" data-use-voucher="${escapeHTML(voucher.code)}">
+                        Dùng ngay ➔
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              `;
+            }).join('')}
+          </div>
+        ` : `
+          <div style="text-align:center;padding:3.5rem 1rem;background:#ffffff;border-radius:16px;border:1px dashed #cbd5e1;max-width:500px;margin:2rem auto">
+            <div style="font-size:3rem;margin-bottom:0.75rem">🎟️</div>
+            <h3 style="font-size:1.2rem;font-weight:800;color:var(--text-main);margin-bottom:0.4rem">Chưa có voucher nào trong mục này</h3>
+            <p style="font-size:0.88rem;color:var(--text-sub);margin-bottom:1.25rem">
+              ${currentFilter === 'claimed' ? 'Bạn chưa lưu voucher nào vào kho. Hãy bấm "Tất cả ưu đãi" để chọn và thu thập mã giảm giá nhé!' : 'Các ưu đãi mới sẽ sớm được cập nhật.'}
+            </p>
+            ${currentFilter === 'claimed' ? `
+              <button type="button" class="portal-button portal-button--primary" data-voucher-filter="all">
+                Xem toàn bộ voucher ngay
+              </button>
+            ` : ''}
+          </div>
+        `}
+      </div>
+    </div>
+  `;
+}
+
 function renderProfilePage() {
   const user = state.profile || getAuthSession()?.user;
   if (!user) return '<section class="portal-page"><p class="portal-empty">Đang tải hồ sơ…</p></section>';
+
+  const claimedVouchersList = state.vouchers.filter(v => state.claimedVoucherIds.includes(Number(v.id)));
 
   return `
     <section class="portal-page">
@@ -530,6 +722,7 @@ function renderProfilePage() {
       <p class="portal-message ${state.profileMessageType === 'error' ? 'is-error' : state.profileMessageType === 'success' ? 'is-success' : ''}" id="profile-message" role="status">${escapeHTML(state.profileMessage)}</p>
       <div class="portal-profile-summary">
         <div class="portal-metric"><span>Tài khoản</span><strong>${getUserRoleInfo(user).icon} ${escapeHTML(getUserRoleInfo(user).title)}</strong></div>
+        <div class="portal-metric"><span>Voucher trong kho</span><strong>${state.claimedVoucherIds.length}</strong></div>
         <div class="portal-metric"><span>Món yêu thích</span><strong>${state.profileFavorites.length}</strong></div>
         <div class="portal-metric"><span>Lượt xem gần đây</span><strong>${state.profileHistory.length}</strong></div>
       </div>
@@ -541,6 +734,37 @@ function renderProfilePage() {
           <div class="portal-actions portal-field--wide"><button class="portal-button portal-button--primary" type="submit">Lưu hồ sơ</button></div>
         </form>
       </section>
+
+      <!-- KHO VOUCHER CỦA BẠN -->
+      <section class="portal-panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem">
+          <h2 style="margin:0">🎟️ Kho Voucher Của Bạn (${claimedVouchersList.length})</h2>
+          <button type="button" class="portal-button" data-nav-to-vouchers="true">Khám phá thêm ưu đãi ↗</button>
+        </div>
+        ${claimedVouchersList.length > 0 ? `
+          <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:0.75rem">
+            ${claimedVouchersList.map(v => {
+              const isPercent = v.discountType === 'percent';
+              const discountText = isPercent ? `${v.discountValue}%` : formatCurrency(v.discountValue);
+              return `
+              <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:0.85rem 1rem;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,0.04)">
+                <div>
+                  <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.25rem">
+                    <span class="admin-code-badge" style="font-size:0.85rem">${escapeHTML(v.code)}</span>
+                    <span class="voucher-badge" style="font-size:0.68rem;padding:1px 5px">${escapeHTML(v.badge || 'Ưu đãi')}</span>
+                  </div>
+                  <div style="font-size:0.85rem;font-weight:750;color:var(--text-main)">${escapeHTML(v.title)}</div>
+                  <div style="font-size:0.75rem;color:var(--orange-dark);font-weight:700">Giảm ${discountText} • Đơn từ ${v.minOrder ? formatCurrency(v.minOrder) : '0đ'}</div>
+                </div>
+                <button type="button" class="voucher-code-copy" data-copy-voucher="${escapeHTML(v.code)}" style="padding:0.35rem 0.65rem">
+                  Chép mã
+                </button>
+              </div>`;
+            }).join('')}
+          </div>
+        ` : '<p class="portal-empty">Bạn chưa lưu voucher nào vào kho cá nhân. <button type="button" class="portal-button portal-button--primary" data-nav-to-vouchers="true" style="margin-left:0.5rem;display:inline-block">Nhận voucher ngay ➔</button></p>'}
+      </section>
+
       <section class="portal-panel">
         <h2>Món yêu thích đồng bộ</h2>
         ${state.profileFavorites.length
@@ -636,6 +860,16 @@ function renderAdminPage() {
   // Simulator probabilities
   const simulatedDishes = simulateDropProbabilities(state.adminDishes, settings).slice(0, 10);
 
+  const editingVoucher = state.adminVouchers.find(v => Number(v.id) === Number(state.adminEditVoucherId));
+  const voucherDraftValues = state.adminVoucherDraft?.voucherId === (editingVoucher ? Number(editingVoucher.id) : null)
+    ? state.adminVoucherDraft.values
+    : null;
+  const voucherSelectedType = voucherDraftValues?.discountType ?? editingVoucher?.discountType ?? 'fixed';
+  const voucherSelectedCategory = voucherDraftValues?.category ?? editingVoucher?.category ?? 'all';
+  const isEditingVoucherActive = voucherDraftValues?.active !== undefined
+    ? (voucherDraftValues.active === 'true' || voucherDraftValues.active === true || voucherDraftValues.active === 'on')
+    : (editingVoucher?.active !== undefined ? Boolean(editingVoucher.active) : true);
+
   return `
     <section class="portal-page">
       <header class="portal-heading">
@@ -651,19 +885,21 @@ function renderAdminPage() {
         <div class="portal-actions">
           ${state.adminTab === 'dishes' ? '<button type="button" class="portal-button portal-button--primary" id="admin-add-dish">＋ Thêm món mới</button>' : ''}
           ${state.adminTab === 'users' ? '<button type="button" class="portal-button portal-button--primary" id="admin-add-user">＋ Tạo tài khoản</button>' : ''}
+          ${state.adminTab === 'vouchers' ? '<button type="button" class="portal-button portal-button--primary" id="admin-add-voucher">＋ Tạo voucher mới</button>' : ''}
           <button type="button" class="portal-button" id="admin-refresh">↻ Làm mới dữ liệu</button>
         </div>
       </header>
 
       <p class="portal-message ${state.adminMessageType === 'error' ? 'is-error' : state.adminMessageType === 'success' ? 'is-success' : ''}" id="admin-message" role="status">${escapeHTML(state.adminMessage)}</p>
 
-      <!-- 5 TABS NAVIGATION -->
+      <!-- 6 TABS NAVIGATION -->
       <div class="portal-segmented" role="group" aria-label="Khu vực quản trị">
         <button type="button" data-admin-tab="dishes" aria-pressed="${state.adminTab === 'dishes'}">🍲 Món ăn & Menu (${state.adminDishes.length})</button>
         <button type="button" data-admin-tab="rules" aria-pressed="${state.adminTab === 'rules'}">🎲 Luật chơi & Tỉ lệ</button>
         <button type="button" data-admin-tab="analytics" aria-pressed="${state.adminTab === 'analytics'}">📊 Dữ liệu & Báo cáo</button>
         <button type="button" data-admin-tab="settings" aria-pressed="${state.adminTab === 'settings'}">⚙️ Cài đặt Web & CMS</button>
         <button type="button" data-admin-tab="users" aria-pressed="${state.adminTab === 'users'}">👥 Người dùng (${state.adminUsers.length})</button>
+        <button type="button" data-admin-tab="vouchers" aria-pressed="${state.adminTab === 'vouchers'}">🎟️ Quản lý Voucher (${state.adminVouchers.length})</button>
       </div>
 
       <!-- TAB 1: DISHES & MENU -->
@@ -1519,6 +1755,190 @@ function renderAdminPage() {
         </section>
       ` : ''}
 
+      <!-- TAB 6: VOUCHERS MANAGEMENT -->
+      ${state.adminTab === 'vouchers' ? `
+        <!-- Form Tạo / Sửa Voucher -->
+        <section class="portal-panel">
+          <h2>${editingVoucher ? `Sửa Voucher: ${escapeHTML(editingVoucher.code)}` : 'Tạo Voucher Giảm Giá & Mã Khuyến Mãi Mới'}</h2>
+          <p style="color:var(--text-sub);margin-bottom:1rem">
+            Thiết lập mã code, mức giảm (tiền mặt VNĐ hoặc %), giá trị đơn tối thiểu, số lượt dùng tối đa và hạn sử dụng để thu hút khách hàng!
+          </p>
+
+          <form id="admin-voucher-form" class="portal-form-grid">
+            <div class="portal-field">
+              <label for="admin-voucher-code">Mã Voucher (Code) *</label>
+              <input id="admin-voucher-code" name="code" value="${escapeHTML(voucherDraftValues?.code ?? editingVoucher?.code ?? '')}" required minlength="3" maxlength="20" placeholder="Ví dụ: BUNGNEW30, GIAM20K..." style="text-transform:uppercase;font-family:monospace;font-weight:700" />
+            </div>
+
+            <div class="portal-field">
+              <label for="admin-voucher-title">Tiêu đề ưu đãi *</label>
+              <input id="admin-voucher-title" name="title" value="${escapeHTML(voucherDraftValues?.title ?? editingVoucher?.title ?? '')}" required minlength="2" placeholder="Ví dụ: Giảm 30k Cho Đơn Đầu Tiên" />
+            </div>
+
+            <div class="portal-field portal-field--wide">
+              <label for="admin-voucher-desc">Mô tả & Điều kiện áp dụng</label>
+              <textarea id="admin-voucher-desc" name="desc" placeholder="Chi tiết điều kiện, món áp dụng hoặc lưu ý khi dùng mã...">${escapeHTML(voucherDraftValues?.desc ?? editingVoucher?.desc ?? '')}</textarea>
+            </div>
+
+            <div class="portal-field">
+              <label for="admin-voucher-type">Loại giảm giá *</label>
+              <select id="admin-voucher-type" name="discountType">
+                <option value="fixed" ${voucherSelectedType !== 'percent' ? 'selected' : ''}>💵 Giảm tiền mặt cố định (VNĐ)</option>
+                <option value="percent" ${voucherSelectedType === 'percent' ? 'selected' : ''}>⚡ Giảm theo phần trăm (%)</option>
+              </select>
+            </div>
+
+            <div class="portal-field">
+              <label for="admin-voucher-val">Mức giảm *</label>
+              <input id="admin-voucher-val" name="discountValue" type="number" min="1" value="${voucherDraftValues?.discountValue ?? editingVoucher?.discountValue ?? 30000}" required placeholder="Ví dụ: 30000 (nếu VNĐ) hoặc 20 (nếu %)" />
+            </div>
+
+            <div class="portal-field">
+              <label for="admin-voucher-min">Đơn hàng tối thiểu (VNĐ)</label>
+              <input id="admin-voucher-min" name="minOrder" type="number" min="0" step="1000" value="${voucherDraftValues?.minOrder ?? editingVoucher?.minOrder ?? 60000}" placeholder="Ví dụ: 60000" />
+            </div>
+
+            <div class="portal-field">
+              <label for="admin-voucher-max">Mức giảm tối đa (VNĐ)</label>
+              <input id="admin-voucher-max" name="maxDiscount" type="number" min="0" step="1000" value="${voucherDraftValues?.maxDiscount ?? editingVoucher?.maxDiscount ?? 30000}" placeholder="Áp dụng khi chọn giảm theo %" />
+            </div>
+
+            <div class="portal-field">
+              <label for="admin-voucher-limit">Giới hạn số lượt dùng tối đa</label>
+              <input id="admin-voucher-limit" name="usageLimit" type="number" min="1" value="${voucherDraftValues?.usageLimit ?? editingVoucher?.usageLimit ?? 100}" placeholder="Ví dụ: 100" />
+            </div>
+
+            <div class="portal-field">
+              <label for="admin-voucher-expiry">Hạn sử dụng (HSD)</label>
+              <input id="admin-voucher-expiry" name="expiryDate" type="date" value="${voucherDraftValues?.expiryDate ?? editingVoucher?.expiryDate ?? new Date(Date.now() + 30*86400000).toISOString().split('T')[0]}" required />
+            </div>
+
+            <div class="portal-field">
+              <label for="admin-voucher-badge">Huy hiệu hiển thị</label>
+              <input id="admin-voucher-badge" name="badge" value="${escapeHTML(voucherDraftValues?.badge ?? editingVoucher?.badge ?? '🎉 Bạn Mới')}" placeholder="Ví dụ: 🎉 Bạn Mới, 🛵 Freeship, 🔥 Hot Deal, 💎 VIP" />
+            </div>
+
+            <div class="portal-field">
+              <label for="admin-voucher-cat">Áp dụng cho</label>
+              <select id="admin-voucher-cat" name="category">
+                <option value="all" ${voucherSelectedCategory === 'all' ? 'selected' : ''}>Mọi món ăn</option>
+                <option value="ancient" ${voucherSelectedCategory === 'ancient' ? 'selected' : ''}>💎 Món Cổ Đại (>100k)</option>
+                <option value="legendary" ${voucherSelectedCategory === 'legendary' ? 'selected' : ''}>🔶 Món Huyền Thoại (55k-99k)</option>
+                <option value="mon-nuoc" ${voucherSelectedCategory === 'mon-nuoc' ? 'selected' : ''}>🍜 Món Nước</option>
+                <option value="com" ${voucherSelectedCategory === 'com' ? 'selected' : ''}>🍚 Cơm</option>
+                <option value="an-vat" ${voucherSelectedCategory === 'an-vat' ? 'selected' : ''}>🧋 Ăn Vặt & Tráng Miệng</option>
+              </select>
+            </div>
+
+            <div class="portal-field portal-field--wide">
+              <label class="admin-switch-label">
+                <input type="checkbox" name="active" ${isEditingVoucherActive ? 'checked' : ''} />
+                <span>Kích hoạt phát hành ngay cho khách hàng thu thập và sử dụng</span>
+              </label>
+            </div>
+
+            <div class="portal-actions portal-field--wide">
+              <button type="submit" class="portal-button portal-button--primary">
+                ${editingVoucher ? '💾 Lưu Thay Đổi Voucher' : '＋ Tạo & Phát Hành Voucher Mới'}
+              </button>
+              ${editingVoucher ? '<button type="button" class="portal-button" id="admin-cancel-voucher-edit">Hủy sửa</button>' : ''}
+            </div>
+          </form>
+        </section>
+
+        <!-- Thống Kê & Bảng Danh Sách Voucher -->
+        <section class="portal-panel">
+          <div class="admin-voucher-summary">
+            <div class="admin-voucher-metric">
+              <span>Tổng số voucher</span>
+              <strong>${state.adminVouchers.length}</strong>
+            </div>
+            <div class="admin-voucher-metric">
+              <span>Đang phát hành</span>
+              <strong style="color:#059669">${state.adminVouchers.filter(v => v.active !== false).length}</strong>
+            </div>
+            <div class="admin-voucher-metric">
+              <span>Tổng lượt thu thập / dùng</span>
+              <strong style="color:var(--orange-dark)">${state.adminVouchers.reduce((acc, v) => acc + (Number(v.usedCount) || 0), 0)}</strong>
+            </div>
+          </div>
+
+          <h2>Danh Sách Mã Voucher & Ưu Đãi (${state.adminVouchers.length})</h2>
+          <div class="portal-table-wrap">
+            <table class="portal-table">
+              <thead>
+                <tr>
+                  <th>Mã Code & Huy hiệu</th>
+                  <th>Tiêu đề & Điều kiện</th>
+                  <th>Mức Giảm</th>
+                  <th>Lượt Dùng</th>
+                  <th>Hạn Dùng</th>
+                  <th>Trạng Thái</th>
+                  <th>Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${state.adminVouchers.length > 0 ? state.adminVouchers.map(v => {
+                  const used = Number(v.usedCount || 0);
+                  const limit = Number(v.usageLimit || 100);
+                  const isPercent = v.discountType === 'percent';
+                  const isExpired = v.expiryDate && new Date(v.expiryDate + 'T23:59:59') < new Date();
+                  const isActive = v.active !== false && !isExpired;
+
+                  return `
+                    <tr>
+                      <td>
+                        <span class="admin-code-badge">${escapeHTML(v.code)}</span>
+                        <div style="margin-top:0.25rem">
+                          <span class="voucher-badge" style="font-size:0.7rem">${escapeHTML(v.badge || 'Ưu đãi')}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <strong>${escapeHTML(v.title)}</strong>
+                        <div style="font-size:0.75rem;color:var(--text-sub);margin-top:0.15rem">
+                          ${escapeHTML(v.desc || '—')}
+                        </div>
+                      </td>
+                      <td>
+                        <strong style="color:${isPercent ? '#7c3aed' : 'var(--orange-dark)'};font-size:1.05rem">
+                          ${isPercent ? `${v.discountValue}%` : formatCurrency(v.discountValue)}
+                        </strong>
+                        <div style="font-size:0.72rem;color:var(--text-sub)">
+                          Đơn tối thiểu: ${v.minOrder ? formatCurrency(v.minOrder) : '0đ'}
+                        </div>
+                      </td>
+                      <td>
+                        <strong>${used}</strong> / ${limit}
+                        <div style="font-size:0.72rem;color:var(--text-muted)">
+                          (${Math.min(100, Math.round((used/limit)*100))}%)
+                        </div>
+                      </td>
+                      <td>
+                        <span style="font-size:0.82rem;font-weight:600;${isExpired ? 'color:#ef4444' : ''}">
+                          ${escapeHTML(v.expiryDate || '—')}
+                        </span>
+                        ${isExpired ? '<div style="font-size:0.7rem;color:#ef4444;font-weight:700">Đã hết hạn</div>' : ''}
+                      </td>
+                      <td>
+                        <button type="button" class="admin-chip ${isActive ? 'active' : ''}" data-toggle-voucher-active="${v.id}" title="Bấm để bật hoặc tắt voucher">
+                          ${isActive ? '🟢 Phát hành' : '⚪ Tạm ngưng'}
+                        </button>
+                      </td>
+                      <td>
+                        <div class="portal-actions">
+                          <button class="portal-button" type="button" data-edit-voucher="${v.id}">Sửa</button>
+                          <button class="portal-button portal-button--danger" type="button" data-delete-voucher="${v.id}">Xóa</button>
+                        </div>
+                      </td>
+                    </tr>
+                  `;
+                }).join('') : '<tr><td colspan="7" class="portal-empty">Chưa có voucher nào được tạo. Hãy bấm "Tạo voucher mới" ở form trên!</td></tr>'}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ` : ''}
+
     </section>
   `;
 }
@@ -2313,6 +2733,29 @@ function navigateTo(page, { updateUrl = true } = {}) {
 
   if (page === 'profile') void loadProfileData();
   if (page === 'admin') void loadAdminDashboard();
+  if (page === 'vouchers') void loadVouchersData();
+}
+
+async function loadVouchersData() {
+  try {
+    const remoteVouchers = await requestApi('/api/vouchers', { auth: false }).catch(() => null);
+    if (Array.isArray(remoteVouchers) && remoteVouchers.length > 0) {
+      state.vouchers = remoteVouchers;
+      saveLocalVouchers(remoteVouchers);
+    }
+  } catch {}
+
+  if (isAuthenticated()) {
+    try {
+      const myClaims = await requestApi('/api/customer/vouchers').catch(() => null);
+      if (Array.isArray(myClaims)) {
+        state.claimedVoucherIds = myClaims.map(c => Number(c.voucherId));
+        saveLocalClaimedVoucherIds(state.claimedVoucherIds);
+      }
+    } catch {}
+  }
+
+  if (state.activePage === 'vouchers') renderApp();
 }
 
 async function loadRemoteDishes() {
@@ -2329,15 +2772,20 @@ async function loadRemoteDishes() {
 
 async function loadProfileData() {
   try {
-    const [profile, favorites, history] = await Promise.all([
+    const [profile, favorites, history, vouchers] = await Promise.all([
       requestApi('/api/me'),
       requestApi('/api/customer/favorites'),
       requestApi('/api/customer/history'),
+      requestApi('/api/customer/vouchers').catch(() => null),
     ]);
     state.profile = profile;
     state.profileFavorites = favorites.dishIds.map(Number);
     state.profileHistory = history;
     state.favorites = state.profileFavorites;
+    if (Array.isArray(vouchers)) {
+      state.claimedVoucherIds = vouchers.map(c => Number(c.voucherId));
+      saveLocalClaimedVoucherIds(state.claimedVoucherIds);
+    }
     localStorage.setItem('bung_favs', JSON.stringify(state.favorites));
     if (state.activePage === 'profile') renderApp();
   } catch (error) {
@@ -2365,12 +2813,13 @@ async function loadCustomerFavorites() {
 
 async function loadAdminDashboard(successMessage = '') {
   try {
-    const [stats, adminDishes, users, analytics, settings] = await Promise.all([
+    const [stats, adminDishes, users, analytics, settings, adminVouchers] = await Promise.all([
       requestApi('/api/admin/stats'),
       requestApi('/api/admin/dishes'),
       requestApi('/api/admin/users'),
       requestApi('/api/admin/analytics').catch(() => null),
       requestApi('/api/admin/settings').catch(() => null),
+      requestApi('/api/admin/vouchers').catch(() => getLocalVouchers()),
     ]);
     state.adminStats = stats;
     state.adminDishes = adminDishes;
@@ -2379,6 +2828,11 @@ async function loadAdminDashboard(successMessage = '') {
     if (settings) {
       state.adminSettings = settings;
       setDynamicSettings(settings);
+    }
+    if (Array.isArray(adminVouchers) && adminVouchers.length > 0) {
+      state.adminVouchers = adminVouchers;
+      state.vouchers = adminVouchers;
+      saveLocalVouchers(adminVouchers);
     }
     replaceDishes(adminDishes);
 
@@ -2480,6 +2934,10 @@ function bindAll() {
           return;
         }
         navigateTo('admin');
+        return;
+      }
+      if (action === 'vouchers') {
+        navigateTo('vouchers');
         return;
       }
       if (action === 'volume') {
@@ -3297,7 +3755,256 @@ let lastBupDishId = null;
     });
   });
 
+  bindVoucherInteractions();
   bindDishCards();
+}
+
+function showVoucherToast(msg) {
+  const existing = document.querySelector('.voucher-toast');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.className = 'voucher-toast';
+  toast.innerHTML = `<span>🎟️</span> <span>${escapeHTML(msg)}</span>`;
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, 2500);
+}
+
+function copyVoucherCode(code, buttonElement) {
+  playSelect();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(code).then(() => {
+      if (buttonElement) {
+        const origText = buttonElement.innerHTML;
+        buttonElement.innerHTML = '✓ Đã chép!';
+        buttonElement.classList.add('copied');
+        setTimeout(() => {
+          buttonElement.innerHTML = origText;
+          buttonElement.classList.remove('copied');
+        }, 2000);
+      }
+      showVoucherToast(`Đã sao chép mã "${code}" thành công! 🎉`);
+    }).catch(() => {
+      showVoucherToast(`Mã ưu đãi của bạn: ${code}`);
+    });
+  } else {
+    showVoucherToast(`Mã ưu đãi của bạn: ${code}`);
+  }
+}
+
+async function handleClaimVoucher(voucherId) {
+  playWin();
+  burst();
+  const vId = Number(voucherId);
+  const target = state.vouchers.find(v => Number(v.id) === vId);
+
+  if (!state.claimedVoucherIds.includes(vId)) {
+    state.claimedVoucherIds.push(vId);
+    saveLocalClaimedVoucherIds(state.claimedVoucherIds);
+    if (target) {
+      target.usedCount = (target.usedCount || 0) + 1;
+      saveLocalVouchers(state.vouchers);
+    }
+  }
+
+  showVoucherToast(`Đã thu thập mã "${target?.code || 'ƯU ĐÃI'}" vào ví! 🎉`);
+  renderApp();
+
+  if (isAuthenticated()) {
+    try {
+      await requestApi('/api/customer/vouchers', {
+        method: 'POST',
+        body: { voucherId: vId }
+      });
+    } catch (err) {
+      console.warn('Lỗi đồng bộ lưu voucher lên server:', err.message);
+    }
+  }
+}
+
+function bindVoucherInteractions() {
+  // Lọc voucher theo danh mục / tab
+  document.querySelectorAll('[data-voucher-filter]').forEach(button => {
+    button.addEventListener('click', () => {
+      playClick();
+      state.voucherFilter = button.dataset.voucherFilter;
+      const voucherPage = document.getElementById('page-vouchers');
+      if (voucherPage) voucherPage.innerHTML = renderVouchersPage();
+      bindVoucherInteractions();
+    });
+  });
+
+  // Sao chép mã voucher
+  document.querySelectorAll('[data-copy-voucher]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const code = btn.dataset.copyVoucher;
+      copyVoucherCode(code, btn);
+    });
+  });
+
+  // Thu thập / lưu voucher vào kho
+  document.querySelectorAll('[data-claim-voucher]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const vId = Number(btn.dataset.claimVoucher);
+      handleClaimVoucher(vId);
+    });
+  });
+
+  // Dùng ngay voucher -> chuyển hướng sang Khám phá
+  document.querySelectorAll('[data-use-voucher]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      playClick();
+      const code = btn.dataset.useVoucher;
+      copyVoucherCode(code);
+      navigateTo('explore');
+    });
+  });
+
+  // Chuyển hướng tới trang voucher
+  document.querySelectorAll('[data-nav-to-vouchers]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      playClick();
+      navigateTo('vouchers');
+    });
+  });
+
+  // ADMIN VOUCHER ACTIONS:
+  document.getElementById('admin-add-voucher')?.addEventListener('click', () => {
+    state.adminEditVoucherId = null;
+    state.adminVoucherDraft = null;
+    renderApp();
+    document.getElementById('admin-voucher-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('admin-voucher-code')?.focus({ preventScroll: true });
+  });
+
+  document.getElementById('admin-cancel-voucher-edit')?.addEventListener('click', () => {
+    state.adminEditVoucherId = null;
+    state.adminVoucherDraft = null;
+    renderApp();
+  });
+
+  // Form tạo / sửa voucher cho Admin
+  document.getElementById('admin-voucher-form')?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const payload = {
+      code: String(formData.get('code') || '').trim().toUpperCase(),
+      title: String(formData.get('title') || '').trim(),
+      desc: String(formData.get('desc') || '').trim(),
+      discountType: String(formData.get('discountType') || 'fixed'),
+      discountValue: Number(formData.get('discountValue') || 0),
+      minOrder: Number(formData.get('minOrder') || 0),
+      maxDiscount: Number(formData.get('maxDiscount') || 0),
+      usageLimit: Number(formData.get('usageLimit') || 100),
+      expiryDate: String(formData.get('expiryDate') || ''),
+      badge: String(formData.get('badge') || 'Ưu Đãi').trim(),
+      category: String(formData.get('category') || 'all'),
+      active: formData.get('active') === 'on',
+    };
+
+    try {
+      if (state.adminEditVoucherId) {
+        await requestApi(`/api/admin/vouchers/${state.adminEditVoucherId}`, {
+          method: 'PATCH',
+          body: payload,
+        });
+        state.adminEditVoucherId = null;
+        state.adminVoucherDraft = null;
+        await loadAdminDashboard('Đã cập nhật voucher thành công!');
+      } else {
+        await requestApi('/api/admin/vouchers', {
+          method: 'POST',
+          body: payload,
+        });
+        state.adminVoucherDraft = null;
+        await loadAdminDashboard('Đã tạo và phát hành voucher mới thành công!');
+      }
+    } catch (error) {
+      // Cập nhật cục bộ nếu chạy tĩnh hoặc demo
+      if (state.adminEditVoucherId) {
+        const idx = state.adminVouchers.findIndex(v => Number(v.id) === Number(state.adminEditVoucherId));
+        if (idx !== -1) {
+          state.adminVouchers[idx] = { ...state.adminVouchers[idx], ...payload };
+          state.vouchers = state.adminVouchers;
+          saveLocalVouchers(state.vouchers);
+        }
+        state.adminEditVoucherId = null;
+        state.adminVoucherDraft = null;
+        state.adminMessage = 'Đã cập nhật voucher (chế độ cục bộ)!';
+        state.adminMessageType = 'success';
+      } else {
+        const newVoucher = {
+          id: Date.now(),
+          ...payload,
+          usedCount: 0,
+          createdAt: new Date().toISOString(),
+        };
+        state.adminVouchers.unshift(newVoucher);
+        state.vouchers = state.adminVouchers;
+        saveLocalVouchers(state.vouchers);
+        state.adminVoucherDraft = null;
+        state.adminMessage = 'Đã tạo voucher mới thành công!';
+        state.adminMessageType = 'success';
+      }
+      renderApp();
+    }
+  });
+
+  // Nút Sửa Voucher
+  document.querySelectorAll('[data-edit-voucher]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const vId = Number(btn.dataset.editVoucher);
+      state.adminEditVoucherId = vId;
+      state.adminVoucherDraft = null;
+      renderApp();
+      document.getElementById('admin-voucher-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById('admin-voucher-code')?.focus();
+    });
+  });
+
+  // Nút Xóa Voucher
+  document.querySelectorAll('[data-delete-voucher]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!window.confirm('Bạn có chắc muốn xóa voucher này? Khách hàng sẽ không thể sử dụng mã này nữa.')) return;
+      const vId = Number(btn.dataset.deleteVoucher);
+      try {
+        await requestApi(`/api/admin/vouchers/${vId}`, { method: 'DELETE' });
+        await loadAdminDashboard('Đã xóa voucher khỏi hệ thống.');
+      } catch (error) {
+        state.adminVouchers = state.adminVouchers.filter(v => Number(v.id) !== vId);
+        state.vouchers = state.adminVouchers;
+        saveLocalVouchers(state.vouchers);
+        state.adminMessage = 'Đã xóa voucher thành công.';
+        state.adminMessageType = 'success';
+        renderApp();
+      }
+    });
+  });
+
+  // Bật/tắt nhanh voucher
+  document.querySelectorAll('[data-toggle-voucher-active]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const vId = Number(btn.dataset.toggleVoucherActive);
+      const v = state.adminVouchers.find(item => Number(item.id) === vId);
+      if (!v) return;
+      const nextActive = !v.active;
+      try {
+        await requestApi(`/api/admin/vouchers/${vId}/quick-toggle`, {
+          method: 'PATCH',
+          body: { active: nextActive }
+        });
+        await loadAdminDashboard(nextActive ? `Đã kích hoạt phát hành mã ${v.code}.` : `Đã tạm ngưng phát hành mã ${v.code}.`);
+      } catch (error) {
+        v.active = nextActive;
+        saveLocalVouchers(state.adminVouchers);
+        renderApp();
+      }
+    });
+  });
 }
 
 function bindDishCards() {
@@ -3361,4 +4068,5 @@ void (async () => {
   const initialPage = pageForPath(window.location.pathname);
   if (initialPage !== 'home') navigateTo(initialPage, { updateUrl: false });
   void loadRemoteDishes();
+  void loadVouchersData();
 })();

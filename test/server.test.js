@@ -386,3 +386,110 @@ test('sanitizeUser retains sub_root adminLevel and roles without demoting to CTV
   assert.equal(sanitized.roleTitle, 'Admin Gốc Phụ');
   assert.equal(sanitized.canManageSettings, true);
 });
+
+test('vouchers can be listed publicly, claimed by customer, and managed by admin', { timeout: 20000 }, async t => {
+  const port = await freePort();
+  const databaseDirectory = mkdtempSync(join(tmpdir(), 'bungoiangi-voucher-api-'));
+  const databasePath = join(databaseDirectory, 'db.json');
+  const baseUrl = `http://127.0.0.1:${port}`;
+  const child = spawn(process.execPath, ['server.js'], {
+    cwd: projectRoot,
+    env: {
+      ...process.env,
+      API_PORT: String(port),
+      DATABASE_PATH: databasePath,
+      ADMIN_EMAIL: 'admin@test.local',
+      ADMIN_PASSWORD: 'SecureAdmin123!',
+    },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+
+  t.after(async () => {
+    if (child.exitCode === null) {
+      child.kill('SIGTERM');
+      await once(child, 'exit');
+    }
+    rmSync(databaseDirectory, { recursive: true, force: true });
+  });
+
+  await waitForServer(baseUrl, child);
+
+  // 1. Public vouchers
+  const publicVouchers = await jsonRequest(`${baseUrl}/api/vouchers`);
+  assert.equal(publicVouchers.response.status, 200);
+  assert.ok(Array.isArray(publicVouchers.data));
+  assert.ok(publicVouchers.data.length >= 5);
+  const sampleVoucher = publicVouchers.data[0];
+  assert.ok(sampleVoucher.code);
+
+  // 2. Register & login customer
+  const customerRegister = await jsonRequest(`${baseUrl}/register`, {
+    method: 'POST',
+    body: { email: 'khachhang@test.local', password: 'Password123!', name: 'Khách Hàng Test' },
+  });
+  assert.equal(customerRegister.response.status, 201);
+  const customerToken = customerRegister.data.accessToken;
+
+  // 3. Customer claims voucher
+  const claimRes = await jsonRequest(`${baseUrl}/660/api/customer/vouchers`, {
+    token: customerToken,
+    method: 'POST',
+    body: { voucherId: sampleVoucher.id },
+  });
+  assert.equal(claimRes.response.status, 201);
+  assert.equal(claimRes.data.voucherId, sampleVoucher.id);
+  assert.equal(claimRes.data.code, sampleVoucher.code);
+
+  // 4. Customer views their claimed vouchers
+  const customerVouchers = await jsonRequest(`${baseUrl}/660/api/customer/vouchers`, {
+    token: customerToken,
+  });
+  assert.equal(customerVouchers.response.status, 200);
+  assert.ok(Array.isArray(customerVouchers.data));
+  assert.ok(customerVouchers.data.some(v => v.id === sampleVoucher.id));
+
+  // 5. Admin login
+  const adminLogin = await jsonRequest(`${baseUrl}/login`, {
+    method: 'POST',
+    body: { email: 'admin@test.local', password: 'SecureAdmin123!' },
+  });
+  assert.equal(adminLogin.response.status, 200);
+  const adminToken = adminLogin.data.accessToken;
+
+  // 6. Admin creates new custom voucher
+  const createRes = await jsonRequest(`${baseUrl}/660/api/admin/vouchers`, {
+    token: adminToken,
+    method: 'POST',
+    body: {
+      code: 'TESTSALE50',
+      title: 'Giảm 50k cho đơn thử nghiệm',
+      discountType: 'fixed',
+      discountValue: 50000,
+      minOrder: 150000,
+      maxDiscount: 50000,
+      usageLimit: 200,
+      badge: 'TEST HOT',
+      expiryDate: '2026-12-31',
+      active: true,
+    },
+  });
+  assert.equal(createRes.response.status, 201);
+  assert.equal(createRes.data.code, 'TESTSALE50');
+  const newVoucherId = createRes.data.id;
+
+  // 7. Admin updates voucher (quick toggle active / modify)
+  const patchRes = await jsonRequest(`${baseUrl}/660/api/admin/vouchers/${newVoucherId}`, {
+    token: adminToken,
+    method: 'PATCH',
+    body: { active: false, title: 'Giảm 50k - Đã tạm dừng' },
+  });
+  assert.equal(patchRes.response.status, 200);
+  assert.equal(patchRes.data.active, false);
+
+  // 8. Admin deletes voucher
+  const deleteRes = await jsonRequest(`${baseUrl}/660/api/admin/vouchers/${newVoucherId}`, {
+    token: adminToken,
+    method: 'DELETE',
+  });
+  assert.equal(deleteRes.response.status, 204);
+});
