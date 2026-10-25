@@ -1108,7 +1108,44 @@ body::after {
 .modal-name {
   font-size: 1.4rem;
   font-weight: 800;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.modal-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.modal-badge-cat {
+  background: #f1f5f9;
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 750;
+  padding: 0.22rem 0.6rem;
+  border-radius: 50px;
+  border: 1px solid #e2e8f0;
+}
+
+.modal-badge-type {
+  font-size: 0.75rem;
+  font-weight: 750;
+  padding: 0.22rem 0.6rem;
+  border-radius: 50px;
+}
+
+.modal-badge-type.chay {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.modal-badge-type.man {
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
 }
 
 .modal-desc {

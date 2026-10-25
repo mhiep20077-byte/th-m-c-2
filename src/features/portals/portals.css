@@ -1552,58 +1552,77 @@ textarea:disabled {
 
 .dish-card-badges {
   position: absolute;
-  top: 8px;
-  left: 8px;
-  z-index: 2;
+  top: 0.65rem;
+  left: 0.65rem;
+  right: 3.4rem; /* Giữ khoảng cách an toàn với nút tim yêu thích ở góc trên bên phải */
+  z-index: 3;
   display: flex;
-  gap: 4px;
+  gap: 0.35rem;
   flex-wrap: wrap;
+  align-items: center;
+  pointer-events: none;
+}
+
+.dish-card-badges > * {
+  pointer-events: auto;
 }
 
 .dish-card-badges .dish-sponsor-badge,
-.dish-card-badges .dish-bestseller-badge {
+.dish-card-badges .dish-bestseller-badge,
+.dish-card-badges .dish-rarity-badge {
   position: static;
+  margin: 0;
 }
 
 /* Rarity badge on dish cards */
 .dish-rarity-badge {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-  z-index: 2;
-  padding: 0.18rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.68rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
   font-weight: 800;
-  letter-spacing: 0.2px;
-  backdrop-filter: blur(4px);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+  white-space: nowrap;
+  line-height: 1.25;
 }
 
 .dish-rarity-badge.badge-ancient {
-  background: linear-gradient(135deg, #6366f1, #a855f7);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.95), rgba(168, 85, 247, 0.95));
   color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
 }
 
 .dish-rarity-badge.badge-legendary {
-  background: linear-gradient(135deg, #f97316, #ea580c);
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.95), rgba(234, 88, 12, 0.95));
   color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
 }
 
 .dish-rarity-badge.badge-mythical {
-  background: linear-gradient(135deg, #0284c7, #2563eb);
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.95), rgba(37, 99, 235, 0.95));
   color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
 }
 
 .dish-rarity-badge.badge-rare {
-  background: linear-gradient(135deg, #0d9488, #059669);
+  background: linear-gradient(135deg, rgba(13, 148, 136, 0.95), rgba(5, 150, 105, 0.95));
   color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.35);
 }
 
 .dish-rarity-badge.badge-common {
-  background: rgba(30, 41, 59, 0.75);
-  color: #e2e8f0;
+  background: rgba(30, 41, 59, 0.85);
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Admin table rarity badges */

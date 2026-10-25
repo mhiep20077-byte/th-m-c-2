@@ -711,7 +711,7 @@ function renderAdminPage() {
                 <option value="" ${!selectedRarity ? 'selected' : ''}>⚡ Tự động theo giá (${editingDish ? rarityLabel(editingDish) : '>=100k là Cổ đại 💎, 55k-99k là Huyền thoại 🔶'})</option>
                 <option value="ancient" ${selectedRarity === 'ancient' ? 'selected' : ''}>💎 Cổ đại (Ancient - Giá >100k, mâm cơm hoàng kim)</option>
                 <option value="legendary" ${selectedRarity === 'legendary' ? 'selected' : ''}>🔶 Huyền thoại (Legendary - Giá 55k-99k)</option>
-                <option value="mythical" ${selectedRarity === 'mythical' ? 'selected' : ''}>💠 Huyền thoại nhẹ (Mythical - Giá 35k-54k)</option>
+                <option value="mythical" ${selectedRarity === 'mythical' ? 'selected' : ''}>💠 Thần thoại (Mythical - Giá 35k-54k)</option>
                 <option value="rare" ${selectedRarity === 'rare' ? 'selected' : ''}>🔹 Hiếm (Rare - Giá 20k-34k)</option>
                 <option value="common" ${selectedRarity === 'common' ? 'selected' : ''}>🥄 Phổ thông (Common - Bình dân)</option>
               </select>
@@ -1792,10 +1792,10 @@ function renderDishCards(list) {
         <div class="card-img-wrap">
           <img class="dish-img" src="${d.img}" alt="${d.name}" loading="lazy" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80';" />
           <div class="dish-card-badges">
+            <span class="dish-rarity-badge badge-${rarity.id}" title="Độ hiếm minigame: ${rarity.label}">${rarity.icon} ${rarity.label}</span>
             ${d.isSponsored ? `<span class="dish-sponsor-badge">📢 ${escapeHTML(d.sponsorBadge || 'Tài trợ')}</span>` : ''}
             ${d.isBestseller ? `<span class="dish-bestseller-badge">⭐ Hot</span>` : ''}
           </div>
-          <span class="dish-rarity-badge badge-${rarity.id}" title="Độ hiếm minigame: ${rarity.label}">${rarity.icon} ${rarity.label}</span>
           <button class="dish-fav-btn ${saved ? 'saved' : ''}" data-fav="${d.id}" id="fav-${d.id}" aria-label="Lưu vào Gu">
             ${saved ? '❤️' : '🤍'}
           </button>
@@ -1831,6 +1831,7 @@ function renderModal() {
         <img id="modal-img" src="" alt="" class="modal-img" />
         <div class="modal-body">
           <div class="modal-name" id="modal-name"></div>
+          <div class="modal-badges" id="modal-badges"></div>
           <div id="modal-sponsor-container"></div>
           <div class="modal-desc" id="modal-desc"></div>
           <div class="modal-facts" id="modal-facts"></div>
@@ -1860,6 +1861,19 @@ function openModal(dish, onRoll) {
   document.getElementById('modal-img').src = dish.img;
   document.getElementById('modal-name').textContent = dish.name;
   document.getElementById('modal-desc').textContent = dish.desc;
+
+  const modalBadges = document.getElementById('modal-badges');
+  if (modalBadges) {
+    const rarity = rarityOf(dish);
+    const catLabel = getCategoryLabel(dish.category);
+    modalBadges.innerHTML = `
+      <span class="modal-badge-cat">🍽️ ${escapeHTML(catLabel)}</span>
+      <span class="modal-badge-type ${dish.type === 'chay' ? 'chay' : 'man'}">${dish.type === 'chay' ? '🥗 Chay' : '🍖 Mặn'}</span>
+      <span class="dish-rarity-badge badge-${rarity.id}">${rarity.icon} ${escapeHTML(rarity.label)}</span>
+      ${dish.isSponsored ? `<span class="dish-sponsor-badge">📢 ${escapeHTML(dish.sponsorBadge || 'Tài trợ')}</span>` : ''}
+      ${dish.isBestseller ? `<span class="dish-bestseller-badge">⭐ Hot</span>` : ''}
+    `;
+  }
 
   const sponsorContainer = document.getElementById('modal-sponsor-container');
   if (sponsorContainer) {
