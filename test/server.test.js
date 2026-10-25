@@ -133,6 +133,19 @@ test('roles protect admin APIs and customer data is scoped to its owner', { time
     body: { name: 'Món đã cập nhật' },
   });
   assert.equal(updatedDish.data.name, 'Món đã cập nhật');
+
+  const quickToggleDish = await jsonRequest(`${baseUrl}/660/api/admin/dishes/${createdDish.data.id}/quick-toggle`, {
+    token: adminToken,
+    method: 'PATCH',
+    body: { field: 'sponsored', value: true },
+  });
+  assert.equal(quickToggleDish.response.status, 200);
+  assert.equal(quickToggleDish.data.isSponsored, true);
+
+  const adminDishesList = await jsonRequest(`${baseUrl}/660/api/admin/dishes`, { token: adminToken });
+  const fetchedDish = adminDishesList.data.find(d => d.id === createdDish.data.id);
+  assert.equal(fetchedDish.isSponsored, true);
+
   const deletedDish = await jsonRequest(`${baseUrl}/660/api/admin/dishes/${createdDish.data.id}`, {
     token: adminToken,
     method: 'DELETE',

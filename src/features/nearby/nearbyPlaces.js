@@ -88,20 +88,22 @@ export async function findNearbyPlaces(location, radiusKm = 5, dishName, categor
             .filter(place => place?.name)
             .sort((left, right) => left.distanceKm - right.distanceKm);
 
-        // Filter exact matches first
+        // Filter exact matches first, strictly within chosen radiusKm
         const exactMatches = places.filter(place => doesPlaceMatchDish(place, searchTerms));
-        if (exactMatches.length > 0) {
-            const withinRadius = exactMatches.filter(place => place.distanceKm <= radiusKm);
-            if (withinRadius.length > 0) return withinRadius.slice(0, 8);
-            return exactMatches.slice(0, 8);
-        }
+        const withinRadius = exactMatches.filter(place => place.distanceKm <= radiusKm);
+        if (withinRadius.length > 0) return withinRadius.slice(0, 8);
+
+        // If no exact match within radius, check other relevant places strictly within radiusKm
+        const allWithinRadius = places.filter(place => place.distanceKm <= radiusKm);
+        if (allWithinRadius.length > 0) return allWithinRadius.slice(0, 8);
 
         return generateLocalFallbackPlaces(location, radiusKm, dishName, category);
     } catch (error) {
-        // Robust client-side fallback with 100% REAL verified restaurants and addresses
+        // Robust client-side fallback strictly within radiusKm
         const fallback = generateLocalFallbackPlaces(location, radiusKm, dishName, category);
-        if (fallback.length > 0) {
-            return fallback;
+        const withinRadiusFallback = fallback.filter(place => place.distanceKm <= radiusKm);
+        if (withinRadiusFallback.length > 0) {
+            return withinRadiusFallback;
         }
         if (error.name === 'AbortError') throw new Error('Tìm quán quá lâu. Hãy thử lại hoặc chọn bán kính nhỏ hơn.');
         if (/failed to fetch|network|load failed/i.test(error.message || '')) {

@@ -259,6 +259,7 @@ function estimateRoadDistanceKm(straightKm) {
 }
 
 async function getRealNearbyPlaces(lat, lng, radiusKm, dishName = '', category = '') {
+  const maxRadius = Math.max(0.5, Number(radiusKm) || 5);
   const knowledge = resolveDishKnowledge(dishName, category);
   const elements = [];
   const seenNames = new Set();
@@ -306,40 +307,42 @@ async function getRealNearbyPlaces(lat, lng, radiusKm, dishName = '', category =
 
     if (partnerAddress && Number.isFinite(partnerLat) && Number.isFinite(partnerLng)) {
       const partnerDist = Number(distanceBetweenKm({ lat, lng }, { lat: partnerLat, lng: partnerLng }).toFixed(2));
-      elements.push({
-        type: 'node',
-        id: `partner-sponsor-${matchedDbDish.id}`,
-        name: partnerName,
-        address: partnerAddress,
-        lat: partnerLat,
-        lon: partnerLng,
-        center: { lat: partnerLat, lon: partnerLng },
-        rating: 4.9,
-        reviewCount: 1680,
-        ratingRate: '99% khách khen ngon',
-        dishReview: matchedDbDish.sponsorDesc || knowledge.dishReview,
-        badge: matchedDbDish.sponsorBadge || '⭐ Quán Vàng Nhà Tài Trợ',
-        priceRange: knowledge.priceRange,
-        openStatus: '🟢 Đang mở cửa (06:30 - 22:30)',
-        specialties: [matchedDbDish.name, knowledge.keyword],
-        distanceKm: partnerDist,
-        roadDistanceKm: estimateRoadDistanceKm(partnerDist),
-        genre: knowledge.genre,
-        tags: {
+      if (partnerDist <= maxRadius) {
+        elements.push({
+          type: 'node',
+          id: `partner-sponsor-${matchedDbDish.id}`,
           name: partnerName,
-          amenity: 'restaurant',
-          dish: matchedDbDish.name,
-          'addr:full': partnerAddress,
-        }
-      });
-      seenNames.add(normalizeDishName(partnerName));
+          address: partnerAddress,
+          lat: partnerLat,
+          lon: partnerLng,
+          center: { lat: partnerLat, lon: partnerLng },
+          rating: 4.9,
+          reviewCount: 1680,
+          ratingRate: '99% khách khen ngon',
+          dishReview: matchedDbDish.sponsorDesc || knowledge.dishReview,
+          badge: matchedDbDish.sponsorBadge || '⭐ Quán Vàng Nhà Tài Trợ',
+          priceRange: knowledge.priceRange,
+          openStatus: '🟢 Đang mở cửa (06:30 - 22:30)',
+          specialties: [matchedDbDish.name, knowledge.keyword],
+          distanceKm: partnerDist,
+          roadDistanceKm: estimateRoadDistanceKm(partnerDist),
+          genre: knowledge.genre,
+          tags: {
+            name: partnerName,
+            amenity: 'restaurant',
+            dish: matchedDbDish.name,
+            'addr:full': partnerAddress,
+          }
+        });
+        seenNames.add(normalizeDishName(partnerName));
+      }
     }
   }
 
   // 2. Tìm kiếm quán ăn THẬT trong khu vực GPS của người dùng qua OpenStreetMap Nominatim
   try {
-    const dLat = (radiusKm * 1.5) / 111.0;
-    const dLon = (radiusKm * 1.5) / (111.0 * Math.cos(lat * Math.PI / 180));
+    const dLat = (maxRadius * 1.5) / 111.0;
+    const dLon = (maxRadius * 1.5) / (111.0 * Math.cos(lat * Math.PI / 180));
     const viewbox = `${(lng - dLon).toFixed(5)},${(lat + dLat).toFixed(5)},${(lng + dLon).toFixed(5)},${(lat - dLat).toFixed(5)}`;
 
     const searchUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(knowledge.keyword)}&viewbox=${viewbox}&bounded=0&countrycodes=vn&format=json&addressdetails=1&limit=12`;
@@ -371,13 +374,12 @@ async function getRealNearbyPlaces(lat, lng, radiusKm, dishName = '', category =
 
           if (!isDishRelevant) return;
 
+          const actualDistKm = Number(distanceBetweenKm({ lat, lng }, { lat: itemLat, lng: itemLng }).toFixed(2));
+          if (actualDistKm > maxRadius) return;
+
           seenNames.add(normName);
 
           const realAddress = formatNominatimAddress(item);
-          const actualDistKm = Number(distanceBetweenKm({ lat, lng }, { lat: itemLat, lng: itemLng }).toFixed(2));
-
-          if (actualDistKm > Math.max(radiusKm * 2, 25)) return;
-
           const hash = Math.abs((item.osm_id || item.place_id || index) % 100);
           const rating = Number((4.6 + (hash % 4) * 0.1).toFixed(1));
           const reviewCount = 180 + (hash * 9);
@@ -430,10 +432,11 @@ async function getRealNearbyPlaces(lat, lng, radiusKm, dishName = '', category =
   fallbackPool.forEach((r, idx) => {
     const normName = normalizeDishName(r.name);
     if (seenNames.has(normName)) return;
-    seenNames.add(normName);
 
     const actualDistKm = Number(distanceBetweenKm({ lat, lng }, { lat: r.lat, lng: r.lng }).toFixed(2));
-    if (actualDistKm > 35) return;
+    if (actualDistKm > maxRadius) return;
+
+    seenNames.add(normName);
 
     elements.push({
       type: 'node',
@@ -805,11 +808,18 @@ function handleAdminApi(req, res, user) {
       res.status(201).json(dish);
       return;
     }
-    const existing = db.get('dishes').find({ id: dishId }).value();
+    const existing = db.get('dishes').find(d => Number(d.id) === dishId).value();
     if (!existing) return res.status(404).json({ message: 'Không tìm thấy món ăn.' });
 
     if (subAction === 'quick-toggle' && req.method === 'PATCH') {
       const changes = {};
+      if (req.body.field !== undefined && req.body.value !== undefined) {
+        const f = String(req.body.field);
+        if (f === 'sponsored' || f === 'isSponsored') changes.isSponsored = Boolean(req.body.value);
+        if (f === 'bestseller' || f === 'isBestseller') changes.isBestseller = Boolean(req.body.value);
+        if (f === 'active') changes.active = Boolean(req.body.value);
+        if (f === 'dropWeight') changes.dropWeight = Math.max(0.1, Math.min(100, Number(req.body.value) || 1));
+      }
       if (req.body.isSponsored !== undefined) changes.isSponsored = Boolean(req.body.isSponsored);
       if (req.body.isBestseller !== undefined) changes.isBestseller = Boolean(req.body.isBestseller);
       if (req.body.active !== undefined) changes.active = Boolean(req.body.active);
@@ -818,7 +828,7 @@ function handleAdminApi(req, res, user) {
       if (req.body.sponsorLink !== undefined) changes.sponsorLink = String(req.body.sponsorLink).trim();
       if (req.body.sponsorBadge !== undefined) changes.sponsorBadge = String(req.body.sponsorBadge).trim();
 
-      const updated = db.get('dishes').find({ id: dishId }).assign(changes).write();
+      const updated = db.get('dishes').find(d => Number(d.id) === dishId).assign(changes).write();
       res.json(updated);
       return;
     }

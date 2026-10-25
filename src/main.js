@@ -1970,8 +1970,8 @@ function renderNearbyPanel(dish, panel = document.getElementById('modal-nearby-p
       const straightDist = place.distanceKm;
       const roadDist = place.roadDistanceKm || estimateRoadDistanceKm(straightDist);
       const travelDistanceText = roadDist < 1
-        ? `~${Math.round(roadDist * 1000)} m lái xe (${formatDistance(straightDist)} thẳng)`
-        : `~${roadDist.toFixed(1)} km lái xe (${formatDistance(straightDist)} thẳng)`;
+        ? `Cách ${formatDistance(straightDist)} (~${Math.round(roadDist * 1000)} m lái xe)`
+        : `Cách ${formatDistance(straightDist)} (~${roadDist.toFixed(1)} km lái xe)`;
 
       const hasCoords = Number.isFinite(place.lat) && Number.isFinite(place.lng);
       const gmapsPlaceUrl = hasCoords
@@ -2699,12 +2699,22 @@ function bindAll() {
       } else if (field === 'bestseller') {
         nextValue = !dish.isBestseller;
       }
+      const propKey = field === 'sponsored' ? 'isSponsored' : (field === 'bestseller' ? 'isBestseller' : 'active');
+      const payload = {
+        field,
+        value: nextValue,
+        [propKey]: nextValue
+      };
       try {
-        await requestApi(`/api/admin/dishes/${dishId}/quick-toggle`, {
+        const updated = await requestApi(`/api/admin/dishes/${dishId}/quick-toggle`, {
           method: 'PATCH',
-          body: { field, value: nextValue },
+          body: payload,
         });
-        dish[field === 'sponsored' ? 'isSponsored' : field === 'bestseller' ? 'isBestseller' : 'active'] = nextValue;
+        if (updated && typeof updated === 'object') {
+          Object.assign(dish, updated);
+        } else {
+          dish[propKey] = nextValue;
+        }
         replaceDishes(state.adminDishes);
         renderApp();
       } catch (error) {
@@ -2722,12 +2732,21 @@ function bindAll() {
       const dish = state.adminDishes.find(d => Number(d.id) === dishId);
       if (!dish) return;
       const newWeight = Math.max(0.1, Number(input.value) || 1);
+      const payload = {
+        field: 'dropWeight',
+        value: newWeight,
+        dropWeight: newWeight
+      };
       try {
-        await requestApi(`/api/admin/dishes/${dishId}/quick-toggle`, {
+        const updated = await requestApi(`/api/admin/dishes/${dishId}/quick-toggle`, {
           method: 'PATCH',
-          body: { field: 'dropWeight', value: newWeight },
+          body: payload,
         });
-        dish.dropWeight = newWeight;
+        if (updated && typeof updated === 'object') {
+          Object.assign(dish, updated);
+        } else {
+          dish.dropWeight = newWeight;
+        }
         replaceDishes(state.adminDishes);
         renderApp();
       } catch (error) {
