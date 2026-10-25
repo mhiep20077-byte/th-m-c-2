@@ -200,4 +200,176 @@ test('roles protect admin APIs and customer data is scoped to its owner', { time
   });
   assert.equal(customerHistory.response.status, 201);
   assert.equal(customerHistory.data.dish.name.length > 0, true);
+
+  // Kiểm tra phân quyền Admin Gốc và Cộng Tác Viên (CTV)
+  // 1. Admin gốc tạo tài khoản CTV
+  const createCtvResponse = await jsonRequest(`${baseUrl}/660/api/admin/users`, {
+    token: adminToken,
+    method: 'POST',
+    body: { name: 'Cộng Tác Viên 1', email: 'ctv1@test.local', password: 'CtvPassword123!', role: 'admin' },
+  });
+  assert.equal(createCtvResponse.response.status, 201);
+  assert.equal(createCtvResponse.data.role, 'admin');
+  assert.equal(createCtvResponse.data.isRootAdmin, false);
+  assert.equal(createCtvResponse.data.isCtv, true);
+  assert.equal(createCtvResponse.data.roleTitle, 'Cộng tác viên (CTV)');
+  const ctvId = createCtvResponse.data.id;
+
+  // 2. CTV đăng nhập thành công
+  const ctvLogin = await jsonRequest(`${baseUrl}/login`, {
+    method: 'POST',
+    body: { email: 'ctv1@test.local', password: 'CtvPassword123!' },
+  });
+  assert.equal(ctvLogin.response.status, 200);
+  const ctvToken = ctvLogin.data.accessToken;
+
+  // 3. CTV không thể tùy chỉnh luật chơi / cài đặt hệ thống (403 Forbidden)
+  const ctvUpdateSettings = await jsonRequest(`${baseUrl}/660/api/admin/settings`, {
+    token: ctvToken,
+    method: 'PUT',
+    body: { gameRules: { sponsoredMultiplier: 10 } },
+  });
+  assert.equal(ctvUpdateSettings.response.status, 403);
+  assert.match(ctvUpdateSettings.data.message, /Chỉ có Admin gốc/);
+
+  // 4. CTV không thể tạo tài khoản Admin/CTV mới (403 Forbidden)
+  const ctvCreateAdmin = await jsonRequest(`${baseUrl}/660/api/admin/users`, {
+    token: ctvToken,
+    method: 'POST',
+    body: { name: 'Admin Lậu', email: 'adminlau@test.local', password: 'Password123!', role: 'admin' },
+  });
+  assert.equal(ctvCreateAdmin.response.status, 403);
+  assert.match(ctvCreateAdmin.data.message, /Cộng tác viên/);
+
+  // 5. CTV không thể phân quyền admin cho khách hàng khác (403 Forbidden)
+  const customerId = registration.data.user.id;
+  const ctvPromoteUser = await jsonRequest(`${baseUrl}/660/api/admin/users/${customerId}`, {
+    token: ctvToken,
+    method: 'PATCH',
+    body: { role: 'admin' },
+  });
+  assert.equal(ctvPromoteUser.response.status, 403);
+  assert.match(ctvPromoteUser.data.message, /Chỉ có Admin gốc/);
+
+  // 6. CTV không thể xóa tài khoản admin khác (403 Forbidden)
+  const createCtv2Response = await jsonRequest(`${baseUrl}/660/api/admin/users`, {
+    token: adminToken,
+    method: 'POST',
+    body: { name: 'Cộng Tác Viên 2', email: 'ctv2@test.local', password: 'CtvPassword123!', role: 'admin' },
+  });
+  const ctv2Id = createCtv2Response.data.id;
+
+  const ctvDeleteCtv2 = await jsonRequest(`${baseUrl}/660/api/admin/users/${ctv2Id}`, {
+    token: ctvToken,
+    method: 'DELETE',
+  });
+  assert.equal(ctvDeleteCtv2.response.status, 403);
+  assert.match(ctvDeleteCtv2.data.message, /Chỉ có Admin gốc/);
+
+  // 7. Admin gốc có quyền lưu cài đặt hệ thống (200 OK)
+  const rootUpdateSettings = await jsonRequest(`${baseUrl}/660/api/admin/settings`, {
+    token: adminToken,
+    method: 'PUT',
+    body: { gameRules: { sponsoredMultiplier: 10 } },
+  });
+  assert.equal(rootUpdateSettings.response.status, 200);
+
+  // 7b. CTV có quyền cập nhật các ô văn bản CMS (Tiêu đề, Nội dung...) nhưng checkbox bật/tắt được bảo toàn
+  const ctvUpdateTextSettings = await jsonRequest(`${baseUrl}/660/api/admin/settings`, {
+    token: ctvToken,
+    method: 'PUT',
+    body: {
+      announcement: { title: 'Thông Báo Mới Bởi CTV', text: 'Giảm giá 50k', enabled: false }, // CTV tries to disable, but backend preserves enabled flag
+      ads: { title: 'Banner Mới Bởi CTV' },
+      features: { maintenanceNotice: 'Bảo trì lúc 2h sáng' },
+    },
+  });
+  assert.equal(ctvUpdateTextSettings.response.status, 200);
+  assert.equal(ctvUpdateTextSettings.data.announcement.title, 'Thông Báo Mới Bởi CTV');
+  assert.equal(ctvUpdateTextSettings.data.announcement.text, 'Giảm giá 50k');
+  assert.equal(ctvUpdateTextSettings.data.ads.title, 'Banner Mới Bởi CTV');
+  assert.equal(ctvUpdateTextSettings.data.features.maintenanceNotice, 'Bảo trì lúc 2h sáng');
+  // Flag toggle is preserved from current settings
+  assert.equal(ctvUpdateTextSettings.data.announcement.enabled, true);
+
+  // 7c. CTV có thể tạo tài khoản Khách hàng mới (201 Created)
+  const ctvCreateCustomer = await jsonRequest(`${baseUrl}/660/api/admin/users`, {
+    token: ctvToken,
+    method: 'POST',
+    body: { name: 'Khách Tạo Bởi CTV', email: 'khach_ctv@test.local', password: 'Password123!', role: 'customer' },
+  });
+  assert.equal(ctvCreateCustomer.response.status, 201);
+  assert.equal(ctvCreateCustomer.data.role, 'customer');
+
+  // 7d. Admin Gốc Chính tạo Admin Gốc Phụ (sub_root)
+  const createSubRoot = await jsonRequest(`${baseUrl}/660/api/admin/users`, {
+    token: adminToken,
+    method: 'POST',
+    body: { name: 'Admin Gốc Phụ Test', email: 'subroot@test.local', password: 'Password123!', role: 'sub_root' },
+  });
+  assert.equal(createSubRoot.response.status, 201);
+  assert.equal(createSubRoot.data.adminLevel, 'sub_root');
+
+  const subRootLogin = await jsonRequest(`${baseUrl}/login`, {
+    method: 'POST',
+    body: { email: 'subroot@test.local', password: 'Password123!' },
+  });
+  assert.equal(subRootLogin.response.status, 200);
+  const subRootToken = subRootLogin.data.accessToken;
+
+  // 7e. Admin Gốc Phụ có thể tạo Khách hàng (201 Created)
+  const subRootCreateCustomer = await jsonRequest(`${baseUrl}/660/api/admin/users`, {
+    token: subRootToken,
+    method: 'POST',
+    body: { name: 'Khách Tạo Bởi SubRoot', email: 'khach_subroot@test.local', password: 'Password123!', role: 'customer' },
+  });
+  assert.equal(subRootCreateCustomer.response.status, 201);
+
+  // 7f. Admin Gốc Phụ có thể tạo Cộng tác viên CTV (201 Created)
+  const subRootCreateCtv = await jsonRequest(`${baseUrl}/660/api/admin/users`, {
+    token: subRootToken,
+    method: 'POST',
+    body: { name: 'CTV Tạo Bởi SubRoot', email: 'ctv_subroot@test.local', password: 'Password123!', role: 'ctv' },
+  });
+  assert.equal(subRootCreateCtv.response.status, 201);
+  assert.equal(subRootCreateCtv.data.adminLevel, 'ctv');
+
+  // 7g. Admin Gốc Phụ KHÔNG THỂ tạo thêm Admin Gốc Phụ khác (403 Forbidden - Chỉ Admin Gốc Chính mới có quyền)
+  const subRootCreateAnotherSubRoot = await jsonRequest(`${baseUrl}/660/api/admin/users`, {
+    token: subRootToken,
+    method: 'POST',
+    body: { name: 'SubRoot Trai Phep', email: 'subroot_illegal@test.local', password: 'Password123!', role: 'sub_root' },
+  });
+  assert.equal(subRootCreateAnotherSubRoot.response.status, 403);
+  assert.match(subRootCreateAnotherSubRoot.data.message, /Chỉ có Admin Gốc Chính/);
+
+  // 8. Admin gốc có quyền xóa các tài khoản CTV khác (204 No Content)
+  const rootDeleteCtv = await jsonRequest(`${baseUrl}/660/api/admin/users/${ctvId}`, {
+    token: adminToken,
+    method: 'DELETE',
+  });
+  assert.equal(rootDeleteCtv.response.status, 204);
+
+  const rootDeleteCtv2 = await jsonRequest(`${baseUrl}/660/api/admin/users/${ctv2Id}`, {
+    token: adminToken,
+    method: 'DELETE',
+  });
+  assert.equal(rootDeleteCtv2.response.status, 204);
+});
+
+test('sanitizeUser retains sub_root adminLevel and roles without demoting to CTV', async () => {
+  const { sanitizeUser } = await import('../src/utils/auth.js');
+  const user = {
+    id: 4,
+    name: '10',
+    email: 'hhiepm003@gmail.com',
+    role: 'admin',
+    adminLevel: 'sub_root'
+  };
+  const sanitized = sanitizeUser(user);
+  assert.equal(sanitized.adminLevel, 'sub_root');
+  assert.equal(sanitized.isSubRootAdmin, true);
+  assert.equal(sanitized.isCtv, false);
+  assert.equal(sanitized.roleTitle, 'Admin Gốc Phụ');
+  assert.equal(sanitized.canManageSettings, true);
 });

@@ -21,12 +21,23 @@ import {
   getCurrentPosition,
   googleMapsDirectionsUrl,
   renderNearbyMap,
-  serviceSearchUrl
+  serviceSearchUrl,
+  estimateRoadDistanceKm
 } from './features/nearby/nearbyPlaces.js';
-import { AUTH_SESSION_EXPIRED_EVENT, apiRegister, apiLogin, apiForgotPassword, getAuthSession, initializeAuth, isAuthenticated, logout, updateProfileName } from './utils/auth.js';
+import { AUTH_SESSION_EXPIRED_EVENT, apiRegister, apiLogin, apiForgotPassword, getAuthSession, setAuthSession, initializeAuth, isAuthenticated, logout, updateProfileName } from './utils/auth.js';
 import { requestApi, uploadImageToCloudinary } from './utils/apiClient.js';
 import { initMealFeature, populateMealFromDishes, closeDishDetail } from './features/meal-feature/main.js';
 import { initCulinaryOracle } from './features/culinary-arena/arena.js';
+import {
+  getDynamicSettings,
+  setDynamicSettings,
+  fetchDynamicSettings,
+  SETTINGS_UPDATED_EVENT,
+  DEFAULT_DYNAMIC_SETTINGS,
+  simulateDropProbabilities,
+  trackAnalyticsEvent,
+  getDishWeight
+} from './utils/weightEngine.js';
 
 // ============================================================
 // STATE QUẢN LÝ ỨNG DỤNG
@@ -54,11 +65,15 @@ const state = {
   adminDishes: [],
   adminUsers: [],
   adminStats: null,
+  adminAnalytics: null,
+  adminSettings: null,
   adminMessage: '',
   adminMessageType: '',
   adminEditDishId: null,
   adminDishDraft: null,
   adminDishSearch: '',
+  adminDishFilter: 'all',
+  announcementDismissed: typeof sessionStorage !== 'undefined' && sessionStorage.getItem('bung_ann_dismissed') === 'true',
 };
 
 const PAGE_PATHS = {
@@ -87,6 +102,7 @@ function renderApp() {
     ${renderHeader()}
     ${renderPages()}
     ${renderModal()}
+    ${renderAnnouncementPopup()}
   `;
   bindAll();
   if (state.activePage === 'meal') initializeMealPage();
@@ -150,14 +166,114 @@ function initializeArenaPage() {
   });
 }
 
+function renderAnnouncementBar() {
+  const settings = getDynamicSettings();
+  const ann = settings?.announcement;
+  if (!ann?.enabled || state.announcementDismissed || !ann?.text) return '';
+  return `
+    <aside class="announcement-bar ${ann.type || 'promo'}" id="announcement-bar">
+      <span>${escapeHTML(ann.text)}</span>
+      ${ann.link ? `<a href="${escapeHTML(ann.link)}" target="_blank" rel="noopener noreferrer" class="announcement-link" data-sponsor-click="announcement" data-sponsor-name="Thanh thông báo">Khám phá ngay ↗</a>` : ''}
+      <button type="button" class="announcement-close" id="announcement-close" aria-label="Đóng thông báo">×</button>
+    </aside>
+  `;
+}
+
+function renderAnnouncementPopup() {
+  const settings = getDynamicSettings();
+  const ann = settings?.announcement;
+  if (!ann?.enabled || state.announcementDismissed || !ann?.text) return '';
+  return `
+    <div class="announcement-modal-backdrop" id="announcement-modal-backdrop" role="dialog" aria-modal="true">
+      <div class="announcement-modal-card ${ann.type || 'promo'}">
+        <div class="announcement-modal-header">
+          <div class="announcement-modal-badge">
+            <span class="announcement-pulse-dot"></span>
+            ${ann.type === 'alert' ? '⚠️ THÔNG BÁO QUAN TRỌNG' : ann.type === 'info' ? 'ℹ️ TIN TỨC MỚI' : '🎁 ƯU ĐÃI NỔI BẬT HÔM NAY'}
+          </div>
+          <button type="button" class="announcement-modal-close" id="announcement-modal-close" aria-label="Đóng thông báo">✕</button>
+        </div>
+        <div class="announcement-modal-body">
+          <div class="announcement-modal-icon">
+            ${ann.type === 'alert' ? '📢' : ann.type === 'info' ? '✨' : '🎉'}
+          </div>
+          <div class="announcement-modal-content">
+            <h3 class="announcement-modal-title">${escapeHTML(ann.title || 'Ưu Đãi Đặc Biệt Từ BungOiAnGi ✨')}</h3>
+            <p class="announcement-modal-desc">${escapeHTML(ann.text)}</p>
+          </div>
+        </div>
+        <div class="announcement-modal-actions">
+          ${ann.link ? `
+            <a href="${escapeHTML(ann.link)}" target="_blank" rel="noopener noreferrer" class="announcement-modal-cta" data-sponsor-click="announcement_popup" data-sponsor-name="${escapeHTML(ann.title || 'Thông báo nổi')}">
+              🚀 Nhận Ưu Đãi Ngay
+            </a>
+          ` : ''}
+          <button type="button" class="announcement-modal-dismiss" id="announcement-modal-dismiss">
+            Đã hiểu & Khám phá
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderHeroAdsBanner() {
+  const settings = getDynamicSettings();
+  const ad = settings?.ads;
+  if (!ad?.bannerEnabled || !ad?.title) return '';
+  return `
+    <section class="hero-ads-banner" id="hero-ads-banner">
+      <div class="hero-ads-inner">
+        <div class="hero-ads-left">
+          <div class="hero-ads-media-wrap">
+            ${ad.img ? `
+              <img src="${escapeHTML(ad.img)}" alt="${escapeHTML(ad.title)}" class="hero-ads-img" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80'" />
+            ` : `
+              <div class="hero-ads-img-fallback">🔥</div>
+            `}
+            <span class="hero-ads-shine-effect"></span>
+          </div>
+          <div class="hero-ads-body">
+            <div class="hero-ads-badge-row">
+              <span class="hero-ads-badge">
+                <span class="hero-ads-ping-dot"></span>
+                ${escapeHTML(ad.badge || 'ĐỐI TÁC VÀNG')}
+              </span>
+              <span class="hero-ads-tag-pill">⭐ Đề Xuất Quán Hot Hôm Nay</span>
+            </div>
+            <h3 class="hero-ads-title">${escapeHTML(ad.title)}</h3>
+            ${ad.subtitle ? `<p class="hero-ads-sub">${escapeHTML(ad.subtitle)}</p>` : ''}
+            <div class="hero-ads-perks">
+              <span class="hero-perk-item">⚡ Nóng hổi tức thì</span>
+              <span class="hero-perk-item">🛵 Giao hỏa tốc 20p</span>
+              <span class="hero-perk-item">🎁 Deal độc quyền BungOiAnGi</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-ads-cta-wrap">
+          ${ad.link ? `
+            <a href="${escapeHTML(ad.link)}" target="_blank" rel="noopener noreferrer" class="hero-ads-btn" data-sponsor-click="hero_banner" data-sponsor-name="${escapeHTML(ad.title)}">
+              <span>ĐẶT MÓN NGAY</span>
+              <span class="hero-ads-arrow">➔</span>
+            </a>
+          ` : ''}
+        </div>
+      </div>
+    </section>
+  `;
+}
+
 function renderHeader() {
   const favCount = state.favorites.length;
   const session = getAuthSession();
   const isLoggedIn = Boolean(session?.user);
   const isAdmin = session?.user?.role === 'admin';
   const authLabel = isLoggedIn ? 'Tài khoản' : 'Đăng nhập';
+  const settings = getDynamicSettings();
+  const feat = settings?.features || {};
 
   return `
+  ${renderAnnouncementBar()}
   <header class="header" id="header">
     <div class="header-inner">
       <a href="#" class="logo" id="logo-link">
@@ -170,10 +286,10 @@ function renderHeader() {
       <nav class="nav" id="main-nav">
         <button class="nav-btn ${state.activePage === 'home' ? 'active' : ''}" data-page="home" id="nav-home">🏠 Trang chủ</button>
         <button class="nav-btn ${state.activePage === 'explore' ? 'active' : ''}" data-page="explore" id="nav-explore">🔍 Khám phá</button>
-        <button class="nav-btn ${state.activePage === 'quiz' ? 'active' : ''}" data-page="quiz" id="nav-quiz">🤔 Hôm nay ăn gì?</button>
-        <button class="nav-btn ${state.activePage === 'meal' ? 'active' : ''}" data-page="meal" id="nav-meal" title="Dựng mâm cơm 4 món chuẩn vị">🍽️ Dựng bữa <span class="nav-badge-pill">Mâm cơm</span></button>
-        <button class="nav-btn ${state.activePage === 'airdrop' ? 'active' : ''}" data-page="airdrop" id="nav-airdrop" title="Thả hòm thính cứu đói">🎁 Hòm thính <span class="nav-badge-pill">Loot</span></button>
-        <button class="nav-btn ${state.activePage === 'arena' ? 'active' : ''}" data-page="arena" id="nav-arena" title="Chiêm tinh ẩm thực & Food Tarot (Culinary Arena)">🔮 Chiêm tinh ẩm thực <span class="nav-badge-pill">Tarot 3D</span></button>
+        ${feat.quizEnabled !== false ? `<button class="nav-btn ${state.activePage === 'quiz' ? 'active' : ''}" data-page="quiz" id="nav-quiz">🤔 Hôm nay ăn gì?</button>` : ''}
+        ${feat.mealEnabled !== false ? `<button class="nav-btn ${state.activePage === 'meal' ? 'active' : ''}" data-page="meal" id="nav-meal" title="Dựng mâm cơm 4 món chuẩn vị">🍽️ Dựng bữa <span class="nav-badge-pill">Mâm cơm</span></button>` : ''}
+        ${feat.airdropEnabled !== false ? `<button class="nav-btn ${state.activePage === 'airdrop' ? 'active' : ''}" data-page="airdrop" id="nav-airdrop" title="Thả hòm thính cứu đói">🎁 Hòm thính <span class="nav-badge-pill">Loot</span></button>` : ''}
+        ${feat.arenaEnabled !== false ? `<button class="nav-btn ${state.activePage === 'arena' ? 'active' : ''}" data-page="arena" id="nav-arena" title="Chiêm tinh ẩm thực & Food Tarot (Culinary Arena)">🔮 Chiêm tinh ẩm thực <span class="nav-badge-pill">Tarot 3D</span></button>` : ''}
       </nav>
       <div class="header-actions">
         <button class="fav-btn" id="fav-nav-btn">
@@ -213,6 +329,22 @@ function renderHeader() {
 }
 
 function renderPages() {
+  const settings = getDynamicSettings();
+  const feat = settings?.features || {};
+  const isAdmin = getAuthSession()?.user?.role === 'admin';
+  if (feat.maintenanceMode && !isAdmin && state.activePage !== 'auth') {
+    return `
+      <main class="portal-page" style="text-align:center;padding:5rem 1rem;max-width:600px;margin:0 auto">
+        <div style="font-size:3.5rem;margin-bottom:1rem">🛠️</div>
+        <h1 style="font-size:1.8rem;margin-bottom:0.75rem;color:var(--text-main)">Hệ Thống Đang Bảo Trì</h1>
+        <p style="font-size:1.05rem;color:var(--text-sub);line-height:1.6;margin-bottom:1.5rem">
+          ${escapeHTML(feat.maintenanceNotice || 'Hệ thống đang bảo trì ít phút để nâng cấp các món ăn mới. Quý khách vui lòng quay lại sau ít phút nhé!')}
+        </p>
+        <button type="button" class="portal-button" onclick="window.location.reload()">↻ Tải lại trang</button>
+      </main>
+    `;
+  }
+
   return `
     <main>
       <div id="page-home" class="page ${state.activePage === 'home' ? 'active' : ''}">${renderHome()}</div>
@@ -280,16 +412,33 @@ function renderPages() {
     </main>`;
 }
 
+function getUserRoleInfo(user) {
+  if (!user) return { level: 'customer', title: 'Khách hàng', icon: '👤', badgeClass: 'badge-customer' };
+  const isPrimary = Boolean(user.isPrimaryRootAdmin || user.adminLevel === 'primary_root' || (!user.adminLevel && (Number(user.id) === 1 || String(user.email).toLowerCase() === 'admin@bungoiangi.com')));
+  if (isPrimary) {
+    return { level: 'primary_root', title: 'Admin Gốc Chính', icon: '👑', badgeClass: 'badge-root' };
+  }
+  const isSub = !isPrimary && Boolean(user.isSubRootAdmin || user.adminLevel === 'sub_root' || user.subRole === 'sub_root');
+  if (isSub) {
+    return { level: 'sub_root', title: 'Admin Gốc Phụ', icon: '⭐', badgeClass: 'badge-sub-root' };
+  }
+  if (user.role === 'admin' || user.adminLevel === 'ctv' || user.isCtv) {
+    return { level: 'ctv', title: 'Cộng tác viên (CTV)', icon: '🛡️', badgeClass: 'badge-ctv' };
+  }
+  return { level: 'customer', title: 'Khách hàng', icon: '👤', badgeClass: 'badge-customer' };
+}
+
 function renderAuthPage() {
   const session = getAuthSession();
   if (session?.user) {
+    const roleInfo = getUserRoleInfo(session.user);
     return `
       <div class="auth-shell">
         <div class="auth-account-box">
           <div class="avatar">👋</div>
           <h3>Xin chào, ${session.user.name}</h3>
           <p>${session.user.email}</p>
-          <div class="meta">🔐 Đã đăng nhập • ${session.user.role === 'admin' ? 'Quản trị viên' : 'Khách hàng'}</div>
+          <div class="meta">🔐 Đã đăng nhập • ${roleInfo.icon} ${roleInfo.title}</div>
           <button class="btn-primary" id="auth-logout-btn" style="width:100%; max-width:220px;">Đăng xuất</button>
         </div>
       </div>`;
@@ -379,7 +528,7 @@ function renderProfilePage() {
       </header>
       <p class="portal-message ${state.profileMessageType === 'error' ? 'is-error' : state.profileMessageType === 'success' ? 'is-success' : ''}" id="profile-message" role="status">${escapeHTML(state.profileMessage)}</p>
       <div class="portal-profile-summary">
-        <div class="portal-metric"><span>Tài khoản</span><strong>${escapeHTML(user.role === 'admin' ? 'Quản trị viên' : 'Khách hàng')}</strong></div>
+        <div class="portal-metric"><span>Tài khoản</span><strong>${getUserRoleInfo(user).icon} ${escapeHTML(getUserRoleInfo(user).title)}</strong></div>
         <div class="portal-metric"><span>Món yêu thích</span><strong>${state.profileFavorites.length}</strong></div>
         <div class="portal-metric"><span>Lượt xem gần đây</span><strong>${state.profileHistory.length}</strong></div>
       </div>
@@ -405,12 +554,32 @@ function renderProfilePage() {
 }
 
 function renderAdminPage() {
-  const user = getAuthSession()?.user;
-  if (user?.role !== 'admin') return '<section class="portal-page"><p class="portal-empty">Bạn không có quyền truy cập trang quản trị.</p></section>';
+  const session = getAuthSession();
+  const sessionUser = session?.user;
+  if (sessionUser?.role !== 'admin') return '<section class="portal-page"><p class="portal-empty">Bạn không có quyền truy cập trang quản trị.</p></section>';
+
+  // Luôn đồng bộ vai trò mới nhất từ danh sách quản trị nếu có
+  const dbUser = state.adminUsers.find(u => String(u.id) === String(sessionUser?.id) || String(u.email).toLowerCase() === String(sessionUser?.email).toLowerCase());
+  const user = dbUser ? { ...sessionUser, ...dbUser } : sessionUser;
+  if (dbUser && session?.token && (sessionUser.adminLevel !== dbUser.adminLevel || sessionUser.isSubRootAdmin !== dbUser.isSubRootAdmin)) {
+    setAuthSession(user, session.token);
+  }
+
+  const roleInfo = getUserRoleInfo(user);
+  const isCurrentPrimaryRoot = roleInfo.level === 'primary_root';
+  const isCurrentSubRoot = roleInfo.level === 'sub_root';
+  const isCurrentCtv = roleInfo.level === 'ctv';
+  const canManageSettings = isCurrentPrimaryRoot || isCurrentSubRoot;
+  const isCurrentRootAdmin = canManageSettings;
 
   const stats = state.adminStats;
-  const hotDishes = stats?.hotDishes || [];
-  const maximumHotScore = Math.max(1, ...hotDishes.map(dish => dish.favorites * 2 + dish.views));
+  const analytics = state.adminAnalytics;
+  const settings = state.adminSettings || getDynamicSettings();
+  const rules = settings?.gameRules || DEFAULT_DYNAMIC_SETTINGS.gameRules;
+  const features = settings?.features || DEFAULT_DYNAMIC_SETTINGS.features;
+  const announcement = settings?.announcement || DEFAULT_DYNAMIC_SETTINGS.announcement;
+  const ads = settings?.ads || DEFAULT_DYNAMIC_SETTINGS.ads;
+
   const editingDish = state.adminDishes.find(dish => Number(dish.id) === Number(state.adminEditDishId));
   const draftValues = state.adminDishDraft?.dishId === (editingDish ? Number(editingDish.id) : null)
     ? state.adminDishDraft.values
@@ -418,59 +587,917 @@ function renderAdminPage() {
   const selectedCategory = draftValues?.category ?? editingDish?.category;
   const selectedType = draftValues?.type ?? editingDish?.type ?? 'man';
 
+  const isEditingSponsored = draftValues?.isSponsored !== undefined
+    ? (draftValues.isSponsored === 'true' || draftValues.isSponsored === true || draftValues.isSponsored === 'on')
+    : Boolean(editingDish?.isSponsored);
+
+  const isEditingBestseller = draftValues?.isBestseller !== undefined
+    ? (draftValues.isBestseller === 'true' || draftValues.isBestseller === true || draftValues.isBestseller === 'on')
+    : Boolean(editingDish?.isBestseller);
+
+  const isEditingActive = draftValues?.active !== undefined
+    ? (draftValues.active === 'true' || draftValues.active === true || draftValues.active === 'on')
+    : (editingDish?.active !== undefined ? Boolean(editingDish.active) : true);
+
+  // Filtered dishes for Tab 1
+  let filteredAdminDishes = [...state.adminDishes];
+  if (state.adminDishFilter === 'sponsored') {
+    filteredAdminDishes = filteredAdminDishes.filter(d => d.isSponsored);
+  } else if (state.adminDishFilter === 'bestseller') {
+    filteredAdminDishes = filteredAdminDishes.filter(d => d.isBestseller);
+  } else if (state.adminDishFilter === 'hidden') {
+    filteredAdminDishes = filteredAdminDishes.filter(d => d.active === false);
+  }
+
+  // TỰ ĐỘNG GHIM MÓN QUẢNG CÁO & TÀI TRỢ LÊN ĐẦU DANH SÁCH
+  filteredAdminDishes.sort((a, b) => {
+    // 1. Món có cấu hình nhận quảng cáo/tài trợ luôn ở trên cùng
+    if (Boolean(b.isSponsored) !== Boolean(a.isSponsored)) {
+      return b.isSponsored ? 1 : -1;
+    }
+    // 2. Trọng số rơi cao hơn
+    if ((b.dropWeight || 1) !== (a.dropWeight || 1)) {
+      return (b.dropWeight || 1) - (a.dropWeight || 1);
+    }
+    // 3. Món bestseller
+    if (Boolean(b.isBestseller) !== Boolean(a.isBestseller)) {
+      return b.isBestseller ? 1 : -1;
+    }
+    // 4. Món mới thêm theo ID
+    return Number(b.id) - Number(a.id);
+  });
+
+  const sponsoredCount = state.adminDishes.filter(d => d.isSponsored).length;
+  const bestsellerCount = state.adminDishes.filter(d => d.isBestseller).length;
+  const hiddenCount = state.adminDishes.filter(d => d.active === false).length;
+
+  // Simulator probabilities
+  const simulatedDishes = simulateDropProbabilities(state.adminDishes, settings).slice(0, 10);
+
   return `
     <section class="portal-page">
-      <header class="portal-heading"><div><h1>Bảng quản trị</h1><p>Quản lý món ăn, tài khoản và số liệu sử dụng.</p></div><div class="portal-actions">${state.adminTab === 'dishes' ? '<button type="button" class="portal-button portal-button--primary" id="admin-add-dish">＋ Thêm món</button>' : '<button type="button" class="portal-button portal-button--primary" id="admin-add-user">＋ Tạo tài khoản</button>'}<button type="button" class="portal-button" id="admin-refresh">↻ Làm mới</button></div></header>
+      <header class="portal-heading">
+        <div>
+          <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap">
+            <h1>Trung Tâm Điều Khiển Quản Trị</h1>
+            <span class="portal-role-indicator ${isCurrentPrimaryRoot ? 'is-root' : isCurrentSubRoot ? 'is-sub-root' : 'is-ctv'}">
+              ${isCurrentPrimaryRoot ? '👑 Admin Gốc Chính (Toàn Quyền Cao Nhất)' : isCurrentSubRoot ? '⭐ Admin Gốc Phụ (Toàn Quyền Dưới Gốc Chính)' : '🛡️ Cộng Tác Viên (CTV) · Quyền Hạn Chế'}
+            </span>
+          </div>
+          <p>Tùy chỉnh toàn bộ tính năng, quản lý luật chơi, tỉ lệ ra món & dữ liệu người dùng.</p>
+        </div>
+        <div class="portal-actions">
+          ${state.adminTab === 'dishes' ? '<button type="button" class="portal-button portal-button--primary" id="admin-add-dish">＋ Thêm món mới</button>' : ''}
+          ${state.adminTab === 'users' ? '<button type="button" class="portal-button portal-button--primary" id="admin-add-user">＋ Tạo tài khoản</button>' : ''}
+          <button type="button" class="portal-button" id="admin-refresh">↻ Làm mới dữ liệu</button>
+        </div>
+      </header>
+
       <p class="portal-message ${state.adminMessageType === 'error' ? 'is-error' : state.adminMessageType === 'success' ? 'is-success' : ''}" id="admin-message" role="status">${escapeHTML(state.adminMessage)}</p>
+
+      <!-- 5 TABS NAVIGATION -->
       <div class="portal-segmented" role="group" aria-label="Khu vực quản trị">
-        <button type="button" data-admin-tab="dishes" aria-pressed="${state.adminTab === 'dishes'}">Món ăn</button>
-        <button type="button" data-admin-tab="users" aria-pressed="${state.adminTab === 'users'}">Người dùng</button>
+        <button type="button" data-admin-tab="dishes" aria-pressed="${state.adminTab === 'dishes'}">🍲 Món ăn & Menu (${state.adminDishes.length})</button>
+        <button type="button" data-admin-tab="rules" aria-pressed="${state.adminTab === 'rules'}">🎲 Luật chơi & Tỉ lệ</button>
+        <button type="button" data-admin-tab="analytics" aria-pressed="${state.adminTab === 'analytics'}">📊 Dữ liệu & Báo cáo</button>
+        <button type="button" data-admin-tab="settings" aria-pressed="${state.adminTab === 'settings'}">⚙️ Cài đặt Web & CMS</button>
+        <button type="button" data-admin-tab="users" aria-pressed="${state.adminTab === 'users'}">👥 Người dùng (${state.adminUsers.length})</button>
       </div>
+
+      <!-- TAB 1: DISHES & MENU -->
       ${state.adminTab === 'dishes' ? `
         <section class="portal-panel">
-          <h2>${editingDish ? 'Sửa món ăn' : 'Thêm món ăn'}</h2>
+          <h2>${editingDish ? `Sửa món: ${escapeHTML(editingDish.name)}` : 'Thêm món ăn mới vào thực đơn'}</h2>
           <form id="admin-dish-form" class="portal-form-grid">
-            <div class="portal-field"><label for="admin-dish-name">Tên món</label><input id="admin-dish-name" name="name" value="${escapeHTML(draftValues?.name ?? editingDish?.name ?? '')}" required minlength="2" /><span class="portal-message" id="admin-dish-name-feedback" role="status" aria-live="polite"></span></div>
-            <div class="portal-field"><label for="admin-dish-price">Giá (đ)</label><input id="admin-dish-price" name="price" type="number" min="0" value="${draftValues?.price ?? editingDish?.price ?? ''}" required /></div>
-            <div class="portal-field portal-field--wide"><label for="admin-dish-desc">Mô tả</label><textarea id="admin-dish-desc" name="desc">${escapeHTML(draftValues?.desc ?? editingDish?.desc ?? '')}</textarea></div>
-            <div class="portal-field"><label for="admin-dish-category">Danh mục</label><select id="admin-dish-category" name="category">${CATEGORIES.filter(category => category.id !== 'all').map(category => `<option value="${category.id}" ${selectedCategory === category.id ? 'selected' : ''}>${escapeHTML(category.name)}</option>`).join('')}</select></div>
-            <div class="portal-field"><label for="admin-dish-type">Loại</label><select id="admin-dish-type" name="type"><option value="man" ${selectedType !== 'chay' ? 'selected' : ''}>Mặn</option><option value="chay" ${selectedType === 'chay' ? 'selected' : ''}>Chay</option></select></div>
-            <div class="portal-field"><label for="admin-dish-calo">Calo</label><input id="admin-dish-calo" name="calo" type="number" min="0" value="${draftValues?.calo ?? editingDish?.calo ?? 0}" /></div>
-            <div class="portal-field portal-field--wide"><label for="admin-dish-img">URL ảnh</label><input id="admin-dish-img" name="img" value="${escapeHTML(draftValues?.img ?? editingDish?.img ?? '')}" placeholder="https://..." /><input id="admin-dish-image-file" type="file" accept="image/*" /><span class="portal-message" id="image-upload-message" role="status"></span></div>
-            <div class="portal-actions portal-field--wide"><button type="submit" class="portal-button portal-button--primary">${editingDish ? 'Lưu món' : 'Thêm món'}</button>${editingDish ? '<button type="button" class="portal-button" id="admin-cancel-edit">Hủy sửa</button>' : ''}</div>
+            <div class="portal-field">
+              <label for="admin-dish-name">Tên món *</label>
+              <input id="admin-dish-name" name="name" value="${escapeHTML(draftValues?.name ?? editingDish?.name ?? '')}" required minlength="2" placeholder="Ví dụ: Phở Bò Tái Nạm" />
+              <span class="portal-message" id="admin-dish-name-feedback" role="status" aria-live="polite"></span>
+            </div>
+            <div class="portal-field">
+              <label for="admin-dish-price">Giá (VNĐ) *</label>
+              <input id="admin-dish-price" name="price" type="number" min="0" value="${draftValues?.price ?? editingDish?.price ?? ''}" required placeholder="Ví dụ: 45000" />
+            </div>
+            <div class="portal-field portal-field--wide">
+              <label for="admin-dish-desc">Mô tả món ăn</label>
+              <textarea id="admin-dish-desc" name="desc" placeholder="Hương vị, thành phần chính, đặc trưng...">${escapeHTML(draftValues?.desc ?? editingDish?.desc ?? '')}</textarea>
+            </div>
+            <div class="portal-field">
+              <label for="admin-dish-category">Danh mục</label>
+              <select id="admin-dish-category" name="category">
+                ${CATEGORIES.filter(c => c.id !== 'all').map(c => `<option value="${c.id}" ${selectedCategory === c.id ? 'selected' : ''}>${escapeHTML(c.name)}</option>`).join('')}
+              </select>
+            </div>
+            <div class="portal-field">
+              <label for="admin-dish-type">Loại món</label>
+              <select id="admin-dish-type" name="type">
+                <option value="man" ${selectedType !== 'chay' ? 'selected' : ''}>Mặn</option>
+                <option value="chay" ${selectedType === 'chay' ? 'selected' : ''}>Chay</option>
+              </select>
+            </div>
+            <div class="portal-field">
+              <label for="admin-dish-calo">Lượng Calo (kcal)</label>
+              <input id="admin-dish-calo" name="calo" type="number" min="0" value="${draftValues?.calo ?? editingDish?.calo ?? 0}" />
+            </div>
+            <div class="portal-field">
+              <label for="admin-dish-weight">Trọng số rơi cơ bản (Drop Weight: 1 - 50)</label>
+              <input id="admin-dish-weight" name="dropWeight" type="number" step="0.5" min="0.1" max="50" value="${draftValues?.dropWeight ?? editingDish?.dropWeight ?? 1}" title="Trọng số càng cao món càng dễ ra" />
+            </div>
+            <div class="portal-field portal-field--wide">
+              <label for="admin-dish-img">Ảnh món ăn (URL hoặc Tải lên từ máy)</label>
+              <input id="admin-dish-img" name="img" value="${escapeHTML(draftValues?.img ?? editingDish?.img ?? '')}" placeholder="https://..." />
+              <input id="admin-dish-image-file" type="file" accept="image/*" />
+              <span class="portal-message" id="image-upload-message" role="status"></span>
+            </div>
+
+            <!-- MỤC QUẢNG CÁO & ĐỐI TÁC -->
+            <div class="portal-field portal-field--wide" style="background:#fffaf4;padding:1rem;border:1.5px dashed #f59e0b;border-radius:8px">
+              <h3 style="font-size:0.95rem;color:#b45309;margin-bottom:0.75rem">📢 Cấu Hình Quảng Cáo & Nhà Tài Trợ (Sponsor Partnership)</h3>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:0.75rem">
+                <label class="admin-switch-label">
+                  <input type="checkbox" name="isSponsored" id="admin-dish-sponsored" ${isEditingSponsored ? 'checked' : ''} />
+                  <span>Kích hoạt Nhận Quảng Cáo (Ưu tiên ra món)</span>
+                </label>
+                <label class="admin-switch-label">
+                  <input type="checkbox" name="isBestseller" id="admin-dish-bestseller" ${isEditingBestseller ? 'checked' : ''} />
+                  <span>Gắn nhãn Món Bestseller (Bán chạy)</span>
+                </label>
+                <label class="admin-switch-label">
+                  <input type="checkbox" name="active" id="admin-dish-active" ${isEditingActive ? 'checked' : ''} />
+                  <span>Hiển thị trên website (Đang bán)</span>
+                </label>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:0.75rem;margin-top:0.75rem">
+                <div>
+                  <label style="font-size:0.78rem;font-weight:700;color:var(--text-sub)">Tên Quán Đối Tác / Nhà Tài Trợ</label>
+                  <input name="sponsorName" value="${escapeHTML(draftValues?.sponsorName ?? editingDish?.sponsorName ?? '')}" placeholder="Ví dụ: Phở Thìn Lò Đúc" />
+                </div>
+                <div>
+                  <label style="font-size:0.78rem;font-weight:700;color:var(--text-sub)">Huy Hiệu Hiển Thị</label>
+                  <input name="sponsorBadge" value="${escapeHTML(draftValues?.sponsorBadge ?? editingDish?.sponsorBadge ?? 'Tài trợ')}" placeholder="Ví dụ: Deal 20%, Quán Vàng" />
+                </div>
+                <div style="grid-column:1/-1">
+                  <label style="font-size:0.78rem;font-weight:700;color:var(--text-sub)">Đường Dẫn Đặt Món / Fanpage Đối Tác (Link chuyển hướng khi click)</label>
+                  <input name="sponsorLink" value="${escapeHTML(draftValues?.sponsorLink ?? editingDish?.sponsorLink ?? '')}" placeholder="https://shopee.vn/..." />
+                </div>
+              </div>
+            </div>
+
+            <div class="portal-actions portal-field--wide">
+              <button type="submit" class="portal-button portal-button--primary">${editingDish ? 'Lưu thay đổi món' : 'Thêm món vào hệ thống'}</button>
+              ${editingDish ? '<button type="button" class="portal-button" id="admin-cancel-edit">Hủy sửa</button>' : ''}
+            </div>
           </form>
         </section>
-        <section class="portal-panel"><h2>Danh sách món (${state.adminDishes.length})</h2>
-          <label class="portal-field" for="admin-dish-search">Tìm món muốn sửa<input id="admin-dish-search" type="search" value="${escapeHTML(state.adminDishSearch)}" placeholder="Nhập tên món..." /></label>
-          <div class="portal-table-wrap"><table class="portal-table"><thead><tr><th>Món</th><th>Danh mục</th><th>Giá</th><th>Thao tác</th></tr></thead><tbody>${state.adminDishes.map(dish => `<tr data-admin-dish-row data-search="${escapeHTML(removeVietnameseTones(dish.name))}"><td><div class="portal-dish-cell">${dish.img ? `<img src="${escapeHTML(dish.img)}" alt="" loading="lazy" />` : ''}<span>${escapeHTML(dish.name)}</span></div></td><td>${escapeHTML(getCategoryLabel(dish.category))}</td><td>${formatCurrency(dish.price)}</td><td><div class="portal-actions"><button class="portal-button" type="button" data-view-dish="${dish.id}">Xem</button><button class="portal-button" type="button" data-edit-dish="${dish.id}">Sửa</button><button class="portal-button portal-button--danger" type="button" data-delete-dish="${dish.id}">Xóa</button></div></td></tr>`).join('')}<tr id="admin-dish-search-empty" hidden><td colspan="4" class="portal-empty">Không tìm thấy món phù hợp.</td></tr></tbody></table></div>
-        </section>` : `
+
         <section class="portal-panel">
-          <h2>Tạo tài khoản</h2>
-          <form id="admin-user-form" class="portal-form-grid">
-            <div class="portal-field"><label for="admin-user-name">Họ và tên</label><input id="admin-user-name" name="name" required minlength="2" /></div>
-            <div class="portal-field"><label for="admin-user-email">Email</label><input id="admin-user-email" name="email" type="email" required /></div>
-            <div class="portal-field"><label for="admin-user-password">Mật khẩu</label><input id="admin-user-password" name="password" type="password" required minlength="8" /></div>
-            <div class="portal-field"><label for="admin-user-role">Vai trò</label><select id="admin-user-role" name="role"><option value="customer">Khách hàng</option><option value="admin">Admin</option></select></div>
-            <div class="portal-actions portal-field--wide"><button class="portal-button portal-button--primary" type="submit">Tạo người dùng</button></div>
+          <h2>Danh Sách Món Ăn (${filteredAdminDishes.length} / ${state.adminDishes.length})</h2>
+          <div class="admin-filter-bar">
+            <button type="button" class="admin-chip ${state.adminDishFilter === 'all' ? 'active' : ''}" data-admin-filter="all">Tất cả (${state.adminDishes.length})</button>
+            <button type="button" class="admin-chip ${state.adminDishFilter === 'sponsored' ? 'active' : ''}" data-admin-filter="sponsored">📢 Đang tài trợ (${sponsoredCount})</button>
+            <button type="button" class="admin-chip ${state.adminDishFilter === 'bestseller' ? 'active' : ''}" data-admin-filter="bestseller">⭐ Bestseller (${bestsellerCount})</button>
+            <button type="button" class="admin-chip ${state.adminDishFilter === 'hidden' ? 'active' : ''}" data-admin-filter="hidden">👁️ Đang ẩn (${hiddenCount})</button>
+          </div>
+          <label class="portal-field" for="admin-dish-search">
+            Tìm kiếm món theo tên
+            <input id="admin-dish-search" type="search" value="${escapeHTML(state.adminDishSearch)}" placeholder="Nhập tên món cần tìm..." />
+          </label>
+          <div class="admin-pinned-note">
+            📢 <strong>Lưu ý:</strong> Các món có cấu hình <em>Nhận quảng cáo & Nhà tài trợ</em> hoặc <em>Bestseller</em> luôn được tự động ghim hiển thị lên đầu danh sách để bạn dễ dàng quản lý và theo dõi!
+          </div>
+          <div class="portal-table-wrap">
+            <table class="portal-table">
+              <thead>
+                <tr>
+                  <th>Món Ăn</th>
+                  <th>Danh Mục</th>
+                  <th>Giá</th>
+                  <th>Trọng Số</th>
+                  <th>Bật/Tắt Nhanh</th>
+                  <th>Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filteredAdminDishes.map(dish => `
+                  <tr data-admin-dish-row data-search="${escapeHTML(removeVietnameseTones(dish.name))}" class="${dish.isSponsored ? 'row-sponsored' : ''}">
+                    <td>
+                      <div class="portal-dish-cell">
+                        ${dish.img ? `<img src="${escapeHTML(dish.img)}" alt="" loading="lazy" />` : ''}
+                        <div>
+                          <strong>${escapeHTML(dish.name)}</strong>
+                          <div style="display:flex;gap:0.3rem;margin-top:0.2rem">
+                            ${dish.isSponsored ? `<span class="admin-badge badge-sponsored">📢 ${escapeHTML(dish.sponsorName || 'Tài trợ')}</span>` : ''}
+                            ${dish.isBestseller ? `<span class="admin-badge badge-bestseller">⭐ Hot</span>` : ''}
+                            ${dish.active === false ? `<span class="admin-badge badge-hidden">Ẩn</span>` : ''}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>${escapeHTML(getCategoryLabel(dish.category))}</td>
+                    <td>${formatCurrency(dish.price)}</td>
+                    <td>
+                      <div style="display:flex;align-items:center;gap:0.3rem">
+                        <input type="number" step="0.5" min="0.1" max="50" style="width:60px;min-height:30px;padding:2px 4px" value="${dish.dropWeight || 1}" data-quick-weight="${dish.id}" title="Chỉnh trọng số rơi và Enter" />
+                        <span style="font-size:0.75rem;color:var(--text-sub)">x</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div style="display:flex;gap:0.3rem;flex-wrap:wrap">
+                        <button type="button" class="admin-chip ${dish.isSponsored ? 'active' : ''}" data-quick-toggle="sponsored" data-id="${dish.id}" title="Bật/Tắt tài trợ">
+                          ${dish.isSponsored ? '📢 Tài trợ: Bật' : '📢 Tắt'}
+                        </button>
+                        <button type="button" class="admin-chip ${dish.isBestseller ? 'active' : ''}" data-quick-toggle="bestseller" data-id="${dish.id}" title="Bật/Tắt Bestseller">
+                          ${dish.isBestseller ? '⭐ Hot: Bật' : '⭐ Tắt'}
+                        </button>
+                        <button type="button" class="admin-chip ${dish.active !== false ? 'active' : ''}" data-quick-toggle="active" data-id="${dish.id}" title="Hiện hoặc ẩn món">
+                          ${dish.active !== false ? '👁️ Hiện' : '👁️ Ẩn'}
+                        </button>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="portal-actions">
+                        <button class="portal-button" type="button" data-view-dish="${dish.id}">Xem</button>
+                        <button class="portal-button" type="button" data-edit-dish="${dish.id}">Sửa</button>
+                        <button class="portal-button portal-button--danger" type="button" data-delete-dish="${dish.id}">Xóa</button>
+                      </div>
+                    </td>
+                  </tr>
+                `).join('')}
+                <tr id="admin-dish-search-empty" hidden><td colspan="6" class="portal-empty">Không tìm thấy món phù hợp.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ` : ''}
+
+      <!-- TAB 2: RULES & DROP RATE ENGINE -->
+      ${state.adminTab === 'rules' ? `
+        <section class="portal-panel">
+          <h2>Điều Khiển Luật Chơi & Tỉ Lệ Xuất Hiện Món Ăn</h2>
+          <p style="color:var(--text-sub);margin-bottom:1rem">
+            Tùy biến xác suất rơi món của toàn bộ website trong thời gian thực. Giúp bạn nhận tài trợ, đẩy quảng cáo quán đối tác lên trang nhất và điều phối minigame mà không cần chạm vào code!
+          </p>
+
+          ${!canManageSettings ? `
+            <div class="admin-ctv-notice">
+              <span class="admin-ctv-notice-icon">🔒</span>
+              <div>
+                <strong>Chế độ Xem (Dành cho Cộng Tác Viên - CTV)</strong>
+                <p>Chỉ có Admin gốc mới có quyền điều chỉnh luật chơi và tỉ lệ rơi món của hệ thống. Bạn đang xem với quyền Cộng tác viên (CTV).</p>
+              </div>
+            </div>
+          ` : ''}
+
+          <form id="admin-rules-form">
+            <fieldset class="admin-readonly-fieldset" ${!canManageSettings ? 'disabled' : ''}>
+            <div class="admin-rules-grid">
+              <!-- KHỐI 1: TỈ LỆ QUẢNG CÁO & BESTSELLER -->
+              <div class="admin-rule-card">
+                <h3><span>📢</span> Hệ Số Nhân Món Tài Trợ & Bestseller</h3>
+                <p class="admin-rule-desc">Món được gắn nhãn Tài trợ hoặc Bestseller sẽ được nhân xác suất lên theo hệ số này khi người dùng bốc món.</p>
+                
+                <div class="admin-control-group">
+                  <div>
+                    <label style="font-size:0.84rem;font-weight:700">Hệ số nhân Món Tài Trợ / Quảng Cáo: <strong id="lbl-sponsored-multiplier">${rules.sponsoredMultiplier}x</strong></label>
+                    <div class="admin-slider-row">
+                      <input type="range" name="sponsoredMultiplier" id="slider-sponsored-multiplier" min="1" max="20" step="1" value="${rules.sponsoredMultiplier}" ${!canManageSettings ? 'disabled' : ''} />
+                      <span class="admin-slider-badge" id="badge-sponsored-multiplier">${rules.sponsoredMultiplier}x</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style="font-size:0.84rem;font-weight:700">Hệ số nhân Món Bestseller (Bán chạy): <strong id="lbl-bestseller-multiplier">${rules.bestsellerMultiplier}x</strong></label>
+                    <div class="admin-slider-row">
+                      <input type="range" name="bestsellerMultiplier" id="slider-bestseller-multiplier" min="1" max="10" step="1" value="${rules.bestsellerMultiplier}" ${!canManageSettings ? 'disabled' : ''} />
+                      <span class="admin-slider-badge" id="badge-bestseller-multiplier">${rules.bestsellerMultiplier}x</span>
+                    </div>
+                  </div>
+
+                  <div style="margin-top:0.5rem;padding:0.75rem;background:#fff8ee;border-radius:6px;border:1px solid #fed7aa">
+                    <label class="admin-switch-label">
+                      <input type="checkbox" name="guaranteeSponsored" ${rules.guaranteeSponsored ? 'checked' : ''} ${!canManageSettings ? 'disabled' : ''} />
+                      <span>✨ Chế độ Ưu Tiên Tài Trợ Tuyệt Đối (Luôn ra ít nhất 1 món tài trợ trong quẻ/mâm cơm)</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- KHỐI 2: LUẬT CÁC MINIGAME -->
+              <div class="admin-rule-card">
+                <h3><span>🎮</span> Cấu Hình Luật Minigame</h3>
+                <p class="admin-rule-desc">Thiết lập tỉ lệ nổ món hiếm, món hot trong Bữa Cơm, Hòm Thính và Chiêm Tinh Tarot.</p>
+
+                <div class="admin-control-group">
+                  <div>
+                    <label style="font-size:0.84rem;font-weight:700">Tỉ lệ ra món Cổ Đại (Meal Ancient): <strong id="lbl-ancient-rate">${rules.mealAncientRate}%</strong></label>
+                    <div class="admin-slider-row">
+                      <input type="range" name="mealAncientRate" id="slider-ancient-rate" min="1" max="30" step="1" value="${rules.mealAncientRate}" ${!canManageSettings ? 'disabled' : ''} />
+                      <span class="admin-slider-badge" id="badge-ancient-rate">${rules.mealAncientRate}%</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style="font-size:0.84rem;font-weight:700">Tỉ lệ ra món Huyền Thoại (Meal Legendary): <strong id="lbl-legendary-rate">${rules.mealLegendaryRate}%</strong></label>
+                    <div class="admin-slider-row">
+                      <input type="range" name="mealLegendaryRate" id="slider-legendary-rate" min="5" max="50" step="1" value="${rules.mealLegendaryRate}" ${!canManageSettings ? 'disabled' : ''} />
+                      <span class="admin-slider-badge" id="badge-legendary-rate">${rules.mealLegendaryRate}%</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style="font-size:0.84rem;font-weight:700">Tỉ lệ nổ món Hot trong Hòm Thính (Airdrop): <strong id="lbl-airdrop-rate">${rules.airdropHotRate}%</strong></label>
+                    <div class="admin-slider-row">
+                      <input type="range" name="airdropHotRate" id="slider-airdrop-rate" min="10" max="60" step="1" value="${rules.airdropHotRate}" ${!canManageSettings ? 'disabled' : ''} />
+                      <span class="admin-slider-badge" id="badge-airdrop-rate">${rules.airdropHotRate}%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            </fieldset>
+
+            <div class="portal-actions">
+              <button type="submit" class="portal-button portal-button--primary" ${!canManageSettings ? 'disabled title="Chỉ Admin gốc mới có quyền lưu cấu hình luật chơi"' : ''}>💾 Lưu Cấu Hình Luật Chơi & Tỉ Lệ</button>
+            </div>
+          </form>
+
+          <!-- BẢNG MÔ PHỎNG XÁC SUẤT TRỰC TIẾP -->
+          <div style="margin-top:1.5rem">
+            <h3>🎯 Bảng Mô Phỏng Xác Suất Xuất Hiện Món (Live Probability Simulator)</h3>
+            <p style="font-size:0.8rem;color:var(--text-sub);margin-bottom:0.75rem">Tỉ lệ % cơ hội rơi thực tế của từng món dựa theo trọng số và hệ số nhân hiện hành:</p>
+            <div class="portal-table-wrap">
+              <table class="portal-table">
+                <thead>
+                  <tr>
+                    <th>Món Ăn</th>
+                    <th>Thuộc Tính</th>
+                    <th>Trọng Số Tính Toán</th>
+                    <th>Xác Suất Xuất Hiện (%)</th>
+                  </tr>
+                </thead>
+                <tbody id="sim-prob-tbody">
+                  ${simulatedDishes.map(d => `
+                    <tr>
+                      <td><strong>${escapeHTML(d.name)}</strong></td>
+                      <td>
+                        ${d.isSponsored ? '<span class="admin-badge badge-sponsored">📢 Tài trợ</span>' : ''}
+                        ${d.isBestseller ? '<span class="admin-badge badge-bestseller">⭐ Hot</span>' : ''}
+                        ${!d.isSponsored && !d.isBestseller ? '<span style="color:var(--text-sub);font-size:0.75rem">Thường</span>' : ''}
+                      </td>
+                      <td><strong>${d.calculatedWeight}</strong></td>
+                      <td>
+                        <div style="display:flex;align-items:center;gap:0.6rem">
+                          <div class="admin-prob-meter" style="width:140px">
+                            <div class="admin-prob-fill ${d.isSponsored ? 'is-sponsored' : ''}" style="width:${Math.min(100, Math.max(3, d.percentage * 4))}%"></div>
+                          </div>
+                          <strong>${d.percentage}%</strong>
+                        </div>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      ` : ''}
+
+      <!-- TAB 3: USER DATA & ANALYTICS -->
+      ${state.adminTab === 'analytics' ? `
+        <!-- 4 GOLDEN KPI CARDS -->
+        <div class="admin-kpi-grid">
+          <div class="admin-kpi-card">
+            <div class="admin-kpi-header">
+              <span class="admin-kpi-label">Người Dùng Đăng Ký</span>
+              <span class="admin-kpi-icon">👥</span>
+            </div>
+            <div class="admin-kpi-value">${stats?.userCount ?? state.adminUsers.length}</div>
+            <span class="admin-kpi-note">Tài khoản quản lý trong hệ thống</span>
+          </div>
+
+          <div class="admin-kpi-card kpi-accent-purple">
+            <div class="admin-kpi-header">
+              <span class="admin-kpi-label">Click Link Tài Trợ (Ad Clicks)</span>
+              <span class="admin-kpi-icon">📢</span>
+            </div>
+            <div class="admin-kpi-value">${analytics?.overview?.adClickCount ?? stats?.adClickCount ?? 0}</div>
+            <span class="admin-kpi-note">Số lượt khách click vào quán đối tác</span>
+          </div>
+
+          <div class="admin-kpi-card kpi-accent-green">
+            <div class="admin-kpi-header">
+              <span class="admin-kpi-label">Lượt Chơi Minigame</span>
+              <span class="admin-kpi-icon">🎲</span>
+            </div>
+            <div class="admin-kpi-value">${analytics?.overview?.gameRollCount ?? stats?.gameRollCount ?? 0}</div>
+            <span class="admin-kpi-note">Lượt bốc mâm cơm, tarot & airdrop</span>
+          </div>
+
+          <div class="admin-kpi-card kpi-accent-blue">
+            <div class="admin-kpi-header">
+              <span class="admin-kpi-label">Tổng Lượt Xem Món</span>
+              <span class="admin-kpi-icon">👁️</span>
+            </div>
+            <div class="admin-kpi-value">${stats?.historyCount ?? 0}</div>
+            <span class="admin-kpi-note">Số lần mở chi tiết món ăn</span>
+          </div>
+        </div>
+
+        <!-- BÁO CÁO CHIẾN DỊCH QUẢNG CÁO & ĐỐI TÁC -->
+        <section class="portal-panel">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem">
+            <h2>📢 Báo Cáo Hiệu Quả Quảng Cáo Đối Tác (Sponsor ROI & Conversion)</h2>
+            <span style="font-size:0.8rem;color:var(--text-sub)">Dữ liệu thực tế gửi cho đối tác tài trợ</span>
+          </div>
+          ${(analytics?.sponsoredPerformance && analytics.sponsoredPerformance.length > 0) ? `
+            <div class="portal-table-wrap">
+              <table class="portal-table">
+                <thead>
+                  <tr>
+                    <th>Món Ăn</th>
+                    <th>Quán Đối Tác / Huy Hiệu</th>
+                    <th>Lượt Xuất Hiện</th>
+                    <th>Lượt Click Quán</th>
+                    <th>Tỉ Lệ Chuyển Đổi CTR</th>
+                    <th>Trọng Số</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${analytics.sponsoredPerformance.map(p => `
+                    <tr>
+                      <td>
+                        <div class="portal-dish-cell">
+                          ${p.img ? `<img src="${escapeHTML(p.img)}" alt="" />` : ''}
+                          <strong>${escapeHTML(p.name)}</strong>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="admin-badge badge-sponsored">${escapeHTML(p.sponsorName)}</span>
+                        ${p.sponsorLink ? `<a href="${escapeHTML(p.sponsorLink)}" target="_blank" rel="noopener noreferrer" style="margin-left:0.3rem;font-size:0.78rem">🔗 Link</a>` : ''}
+                      </td>
+                      <td><strong>${p.impressions}</strong> lần</td>
+                      <td><strong style="color:var(--orange-dark);font-size:1.05rem">${p.clicks}</strong> clicks</td>
+                      <td><span class="admin-badge badge-active">${p.ctr}</span></td>
+                      <td>${p.dropWeight}x</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          ` : '<p class="portal-empty">Chưa có món nào được bật chế độ Quảng Cáo hoặc chưa phát sinh lượt tương tác.</p>'}
+        </section>
+
+        <!-- THỊ HIẾU KHÁCH HÀNG & TỪ KHÓA TÌM KIẾM -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:1rem;margin-top:1rem">
+          <section class="portal-panel">
+            <h2>🔍 Nắm Bắt Nhu Cầu: Top Từ Khóa Khách Tìm Kiếm</h2>
+            ${(analytics?.topSearches && analytics.topSearches.length > 0) ? `
+              <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem">
+                ${analytics.topSearches.map(s => `
+                  <span class="admin-chip active" style="font-size:0.85rem">
+                    #${escapeHTML(s.query)} <strong style="margin-left:0.3rem;background:rgba(0,0,0,0.15);padding:1px 6px;border-radius:10px">${s.count}</strong>
+                  </span>
+                `).join('')}
+              </div>
+            ` : '<p class="portal-empty">Chưa có dữ liệu tìm kiếm.</p>'}
+          </section>
+
+          <section class="portal-panel">
+            <h2>🎮 Phân Bổ Tương Tác Giữa Các Minigame</h2>
+            <div style="display:grid;gap:0.6rem;margin-top:0.5rem">
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:0.82rem;font-weight:700">
+                  <span>🍽️ Dựng Bữa Cơm:</span>
+                  <strong>${analytics?.gameCounts?.meal ?? 0} lượt</strong>
+                </div>
+                <div class="portal-chart-track"><div class="portal-chart-bar" style="width:${Math.min(100, (analytics?.gameCounts?.meal ?? 0) * 10)}%"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:0.82rem;font-weight:700">
+                  <span>🔮 Chiêm Tinh Tarot Ẩm Thực:</span>
+                  <strong>${analytics?.gameCounts?.arena_tarot ?? 0} lượt</strong>
+                </div>
+                <div class="portal-chart-track"><div class="portal-chart-bar" style="background:#8e44ad;width:${Math.min(100, (analytics?.gameCounts?.arena_tarot ?? 0) * 10)}%"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:0.82rem;font-weight:700">
+                  <span>🎁 Hòm Thính Tiếp Tế (Airdrop):</span>
+                  <strong>${analytics?.gameCounts?.airdrop ?? 0} lượt</strong>
+                </div>
+                <div class="portal-chart-track"><div class="portal-chart-bar" style="background:#27ae60;width:${Math.min(100, (analytics?.gameCounts?.airdrop ?? 0) * 10)}%"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:0.82rem;font-weight:700">
+                  <span>🎲 BỤP! Ăn Gì Trang Chủ:</span>
+                  <strong>${analytics?.gameCounts?.home_bup ?? 0} lượt</strong>
+                </div>
+                <div class="portal-chart-track"><div class="portal-chart-bar" style="background:#e67e22;width:${Math.min(100, (analytics?.gameCounts?.home_bup ?? 0) * 10)}%"></div></div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- HỒ SƠ NGƯỜI DÙNG: NẮM BẮT TÂM LÝ & SỞ THÍCH -->
+        <section class="portal-panel" style="margin-top:1rem">
+          <h2>👤 Nắm Bắt Dữ Liệu Khách Hàng (User Profiles & Behavior)</h2>
+          <p style="font-size:0.8rem;color:var(--text-sub);margin-bottom:0.75rem">Xem từng người dùng yêu thích món gì, số lần xem và hoạt động gần nhất:</p>
+          <div class="portal-table-wrap">
+            <table class="portal-table">
+              <thead>
+                <tr>
+                  <th>Khách Hàng</th>
+                  <th>Email</th>
+                  <th>Món Yêu Thích Đã Lưu (Gu)</th>
+                  <th>Tương Tác</th>
+                  <th>Lần Cuối Hoạt Động</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${(analytics?.userInsights || []).map(u => {
+                  const uRole = getUserRoleInfo(u);
+                  return `
+                  <tr>
+                    <td><strong>${escapeHTML(u.name)}</strong> <span class="admin-badge ${uRole.badgeClass}" style="font-size:0.75rem;padding:2px 6px">${uRole.icon} ${uRole.title}</span></td>
+                    <td>${escapeHTML(u.email)}</td>
+                    <td>
+                      <div>
+                        <strong>${u.favoriteCount} món</strong>
+                        <div class="admin-user-detail-row">
+                          ${u.favoriteDishes.map(dishName => `<span class="admin-pill-tag">❤️ ${escapeHTML(dishName)}</span>`).join('')}
+                        </div>
+                      </div>
+                    </td>
+                    <td>${u.viewCount} xem • ${u.eventCount} thao tác</td>
+                    <td>
+                      <span style="font-size:0.8rem;color:var(--text-sub)">
+                        ${u.lastActive ? new Date(u.lastActive).toLocaleString('vi-VN') : '—'}
+                      </span>
+                    </td>
+                  </tr>
+                `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- NHẬT KÝ SỰ KIỆN TRỰC TIẾP -->
+        <section class="portal-panel" style="margin-top:1rem">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem">
+            <h2>⚡ Nhật Ký Hoạt Động Thời Gian Thực (Live Activity Feed)</h2>
+            <button type="button" class="portal-button portal-button--danger" id="admin-clear-analytics" style="min-height:32px;padding:0.25rem 0.65rem;font-size:0.78rem">🗑️ Xóa Lịch Sử Sự Kiện</button>
+          </div>
+          <div class="admin-feed-list">
+            ${(analytics?.recentEvents && analytics.recentEvents.length > 0) ? analytics.recentEvents.map(e => {
+              let icon = '⚡';
+              let text = '';
+              if (e.type === 'ad_click') {
+                icon = '📢';
+                text = `<strong>${escapeHTML(e.userName)}</strong> đã CLICK quảng cáo đối tác: <em>${escapeHTML(e.details?.sponsorName || e.details?.dishName || 'Quán đối tác')}</em>`;
+              } else if (e.type === 'game_roll') {
+                icon = '🎲';
+                text = `<strong>${escapeHTML(e.userName)}</strong> vừa quay minigame <em>[${escapeHTML(e.details?.game || 'game')}]</em> ra món <em>${escapeHTML(e.details?.dishName || (e.details?.dishes?.map(d => d.name).join(', ')) || 'món ăn')}</em>`;
+              } else if (e.type === 'dish_view') {
+                icon = '👁️';
+                text = `<strong>${escapeHTML(e.userName)}</strong> đã xem chi tiết món: <em>${escapeHTML(e.details?.dishName || 'món ăn')}</em>`;
+              } else if (e.type === 'search') {
+                icon = '🔍';
+                text = `<strong>${escapeHTML(e.userName)}</strong> vừa tìm kiếm: "<em>${escapeHTML(e.details?.query || '')}</em>"`;
+              } else {
+                icon = '✨';
+                text = `<strong>${escapeHTML(e.userName)}</strong> thực hiện thao tác: ${escapeHTML(e.type)}`;
+              }
+              return `
+                <div class="admin-feed-item">
+                  <div class="admin-feed-main">
+                    <span class="admin-feed-icon">${icon}</span>
+                    <span class="admin-feed-text">${text}</span>
+                  </div>
+                  <span class="admin-feed-time">${new Date(e.timestamp).toLocaleTimeString('vi-VN')}</span>
+                </div>
+              `;
+            }).join('') : '<p class="portal-empty">Chưa có nhật ký hoạt động nào gần đây.</p>'}
+          </div>
+        </section>
+      ` : ''}
+
+      <!-- TAB 4: WEB SETTINGS & CMS -->
+      ${state.adminTab === 'settings' ? `
+        <section class="portal-panel">
+          <h2>Tùy Chỉnh Toàn Bộ Giao Diện & Bật/Tắt Tính Năng (Dynamic CMS)</h2>
+          <p style="color:var(--text-sub);margin-bottom:1.25rem">
+            Mọi thiết lập ở đây sẽ lập tức có hiệu lực trên toàn bộ website người dùng mà không cần sửa code hay triển khai lại!
+          </p>
+
+          ${isCurrentCtv ? `
+            <div class="admin-ctv-notice" style="margin-bottom:1.25rem;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:0.85rem 1rem;display:flex;align-items:flex-start;gap:0.75rem">
+              <span class="admin-ctv-notice-icon" style="font-size:1.4rem">🛡️</span>
+              <div>
+                <strong style="color:#1e40af;font-size:0.95rem">Quyền Hạn Cộng Tác Viên (CTV)</strong>
+                <p style="margin:0.25rem 0 0 0;font-size:0.83rem;color:#1e3a8a">Bạn có quyền nhập và chỉnh sửa toàn bộ nội dung văn bản (Tiêu đề, Mô tả, Đường dẫn liên kết, URL ảnh, Lời nhắn bảo trì...). Các nút gạt bật/tắt (bảo trì, tính năng, thông báo, banner) bị khóa và chỉ dành riêng cho Admin Gốc.</p>
+              </div>
+            </div>
+          ` : ''}
+
+          <form id="admin-settings-form">
+            <fieldset style="border:0;padding:0;margin:0">
+            <!-- PHẦN 1: BẬT TẮT CHỨC NĂNG -->
+            <h3 style="margin-bottom:0.6rem">🧩 Bật / Tắt Các Chức Năng (Feature Flags)</h3>
+            <p style="font-size:0.83rem;color:var(--text-sub);margin-bottom:0.85rem">
+              Bạn có thể bật hoặc tắt riêng từng tính năng của website. Khi bật <strong>Chế độ bảo trì toàn hệ thống</strong>, toàn bộ các tính năng người dùng sẽ tự động tạm ngưng để đảm bảo an toàn.
+            </p>
+
+            <!-- KHỐI CHẾ ĐỘ BẢO TRÌ ĐỘC LẬP -->
+            <div class="admin-maintenance-card ${features.maintenanceMode ? 'is-active' : ''}">
+              <label class="admin-switch-label" style="font-size:0.95rem;font-weight:800;color:#991b1b">
+                <input type="checkbox" name="feat_maintenanceMode" id="admin-maintenance-toggle" ${features.maintenanceMode ? 'checked' : ''} ${!canManageSettings ? 'disabled title="Chỉ Admin Gốc mới có quyền bật/tắt chế độ bảo trì"' : ''} />
+                <span>⚠️ Chế Độ Bảo Trì Toàn Hệ Thống (Tạm ngưng phục vụ khách hàng)</span>
+              </label>
+              <div id="maintenance-lock-notice" class="maintenance-lock-notice ${features.maintenanceMode ? '' : 'hidden'}">
+                🔒 <strong>Đang bật bảo trì:</strong> Toàn bộ 5 tính năng bên dưới tạm thời bị khóa vì website đang ngưng phục vụ khách hàng thông thường. Khi bạn tắt chế độ bảo trì, các tính năng sẽ mở lại bình thường.
+              </div>
+              <div class="portal-field" style="margin-top:0.75rem">
+                <label for="admin-maintenance-notice" style="font-size:0.8rem;color:#7f1d1d;font-weight:700">Lời nhắn khi bảo trì (hiển thị cho khách hàng):</label>
+                <input id="admin-maintenance-notice" name="feat_maintenanceNotice" value="${escapeHTML(features.maintenanceNotice || 'Hệ thống đang bảo trì ít phút để nâng cấp các món ăn mới.')}" style="background:#fff" placeholder="Nhập thông báo khi bảo trì..." />
+              </div>
+            </div>
+
+            <!-- LƯỚI 5 CHỨC NĂNG CON -->
+            <div class="admin-flags-grid ${features.maintenanceMode ? 'is-maintenance-locked' : ''}" id="admin-subfeatures-grid" style="margin-bottom:1.5rem">
+              <label class="admin-flag-item ${features.maintenanceMode ? 'is-locked-by-maintenance' : ''}">
+                <input type="checkbox" name="feat_mealEnabled" class="feature-sub-checkbox" ${features.mealEnabled !== false ? 'checked' : ''} ${!canManageSettings || features.maintenanceMode ? 'disabled title="Chỉ Admin Gốc mới có quyền bật/tắt tính năng"' : ''} />
+                <div class="admin-flag-content">
+                  <div class="admin-flag-title">🍽️ Dựng Mâm Cơm 4 Món (Meal Builder)</div>
+                  <div class="admin-flag-desc">Cho phép khách bốc mâm cơm tự động theo sở thích và giá tiền.</div>
+                </div>
+              </label>
+
+              <label class="admin-flag-item ${features.maintenanceMode ? 'is-locked-by-maintenance' : ''}">
+                <input type="checkbox" name="feat_arenaEnabled" class="feature-sub-checkbox" ${features.arenaEnabled !== false ? 'checked' : ''} ${!canManageSettings || features.maintenanceMode ? 'disabled title="Chỉ Admin Gốc mới có quyền bật/tắt tính năng"' : ''} />
+                <div class="admin-flag-content">
+                  <div class="admin-flag-title">🔮 Chiêm Tinh Tarot Ẩm Thực (Culinary Arena)</div>
+                  <div class="admin-flag-desc">Bốc quẻ bài Tarot 3D thần bí chọn món ăn định mệnh.</div>
+                </div>
+              </label>
+
+              <label class="admin-flag-item ${features.maintenanceMode ? 'is-locked-by-maintenance' : ''}">
+                <input type="checkbox" name="feat_airdropEnabled" class="feature-sub-checkbox" ${features.airdropEnabled !== false ? 'checked' : ''} ${!canManageSettings || features.maintenanceMode ? 'disabled title="Chỉ Admin Gốc mới có quyền bật/tắt tính năng"' : ''} />
+                <div class="admin-flag-content">
+                  <div class="admin-flag-title">🎁 Hòm Thính Cứu Đói (Airdrop)</div>
+                  <div class="admin-flag-desc">Thả hòm thính dù rơi gợi ý món ngẫu nhiên sống động.</div>
+                </div>
+              </label>
+
+              <label class="admin-flag-item ${features.maintenanceMode ? 'is-locked-by-maintenance' : ''}">
+                <input type="checkbox" name="feat_quizEnabled" class="feature-sub-checkbox" ${features.quizEnabled !== false ? 'checked' : ''} ${!canManageSettings || features.maintenanceMode ? 'disabled title="Chỉ Admin Gốc mới có quyền bật/tắt tính năng"' : ''} />
+                <div class="admin-flag-content">
+                  <div class="admin-flag-title">🤔 Trắc Nghiệm Hôm Nay Ăn Gì (Quiz)</div>
+                  <div class="admin-flag-desc">Bộ câu hỏi trắc nghiệm tâm lý ẩm thực nhanh.</div>
+                </div>
+              </label>
+
+              <label class="admin-flag-item ${features.maintenanceMode ? 'is-locked-by-maintenance' : ''}">
+                <input type="checkbox" name="feat_nearbyEnabled" class="feature-sub-checkbox" ${features.nearbyEnabled !== false ? 'checked' : ''} ${!canManageSettings || features.maintenanceMode ? 'disabled title="Chỉ Admin Gốc mới có quyền bật/tắt tính năng"' : ''} />
+                <div class="admin-flag-content">
+                  <div class="admin-flag-title">📍 Bản Đồ Quán Ăn Gần Đây (Nearby Places)</div>
+                  <div class="admin-flag-desc">Tìm quán ăn bán món đã chọn quanh vị trí người dùng.</div>
+                </div>
+              </label>
+            </div>
+
+            <hr style="border:0;border-top:1px solid var(--border);margin:1.5rem 0" />
+
+            <!-- PHẦN 2: THÔNG BÁO NỔI BẬT KHI VÀO TRANG & THANH BANNER -->
+            <h3 style="margin-bottom:0.6rem">📢 Thông Báo Nổi Bật Khi Vào Trang & Thanh Banner (Announcement)</h3>
+            <div style="background:#fefbf6;padding:1rem;border:1px solid #fed7aa;border-radius:8px;margin-bottom:1.5rem">
+              <div style="margin-bottom:0.75rem">
+                <label class="admin-switch-label">
+                  <input type="checkbox" name="ann_enabled" ${announcement.enabled ? 'checked' : ''} ${!canManageSettings ? 'disabled title="Chỉ Admin Gốc mới có quyền bật/tắt thông báo"' : ''} />
+                  <span>Kích hoạt hiển thị thông báo nổi bật ngay khi khách vào trang web</span>
+                </label>
+              </div>
+              <div class="portal-form-grid">
+                <div class="portal-field">
+                  <label for="admin-ann-title">Tiêu đề thông báo nổi (Pop-up):</label>
+                  <input id="admin-ann-title" name="ann_title" value="${escapeHTML(announcement.title || 'Ưu Đãi Đặc Biệt Từ BungOiAnGi ✨')}" placeholder="Ví dụ: Ưu Đãi Đặc Biệt Hôm Nay..." />
+                </div>
+                <div class="portal-field">
+                  <label for="admin-ann-type">Kiểu thông báo:</label>
+                  <select id="admin-ann-type" name="ann_type">
+                    <option value="promo" ${announcement.type === 'promo' ? 'selected' : ''}>🎁 Khuyến mãi / Ưu đãi (Màu đỏ cam nổi bật)</option>
+                    <option value="info" ${announcement.type === 'info' ? 'selected' : ''}>ℹ️ Tin tức / Thông tin (Xanh dương)</option>
+                    <option value="alert" ${announcement.type === 'alert' ? 'selected' : ''}>⚠️ Cảnh báo / Khẩn cấp (Đỏ đậm)</option>
+                  </select>
+                </div>
+                <div class="portal-field portal-field--wide">
+                  <label for="admin-ann-text">Nội dung chi tiết thông báo:</label>
+                  <input id="admin-ann-text" name="ann_text" value="${escapeHTML(announcement.text || '')}" placeholder="Ví dụ: Nhập mã BUNGOIANGI giảm 30k..." />
+                </div>
+                <div class="portal-field portal-field--wide">
+                  <label for="admin-ann-link">Đường dẫn liên kết nhận quà / ưu đãi (tùy chọn):</label>
+                  <input id="admin-ann-link" name="ann_link" value="${escapeHTML(announcement.link || '')}" placeholder="https://..." />
+                </div>
+              </div>
+            </div>
+
+            <!-- PHẦN 3: BANNER QUẢNG CÁO ĐỐI TÁC TRANG CHỦ -->
+            <h3 style="margin-bottom:0.6rem">🌟 Banner Quảng Cáo Tài TrỢ Trang Chủ (Hero Sponsor Banner)</h3>
+            <div style="background:#fffaf4;padding:1rem;border:1px solid #fdba74;border-radius:8px;margin-bottom:1.5rem">
+              <div style="margin-bottom:0.75rem">
+                <label class="admin-switch-label">
+                  <input type="checkbox" name="ads_bannerEnabled" ${ads.bannerEnabled ? 'checked' : ''} ${!canManageSettings ? 'disabled title="Chỉ Admin Gốc mới có quyền bật/tắt banner quảng cáo"' : ''} />
+                  <span>Kích hoạt Banner quảng cáo đối tác nổi bật trang chủ</span>
+                </label>
+              </div>
+              <div class="portal-form-grid">
+                <div class="portal-field">
+                  <label for="admin-ads-title">Tiêu đề Banner:</label>
+                  <input id="admin-ads-title" name="ads_title" value="${escapeHTML(ads.title || '')}" placeholder="Ví dụ: Cơm Tấm Sườn Bì Chả Đặc Biệt" />
+                </div>
+                <div class="portal-field">
+                  <label for="admin-ads-badge">Huy hiệu:</label>
+                  <input id="admin-ads-badge" name="ads_badge" value="${escapeHTML(ads.badge || 'TÀI TRỢ HOT')}" placeholder="TÀI TRỢ HOT" />
+                </div>
+                <div class="portal-field portal-field--wide">
+                  <label for="admin-ads-sub">Phụ đề mô tả ưu đãi:</label>
+                  <input id="admin-ads-sub" name="ads_subtitle" value="${escapeHTML(ads.subtitle || '')}" placeholder="Giảm 20% cho đơn hàng đầu tiên hôm nay..." />
+                </div>
+                <div class="portal-field">
+                  <label for="admin-ads-img">URL Ảnh Banner:</label>
+                  <input id="admin-ads-img" name="ads_img" value="${escapeHTML(ads.img || '')}" placeholder="https://..." />
+                </div>
+                <div class="portal-field">
+                  <label for="admin-ads-link">Link liên kết đối tác:</label>
+                  <input id="admin-ads-link" name="ads_link" value="${escapeHTML(ads.link || '')}" placeholder="https://shopee.vn/..." />
+                </div>
+              </div>
+            </div>
+            </fieldset>
+
+            <div class="portal-actions">
+              <button type="submit" class="portal-button portal-button--primary">💾 Lưu Cấu Hình Hệ Thống & CMS</button>
+            </div>
           </form>
         </section>
-        <section class="portal-panel"><h2>Danh sách người dùng (${state.adminUsers.length})</h2>
-          <div class="portal-table-wrap"><table class="portal-table"><thead><tr><th>Họ tên</th><th>Email</th><th>Vai trò</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>${state.adminUsers.map(user => `<tr><td><input type="text" value="${escapeHTML(user.name || '')}" minlength="2" aria-label="Họ tên của ${escapeHTML(user.email)}" data-user-name="${user.id}" /></td><td>${escapeHTML(user.email)}</td><td><select aria-label="Vai trò của ${escapeHTML(user.email)}" data-user-role="${user.id}"><option value="customer" ${user.role === 'customer' ? 'selected' : ''}>Khách hàng</option><option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option></select></td><td>Đang hoạt động</td><td><div class="portal-actions"><button class="portal-button" type="button" data-save-user-name="${user.id}">Lưu</button><button class="portal-button portal-button--danger" type="button" data-delete-user="${user.id}" ${String(user.id) === String(getAuthSession()?.user?.id) ? 'disabled' : ''}>Xóa</button></div></td></tr>`).join('')}</tbody></table></div>
-        </section>`}
-      <div class="portal-metrics">
-        <div class="portal-metric"><span>Người dùng</span><strong>${stats?.userCount ?? '—'}</strong></div>
-        <div class="portal-metric"><span>Món ăn</span><strong>${stats?.dishCount ?? '—'}</strong></div>
-        <div class="portal-metric"><span>Lượt yêu thích</span><strong>${stats?.favoriteCount ?? '—'}</strong></div>
-        <div class="portal-metric"><span>Lượt xem món</span><strong>${stats?.historyCount ?? '—'}</strong></div>
-      </div>
-      <section class="portal-panel">
-        <h2>Món nổi bật</h2>
-        ${hotDishes.length ? `<div class="portal-chart">${hotDishes.map(dish => {
-    const score = dish.favorites * 2 + dish.views;
-    return `<div class="portal-chart-row"><span>${escapeHTML(dish.name)}</span><div class="portal-chart-track"><div class="portal-chart-bar" style="width:${Math.max(3, score / maximumHotScore * 100)}%"></div></div><strong>${score}</strong></div>`;
-  }).join('')}</div>` : '<p class="portal-empty">Chưa có dữ liệu thống kê.</p>'}
-      </section>
-    </section>`;
+      ` : ''}
+
+      <!-- TAB 5: USERS -->
+      ${state.adminTab === 'users' ? `
+        <section class="portal-panel">
+          <h2>Tạo tài khoản người dùng mới</h2>
+          ${isCurrentPrimaryRoot ? `
+            <div class="admin-ctv-notice" style="margin-bottom:1rem;background:#fefce8;border:1px solid #fef08a;border-radius:8px;padding:0.75rem 1rem;display:flex;align-items:center;gap:0.75rem">
+              <span style="font-size:1.4rem">👑</span>
+              <div>
+                <strong style="color:#854d0e">Quyền Admin Gốc Chính (Toàn quyền cao nhất)</strong>
+                <p style="margin:0;font-size:0.83rem;color:#713f12">Bạn có toàn quyền tạo tài khoản <strong>Khách hàng</strong>, <strong>Cộng tác viên (CTV)</strong> và <strong>Admin Gốc Phụ</strong>.</p>
+              </div>
+            </div>
+          ` : isCurrentSubRoot ? `
+            <div class="admin-ctv-notice" style="margin-bottom:1rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:0.75rem 1rem;display:flex;align-items:center;gap:0.75rem">
+              <span style="font-size:1.4rem">⭐</span>
+              <div>
+                <strong style="color:#166534">Quyền Admin Gốc Phụ</strong>
+                <p style="margin:0;font-size:0.83rem;color:#14532d">Bạn có quyền tạo tài khoản <strong>Khách hàng</strong> và <strong>Cộng tác viên (CTV)</strong>. Chỉ có Admin Gốc Chính mới có quyền tạo thêm Admin Gốc Phụ.</p>
+              </div>
+            </div>
+          ` : `
+            <div class="admin-ctv-notice" style="margin-bottom:1rem;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:0.75rem 1rem;display:flex;align-items:center;gap:0.75rem">
+              <span style="font-size:1.4rem">🛡️</span>
+              <div>
+                <strong style="color:#1e40af">Quyền Cộng Tác Viên (CTV)</strong>
+                <p style="margin:0;font-size:0.83rem;color:#1e3a8a">Bạn có quyền tạo tài khoản <strong>Khách hàng</strong> mới trên hệ thống. Quyền tạo CTV và Admin do Quản trị viên cấp trên đảm nhận.</p>
+              </div>
+            </div>
+          `}
+          <form id="admin-user-form" class="portal-form-grid">
+            <div class="portal-field"><label for="admin-user-name">Họ và tên</label><input id="admin-user-name" name="name" required minlength="2" placeholder="Ví dụ: Nguyễn Văn A" /></div>
+            <div class="portal-field"><label for="admin-user-email">Email</label><input id="admin-user-email" name="email" type="email" required placeholder="user@gmail.com" /></div>
+            <div class="portal-field"><label for="admin-user-password">Mật khẩu</label><input id="admin-user-password" name="password" type="password" required minlength="8" placeholder="Tối thiểu 8 ký tự" /></div>
+            <div class="portal-field">
+              <label for="admin-user-role">Vai trò</label>
+              ${isCurrentPrimaryRoot ? `
+                <select id="admin-user-role" name="role">
+                  <option value="customer">👤 Khách hàng</option>
+                  <option value="ctv">🛡️ Cộng tác viên (CTV)</option>
+                  <option value="sub_root">⭐ Admin Gốc Phụ (Toàn quyền dưới Gốc Chính)</option>
+                </select>
+              ` : isCurrentSubRoot ? `
+                <select id="admin-user-role" name="role">
+                  <option value="customer">👤 Khách hàng</option>
+                  <option value="ctv">🛡️ Cộng tác viên (CTV)</option>
+                </select>
+              ` : `
+                <select id="admin-user-role" name="role" disabled class="admin-locked-input">
+                  <option value="customer" selected>👤 Khách hàng (Mặc định)</option>
+                </select>
+                <input type="hidden" name="role" value="customer" />
+              `}
+            </div>
+            <div class="portal-actions portal-field--wide">
+              <button class="portal-button portal-button--primary" type="submit">Tạo tài khoản</button>
+            </div>
+          </form>
+        </section>
+        <section class="portal-panel">
+          <h2>Danh sách người dùng (${state.adminUsers.length})</h2>
+          <div class="portal-table-wrap">
+            <table class="portal-table">
+              <thead><tr><th>Họ tên</th><th>Email</th><th>Vai trò</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+              <tbody>
+                ${state.adminUsers.map(userItem => {
+                  const currentAuth = getAuthSession()?.user;
+                  const isCurrentAuthUser = String(userItem.id) === String(currentAuth?.id);
+                  const itemRole = getUserRoleInfo(userItem);
+                  const isTargetPrimary = itemRole.level === 'primary_root';
+                  const isTargetSub = itemRole.level === 'sub_root';
+                  const isTargetCtv = itemRole.level === 'ctv';
+                  const isTargetCustomer = itemRole.level === 'customer';
+                  const isBanned = Boolean(userItem.isBanned || userItem.status === 'banned');
+
+                  // Phân quyền tương tác với từng dòng:
+                  const canChangeRole = !isTargetPrimary && !isCurrentAuthUser && (
+                    isCurrentPrimaryRoot || (isCurrentSubRoot && !isTargetSub)
+                  );
+
+                  const canToggleBan = !isTargetPrimary && !isCurrentAuthUser && (
+                    isCurrentPrimaryRoot ||
+                    (isCurrentSubRoot && !isTargetSub) ||
+                    (!isTargetPrimary && !isTargetSub && !isTargetCtv)
+                  );
+
+                  const canDelete = !isTargetPrimary && !isCurrentAuthUser && (
+                    isCurrentPrimaryRoot ||
+                    (isCurrentSubRoot && !isTargetSub) ||
+                    (!isTargetPrimary && !isTargetSub && !isTargetCtv)
+                  );
+
+                  return `
+                    <tr class="${isTargetPrimary ? 'row-root-admin' : isTargetSub ? 'row-sub-root-admin' : isBanned ? 'row-banned-user' : ''}">
+                      <td>
+                        <input type="text" value="${escapeHTML(userItem.name || '')}" minlength="2" aria-label="Họ tên của ${escapeHTML(userItem.email)}" data-user-name="${userItem.id}" />
+                        ${isTargetPrimary ? '<div style="font-size:0.75rem;color:#b45309;font-weight:750;margin-top:3px">👑 Admin Gốc Chính (Bảo vệ tối cao)</div>' : ''}
+                        ${isTargetSub ? '<div style="font-size:0.75rem;color:#c2410c;font-weight:750;margin-top:3px">⭐ Admin Gốc Phụ (Dưới Gốc Chính)</div>' : ''}
+                        ${isTargetCtv ? '<div style="font-size:0.75rem;color:#4338ca;font-weight:750;margin-top:3px">🛡️ Cộng tác viên (CTV)</div>' : ''}
+                        ${isCurrentAuthUser ? '<div style="font-size:0.75rem;color:var(--text-sub);margin-top:2px">(Tài khoản bạn đang dùng)</div>' : ''}
+                      </td>
+                      <td>${escapeHTML(userItem.email)}</td>
+                      <td>
+                        ${isTargetPrimary ? `
+                          <span class="admin-badge badge-root" style="font-size:0.8rem;padding:3px 8px">👑 Admin Gốc Chính</span>
+                        ` : isCurrentAuthUser ? `
+                          <span class="admin-badge ${itemRole.badgeClass}" style="font-size:0.8rem;padding:3px 8px">
+                            ${itemRole.icon} ${itemRole.title} (Bạn)
+                          </span>
+                        ` : canChangeRole ? `
+                          <select aria-label="Vai trò của ${escapeHTML(userItem.email)}" data-user-role="${userItem.id}">
+                            <option value="customer" ${isTargetCustomer ? 'selected' : ''}>👤 Khách hàng</option>
+                            <option value="ctv" ${isTargetCtv ? 'selected' : ''}>🛡️ CTV</option>
+                            ${isCurrentPrimaryRoot ? `<option value="sub_root" ${isTargetSub ? 'selected' : ''}>⭐ Admin Gốc Phụ</option>` : ''}
+                          </select>
+                        ` : `
+                          <span class="admin-badge ${itemRole.badgeClass}" style="font-size:0.8rem;padding:3px 8px">
+                            ${itemRole.icon} ${itemRole.title}
+                          </span>
+                        `}
+                      </td>
+                      <td>
+                        ${isBanned ? `
+                          <span class="admin-badge badge-hidden" style="background:#fee2e2;color:#991b1b;border:1px solid #f87171">🔒 Đã vô hiệu hóa</span>
+                        ` : `
+                          <span class="admin-badge badge-active">🟢 Hoạt động</span>
+                        `}
+                      </td>
+                      <td>
+                        <div class="portal-actions">
+                          <button class="portal-button" type="button" data-save-user-name="${userItem.id}">Lưu</button>
+                          
+                          <!-- Nút Vô hiệu hóa / Mở khóa -->
+                          ${canToggleBan ? `
+                            ${isBanned ? `
+                              <button class="portal-button portal-button--success" type="button" data-toggle-user-ban="${userItem.id}" data-action="unban" title="Mở khóa tài khoản">Mở khóa</button>
+                            ` : `
+                              <button class="portal-button portal-button--warning" type="button" data-toggle-user-ban="${userItem.id}" data-action="ban" title="Khóa tài khoản không cho đăng nhập">Vô hiệu hóa</button>
+                            `}
+                          ` : ''}
+
+                          <!-- Nút Xóa -->
+                          ${canDelete ? `
+                            <button class="portal-button portal-button--danger" type="button" data-delete-user="${userItem.id}" title="Xóa tài khoản vĩnh viễn">Xóa</button>
+                          ` : ''}
+                        </div>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ` : ''}
+
+    </section>
+  `;
 }
 
 // ============================================================
@@ -513,6 +1540,7 @@ function renderHome() {
         <div class="budget-row" id="budget-row">${budgetButtons}</div>
       </div>
     </section>
+    ${renderHeroAdsBanner()}
 
     <div class="container">
       <div class="section-header">
@@ -725,9 +1753,10 @@ function renderDishCards(list) {
     const saved = state.favorites.includes(d.id);
     const catLabel = getCategoryLabel(d.category);
     return `
-      <div class="dish-card" data-dish="${d.id}" id="dish-card-${d.id}">
+      <div class="dish-card ${d.isSponsored ? 'is-sponsored' : ''}" data-dish="${d.id}" id="dish-card-${d.id}">
         <div class="card-img-wrap">
           <img class="dish-img" src="${d.img}" alt="${d.name}" loading="lazy" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80';" />
+          ${d.isSponsored ? `<span class="dish-sponsor-badge">📢 ${escapeHTML(d.sponsorBadge || 'Tài trợ')}</span>` : (d.isBestseller ? `<span class="dish-bestseller-badge">⭐ Bestseller</span>` : '')}
           <button class="dish-fav-btn ${saved ? 'saved' : ''}" data-fav="${d.id}" id="fav-${d.id}" aria-label="Lưu vào Gu">
             ${saved ? '❤️' : '🤍'}
           </button>
@@ -747,6 +1776,10 @@ function renderDishCards(list) {
             <span>🔥 ${d.calo} kcal</span>
             <span>⏱️ ${d.time}</span>
           </div>
+          ${d.sponsorLink ? `
+            <a href="${escapeHTML(d.sponsorLink)}" target="_blank" rel="noopener noreferrer" class="dish-sponsor-btn" data-sponsor-click="${d.id}" data-sponsor-name="${escapeHTML(d.sponsorName || d.name)}" onclick="event.stopPropagation()">
+              🔗 ${escapeHTML(d.sponsorName ? `Ghé ${d.sponsorName}` : 'Đặt món ưu đãi')}
+            </a>` : ''}
         </div>
       </div>`;
   }).join('');
@@ -759,6 +1792,7 @@ function renderModal() {
         <img id="modal-img" src="" alt="" class="modal-img" />
         <div class="modal-body">
           <div class="modal-name" id="modal-name"></div>
+          <div id="modal-sponsor-container"></div>
           <div class="modal-desc" id="modal-desc"></div>
           <div class="modal-facts" id="modal-facts"></div>
           <div class="modal-reason" id="modal-reason"></div>
@@ -774,6 +1808,12 @@ function renderModal() {
 
 function openModal(dish, onRoll) {
   if (!dish) return;
+  trackAnalyticsEvent('dish_view', {
+    dishId: Number(dish.id),
+    dishName: dish.name,
+    isSponsored: Boolean(dish.isSponsored),
+    isBestseller: Boolean(dish.isBestseller),
+  });
   if (isAuthenticated() && getAuthSession()?.user?.role === 'customer') {
     requestApi('/api/customer/history', { method: 'POST', body: { dishId: Number(dish.id) } }).catch(() => { });
   }
@@ -781,6 +1821,23 @@ function openModal(dish, onRoll) {
   document.getElementById('modal-img').src = dish.img;
   document.getElementById('modal-name').textContent = dish.name;
   document.getElementById('modal-desc').textContent = dish.desc;
+
+  const sponsorContainer = document.getElementById('modal-sponsor-container');
+  if (sponsorContainer) {
+    if (dish.isSponsored) {
+      sponsorContainer.innerHTML = `
+        <div class="modal-sponsor-card">
+          <div class="msc-badge">📢 ${escapeHTML(dish.sponsorBadge || 'Món Được Tài Trợ')}</div>
+          <div class="msc-title">${escapeHTML(dish.sponsorName || 'Đối tác của BungOiAnGi')}</div>
+          <p class="msc-sub">Món ngon nổi bật được đề xuất từ quán ăn đối tác của BungOiAnGi.</p>
+          ${dish.sponsorLink ? `<a href="${escapeHTML(dish.sponsorLink)}" target="_blank" rel="noopener noreferrer" class="btn-sponsor-cta" data-sponsor-click="${dish.id}" data-sponsor-name="${escapeHTML(dish.sponsorName || dish.name)}">🚀 Ghé Quán Đặt Món Ngay</a>` : ''}
+        </div>
+      `;
+    } else {
+      sponsorContainer.innerHTML = '';
+    }
+  }
+
   document.getElementById('modal-facts').innerHTML = `
     <div class="modal-fact"><span class="mf-value">${formatCurrency(dish.price)}</span><span class="mf-key">Giá</span></div>
     <div class="modal-fact"><span class="mf-value">${dish.calo}</span><span class="mf-key">Kcal</span></div>
@@ -882,6 +1939,119 @@ function renderNearbyPanel(dish, panel = document.getElementById('modal-nearby-p
     event.currentTarget.setAttribute('aria-expanded', String(!help.hidden));
   });
 
+  function renderResults(places) {
+    if (!panel.isConnected) return;
+    const currentRadius = Number(panel.querySelector(`#${ids.radius}`)?.value || 5);
+    const mapsSearchUrl = currentLocation
+      ? `https://www.google.com/maps/search/${encodeURIComponent(dish.name + ' gần đây')}/@${currentLocation.lat},${currentLocation.lng},15z`
+      : `https://www.google.com/maps/search/${encodeURIComponent(dish.name + ' gần đây')}`;
+
+    const googleLiveHeader = `
+      <div class="nearby-google-live-bar">
+        <a class="nearby-google-live-btn" href="${mapsSearchUrl}" target="_blank" rel="noopener noreferrer">
+          <span class="nearby-google-live-icon">🗺️</span>
+          <div class="nearby-google-live-info">
+            <span class="nearby-google-live-title">Tìm “${escapeHTML(dish.name)}” trực tiếp trên Google Maps (Bán kính ${currentRadius} km) ↗</span>
+            <span class="nearby-google-live-sub">Xem vị trí GPS vệ tinh, hình ảnh thực tế & hàng trăm đánh giá mới nhất</span>
+          </div>
+        </a>
+      </div>`;
+
+    if (places.length === 0) {
+      status.textContent = `Chưa tìm thấy quán nào trong bán kính ${currentRadius} km. Hãy bấm mở Google Maps bên dưới hoặc tăng bán kính.`;
+      resultsElement.innerHTML = googleLiveHeader;
+      return;
+    }
+
+    const nearestRoadDist = places[0].roadDistanceKm || estimateRoadDistanceKm(places[0].distanceKm);
+    const nearestRoadText = nearestRoadDist < 1 ? `${Math.round(nearestRoadDist * 1000)} m` : `${nearestRoadDist.toFixed(1)} km`;
+    status.textContent = `Tìm thấy ${places.length} quán có món ${dish.name} được đánh giá cao quanh bạn (gần nhất: ~${nearestRoadText} lái xe).`;
+    const cardsHtml = places.slice(0, 8).map((place, index) => {
+      const straightDist = place.distanceKm;
+      const roadDist = place.roadDistanceKm || estimateRoadDistanceKm(straightDist);
+      const travelDistanceText = roadDist < 1
+        ? `~${Math.round(roadDist * 1000)} m lái xe (${formatDistance(straightDist)} thẳng)`
+        : `~${roadDist.toFixed(1)} km lái xe (${formatDistance(straightDist)} thẳng)`;
+
+      const hasCoords = Number.isFinite(place.lat) && Number.isFinite(place.lng);
+      const gmapsPlaceUrl = hasCoords
+        ? `https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}`
+        : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([place.name, place.address].filter(Boolean).join(' '))}`;
+
+      return `
+      <article class="nearby-place ${index === 0 ? 'is-nearest' : ''} ${place.isTopRated ? 'is-top-rated' : ''}">
+        <button type="button" class="nearby-place-select" data-place-index="${index}">
+          <div class="nearby-place-header">
+            <span class="nearby-place-name">${escapeHTML(place.name)}</span>
+            <span class="nearby-rating-badge">⭐ ${Number(place.rating || 4.7).toFixed(1)}</span>
+          </div>
+          <div class="nearby-place-subrow">
+            <span class="nearby-place-distance" title="Ước tính khoảng cách lái xe trên đường thực tế ~${roadDist.toFixed(1)} km theo Google Maps (khoảng cách đường chim bay: ${formatDistance(straightDist)})">📍 ${travelDistanceText}</span>
+            <span class="nearby-review-rate">👍 ${escapeHTML(place.ratingRate || '97% khen ngon')}</span>
+            <span class="nearby-review-count">(${place.reviewCount || 180}+ đánh giá)</span>
+            ${place.badge ? `<span class="nearby-badge-pill">${escapeHTML(place.badge)}</span>` : ''}
+          </div>
+          ${place.dishReview ? `
+          <div class="nearby-dish-review">
+            <span class="nearby-dish-review-icon">💬</span>
+            <div class="nearby-dish-review-body">
+              <span class="nearby-dish-review-title">Đánh giá món ${escapeHTML(dish.name)}:</span>
+              <span class="nearby-dish-review-quote">“${escapeHTML(place.dishReview)}”</span>
+            </div>
+          </div>` : ''}
+          <div class="nearby-place-meta">
+            <span class="nearby-place-price">💰 ${escapeHTML(place.priceRange || '35.000đ - 65.000đ')}</span>
+            <span class="nearby-place-status">${escapeHTML(place.openStatus || '🟢 Đang mở cửa')}</span>
+          </div>
+          <span class="nearby-place-address">${escapeHTML(place.address)}</span>
+        </button>
+        <div class="nearby-place-actions">
+          <a class="nearby-directions" href="${googleMapsDirectionsUrl(currentLocation, place)}" target="_blank" rel="noopener noreferrer" aria-label="Chỉ đường đến ${escapeHTML(place.name)}">
+            Chỉ đường ↗
+          </a>
+          <a class="nearby-map-link" href="${gmapsPlaceUrl}" target="_blank" rel="noopener noreferrer" title="Xem trên Google Maps">
+            Xem GG Map 📍
+          </a>
+          <a class="nearby-ship-link" href="${serviceSearchUrl('shopee', place.name, currentLocation)}" target="_blank" rel="noopener noreferrer" title="Tìm trên ShopeeFood">
+            Đặt món 🛵
+          </a>
+        </div>
+      </article>`;
+    }).join('');
+
+    resultsElement.innerHTML = googleLiveHeader + cardsHtml;
+
+    resultsElement.querySelectorAll('[data-place-index]').forEach(button => {
+      button.addEventListener('click', async () => {
+        selectedPlace = places[Number(button.dataset.placeIndex)];
+        status.textContent = mapElement
+          ? `Đang mở bản đồ đến ${selectedPlace.name}…`
+          : `Đã chọn ${selectedPlace.name}. Nhấn “Chỉ đường” để mở Google Maps.`;
+        if (mapElement) await renderNearbyMap(mapElement, currentLocation, selectedPlace);
+        if (mapElement) {
+          const selRoadDist = selectedPlace.roadDistanceKm || estimateRoadDistanceKm(selectedPlace.distanceKm);
+          const selRoadText = selRoadDist < 1 ? `${Math.round(selRoadDist * 1000)} m` : `${selRoadDist.toFixed(1)} km`;
+          status.textContent = `${selectedPlace.name} · ~${selRoadText} lái xe (${formatDistance(selectedPlace.distanceKm)} thẳng) từ vị trí của bạn (⭐ ${Number(selectedPlace.rating || 4.7).toFixed(1)}).`;
+        }
+        resultsElement.querySelectorAll('.nearby-place').forEach(row => row.classList.remove('is-selected'));
+        button.closest('.nearby-place')?.classList.add('is-selected');
+      });
+    });
+  }
+
+  // Tùy chỉnh bán kính thay đổi -> tự động cập nhật ngay nếu đã có vị trí
+  panel.querySelector(`#${ids.radius}`)?.addEventListener('change', async () => {
+    if (!currentLocation) return;
+    const radiusKm = Number(panel.querySelector(`#${ids.radius}`)?.value || 5);
+    status.textContent = `Đang tìm quán bán ${dish.name} trong bán kính tùy chỉnh ${radiusKm} km…`;
+    try {
+      const places = await findNearbyPlaces(currentLocation, radiusKm, dish.name, dish.category);
+      renderResults(places);
+    } catch (err) {
+      status.textContent = err.message || 'Không thể tìm quán.';
+    }
+  });
+
   panel.querySelector(`#${ids.locate}`)?.addEventListener('click', async () => {
     if (!requireAuthentication('Vui lòng đăng nhập hoặc đăng ký trước khi tìm địa chỉ quán ăn.')) return;
     const radiusKm = Number(panel.querySelector(`#${ids.radius}`)?.value || 5);
@@ -893,41 +2063,25 @@ function renderNearbyPanel(dish, panel = document.getElementById('modal-nearby-p
       status.textContent = `Đã xác định vị trí. Đang tìm quán bán ${dish.name} trong bán kính ${radiusKm} km…`;
       if (mapElement) await renderNearbyMap(mapElement, currentLocation);
 
-      const places = await findNearbyPlaces(currentLocation, radiusKm, dish.name);
-      if (!panel.isConnected) return;
-      if (places.length === 0) {
-        status.textContent = `Chưa có quán nào gần bạn trong bán kính ${radiusKm} km. Hãy thử tăng bán kính hoặc xem trên Google Maps.`;
-        return;
-      }
-
-      const fallbackMode = places.some(place => place.fallback);
-      status.textContent = fallbackMode
-        ? `Không tìm thấy quán bán ${dish.name} đúng món, nhưng đây là quán gần nhất quanh bạn.`
-        : `Tìm thấy ${places.length} quán. Gần nhất cách bạn ${formatDistance(places[0].distanceKm)}.`;
-      resultsElement.innerHTML = places.slice(0, 8).map((place, index) => `
-        <article class="nearby-place ${index === 0 ? 'is-nearest' : ''}">
-          <button type="button" class="nearby-place-select" data-place-index="${index}">
-            <span class="nearby-place-name">${escapeHTML(place.name)}</span>
-            <span class="nearby-place-distance">${formatDistance(place.distanceKm)}</span>
-            <span class="nearby-place-address">${escapeHTML(place.address)}${place.fallback ? ' · Gần bạn' : ''}</span>
-          </button>
-          <a class="nearby-directions" href="${googleMapsDirectionsUrl(currentLocation, place)}" target="_blank" rel="noopener noreferrer" aria-label="Chỉ đường đến ${escapeHTML(place.name)}">Chỉ đường ↗</a>
-        </article>`).join('');
-
-      resultsElement.querySelectorAll('[data-place-index]').forEach(button => {
-        button.addEventListener('click', async () => {
-          selectedPlace = places[Number(button.dataset.placeIndex)];
-          status.textContent = mapElement
-            ? `Đang mở bản đồ đến ${selectedPlace.name}…`
-            : `Đã chọn ${selectedPlace.name}. Nhấn “Chỉ đường” để mở Google Maps.`;
-          if (mapElement) await renderNearbyMap(mapElement, currentLocation, selectedPlace);
-          if (mapElement) status.textContent = `${selectedPlace.name} · ${formatDistance(selectedPlace.distanceKm)} từ vị trí của bạn.`;
-          resultsElement.querySelectorAll('.nearby-place').forEach(row => row.classList.remove('is-selected'));
-          button.closest('.nearby-place')?.classList.add('is-selected');
-        });
-      });
+      const places = await findNearbyPlaces(currentLocation, radiusKm, dish.name, dish.category);
+      renderResults(places);
     } catch (error) {
-      if (panel.isConnected) status.textContent = error.message || 'Không thể lấy vị trí. Hãy kiểm tra quyền GPS của trình duyệt.';
+      if (panel.isConnected) {
+        status.innerHTML = `
+          <div class="nearby-error-row">
+            <span class="nearby-error-msg">${escapeHTML(error.message || 'Không thể lấy vị trí hiện tại.')}</span>
+            <button type="button" class="nearby-sample-btn" id="${panelId}-sample-btn">
+              📍 Dùng vị trí trung tâm để xem mẫu
+            </button>
+          </div>`;
+        panel.querySelector(`#${panelId}-sample-btn`)?.addEventListener('click', async () => {
+          currentLocation = { lat: 10.7769, lng: 106.7009 };
+          status.textContent = `Đang tải các quán bán ${dish.name} quanh trung tâm…`;
+          if (mapElement) await renderNearbyMap(mapElement, currentLocation);
+          const places = await findNearbyPlaces(currentLocation, radiusKm, dish.name, dish.category);
+          renderResults(places);
+        });
+      }
     }
   });
 
@@ -1136,15 +2290,32 @@ async function loadCustomerFavorites() {
 
 async function loadAdminDashboard(successMessage = '') {
   try {
-    const [stats, adminDishes, users] = await Promise.all([
+    const [stats, adminDishes, users, analytics, settings] = await Promise.all([
       requestApi('/api/admin/stats'),
       requestApi('/api/admin/dishes'),
       requestApi('/api/admin/users'),
+      requestApi('/api/admin/analytics').catch(() => null),
+      requestApi('/api/admin/settings').catch(() => null),
     ]);
     state.adminStats = stats;
     state.adminDishes = adminDishes;
     state.adminUsers = users;
+    if (analytics) state.adminAnalytics = analytics;
+    if (settings) {
+      state.adminSettings = settings;
+      setDynamicSettings(settings);
+    }
     replaceDishes(adminDishes);
+
+    // Đồng bộ ngay vai trò và quyền hạn của tài khoản đang đăng nhập từ database
+    const session = getAuthSession();
+    if (session?.user && session?.token) {
+      const match = users.find(u => String(u.id) === String(session.user.id) || String(u.email).toLowerCase() === String(session.user.email).toLowerCase());
+      if (match) {
+        setAuthSession({ ...session.user, ...match }, session.token);
+      }
+    }
+
     state.adminMessage = successMessage;
     state.adminMessageType = successMessage ? 'success' : '';
   } catch (error) {
@@ -1301,8 +2472,22 @@ function bindAll() {
     const formData = new FormData(adminDishForm);
     state.adminDishDraft = {
       dishId: state.adminEditDishId === null ? null : Number(state.adminEditDishId),
-      values: Object.fromEntries(['name', 'price', 'desc', 'category', 'type', 'calo', 'img']
-        .map(name => [name, String(formData.get(name) ?? '')])),
+      values: {
+        name: String(formData.get('name') ?? ''),
+        price: String(formData.get('price') ?? ''),
+        desc: String(formData.get('desc') ?? ''),
+        category: String(formData.get('category') ?? ''),
+        type: String(formData.get('type') ?? ''),
+        calo: String(formData.get('calo') ?? ''),
+        img: String(formData.get('img') ?? ''),
+        dropWeight: String(formData.get('dropWeight') ?? '1'),
+        isSponsored: formData.get('isSponsored') === 'on',
+        sponsorName: String(formData.get('sponsorName') ?? ''),
+        sponsorBadge: String(formData.get('sponsorBadge') ?? ''),
+        sponsorLink: String(formData.get('sponsorLink') ?? ''),
+        isBestseller: formData.get('isBestseller') === 'on',
+        active: formData.get('active') === 'on',
+      },
     };
   };
   adminDishForm?.addEventListener('input', captureAdminDishDraft);
@@ -1354,6 +2539,13 @@ function bindAll() {
       diet: values.type,
       calo: Number(values.calo || 0),
       img: values.img,
+      dropWeight: Math.max(0.1, Number(values.dropWeight || 1)),
+      isSponsored: values.isSponsored === 'on' || values.isSponsored === true || values.isSponsored === 'true',
+      sponsorName: String(values.sponsorName || '').trim(),
+      sponsorBadge: String(values.sponsorBadge || 'Tài trợ').trim(),
+      sponsorLink: String(values.sponsorLink || '').trim(),
+      isBestseller: values.isBestseller === 'on' || values.isBestseller === true || values.isBestseller === 'true',
+      active: values.active === 'on' || values.active === true || values.active === 'true',
     };
     const editingId = state.adminEditDishId;
     try {
@@ -1405,9 +2597,20 @@ function bindAll() {
   document.getElementById('admin-user-form')?.addEventListener('submit', async event => {
     event.preventDefault();
     const values = Object.fromEntries(new FormData(event.currentTarget));
+    const roleVal = values.role;
+    if (roleVal === 'sub_root') {
+      values.role = 'admin';
+      values.adminLevel = 'sub_root';
+    } else if (roleVal === 'ctv' || roleVal === 'admin') {
+      values.role = 'admin';
+      values.adminLevel = 'ctv';
+    } else {
+      values.role = 'customer';
+      values.adminLevel = 'customer';
+    }
     try {
       await requestApi('/api/admin/users', { method: 'POST', body: values });
-      await loadAdminDashboard('Đã tạo người dùng.');
+      await loadAdminDashboard('Đã tạo người dùng mới thành công.');
     } catch (error) {
       state.adminMessage = error.message;
       state.adminMessageType = 'error';
@@ -1417,11 +2620,18 @@ function bindAll() {
 
   document.querySelectorAll('[data-user-role]').forEach(select => {
     select.addEventListener('change', async () => {
+      const val = select.value;
+      const payload = val === 'sub_root'
+        ? { role: 'admin', adminLevel: 'sub_root' }
+        : val === 'ctv' || val === 'admin'
+          ? { role: 'admin', adminLevel: 'ctv' }
+          : { role: 'customer', adminLevel: 'customer' };
+
       try {
         await requestApi(`/api/admin/users/${select.dataset.userRole}`, {
-          method: 'PATCH', body: { role: select.value },
+          method: 'PATCH', body: payload,
         });
-        await loadAdminDashboard('Đã cập nhật vai trò.');
+        await loadAdminDashboard('Đã cập nhật vai trò người dùng.');
       } catch (error) {
         state.adminMessage = error.message;
         state.adminMessageType = 'error';
@@ -1463,6 +2673,286 @@ function bindAll() {
         state.adminMessageType = 'error';
         renderApp();
       }
+    });
+  });
+
+  // Lọc nhanh danh sách món ăn trên Admin Tab 1
+  document.querySelectorAll('[data-admin-filter]').forEach(button => {
+    button.addEventListener('click', () => {
+      state.adminDishFilter = button.dataset.adminFilter;
+      renderApp();
+    });
+  });
+
+  // Bật/tắt nhanh thuộc tính món ăn (Quảng cáo, Bestseller, Ẩn/Hiện)
+  document.querySelectorAll('[data-quick-toggle]').forEach(button => {
+    button.addEventListener('click', async () => {
+      const field = button.dataset.quickToggle;
+      const dishId = Number(button.dataset.id);
+      const dish = state.adminDishes.find(d => Number(d.id) === dishId);
+      if (!dish) return;
+      let nextValue;
+      if (field === 'active') {
+        nextValue = dish.active === false ? true : false;
+      } else if (field === 'sponsored') {
+        nextValue = !dish.isSponsored;
+      } else if (field === 'bestseller') {
+        nextValue = !dish.isBestseller;
+      }
+      try {
+        await requestApi(`/api/admin/dishes/${dishId}/quick-toggle`, {
+          method: 'PATCH',
+          body: { field, value: nextValue },
+        });
+        dish[field === 'sponsored' ? 'isSponsored' : field === 'bestseller' ? 'isBestseller' : 'active'] = nextValue;
+        replaceDishes(state.adminDishes);
+        renderApp();
+      } catch (error) {
+        state.adminMessage = error.message;
+        state.adminMessageType = 'error';
+        renderApp();
+      }
+    });
+  });
+
+  // Thay đổi trọng số rơi trực tiếp từ bảng món ăn
+  document.querySelectorAll('[data-quick-weight]').forEach(input => {
+    input.addEventListener('change', async () => {
+      const dishId = Number(input.dataset.quickWeight);
+      const dish = state.adminDishes.find(d => Number(d.id) === dishId);
+      if (!dish) return;
+      const newWeight = Math.max(0.1, Number(input.value) || 1);
+      try {
+        await requestApi(`/api/admin/dishes/${dishId}/quick-toggle`, {
+          method: 'PATCH',
+          body: { field: 'dropWeight', value: newWeight },
+        });
+        dish.dropWeight = newWeight;
+        replaceDishes(state.adminDishes);
+        renderApp();
+      } catch (error) {
+        state.adminMessage = error.message;
+        state.adminMessageType = 'error';
+        renderApp();
+      }
+    });
+  });
+
+  // Lưu cấu hình Luật chơi & Tỉ lệ rơi món (Tab 2)
+  document.getElementById('admin-rules-form')?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const updatedRules = {
+      sponsoredMultiplier: Number(formData.get('sponsoredMultiplier') || 3),
+      bestsellerMultiplier: Number(formData.get('bestsellerMultiplier') || 2),
+      guaranteeSponsored: formData.get('guaranteeSponsored') === 'on',
+      mealAncientRate: Number(formData.get('mealAncientRate') || 5),
+      mealLegendaryRate: Number(formData.get('mealLegendaryRate') || 15),
+      airdropHotRate: Number(formData.get('airdropHotRate') || 30),
+    };
+    try {
+      const currentSettings = state.adminSettings || getDynamicSettings();
+      const newSettings = {
+        ...currentSettings,
+        gameRules: { ...currentSettings.gameRules, ...updatedRules },
+      };
+      const saved = await requestApi('/api/admin/settings', {
+        method: 'PUT',
+        body: newSettings,
+      });
+      state.adminSettings = saved;
+      setDynamicSettings(saved);
+      await loadAdminDashboard('Đã lưu cấu hình luật chơi & tỉ lệ thành công!');
+    } catch (error) {
+      state.adminMessage = error.message;
+      state.adminMessageType = 'error';
+      renderApp();
+    }
+  });
+
+  // Tương tác trực tiếp với thanh trượt luật chơi & mô phỏng tỉ lệ rơi thời gian thực
+  const bindRuleSlider = (sliderId, badgeId, labelId, suffix) => {
+    const slider = document.getElementById(sliderId);
+    if (!slider) return;
+    slider.addEventListener('input', () => {
+      const val = slider.value + suffix;
+      const badge = document.getElementById(badgeId);
+      const label = document.getElementById(labelId);
+      if (badge) badge.textContent = val;
+      if (label) label.textContent = val;
+      const currentSettings = state.adminSettings || getDynamicSettings();
+      const tempSettings = {
+        ...currentSettings,
+        gameRules: {
+          ...currentSettings.gameRules,
+          sponsoredMultiplier: Number(document.getElementById('slider-sponsored-multiplier')?.value || 3),
+          bestsellerMultiplier: Number(document.getElementById('slider-bestseller-multiplier')?.value || 2),
+        }
+      };
+      const simulated = simulateDropProbabilities(state.adminDishes, tempSettings).slice(0, 10);
+      const tbody = document.getElementById('sim-prob-tbody');
+      if (tbody) {
+        tbody.innerHTML = simulated.map(d => `
+          <tr>
+            <td><strong>${escapeHTML(d.name)}</strong></td>
+            <td>
+              ${d.isSponsored ? '<span class="admin-badge badge-sponsored">📢 Tài trợ</span>' : ''}
+              ${d.isBestseller ? '<span class="admin-badge badge-bestseller">⭐ Hot</span>' : ''}
+              ${!d.isSponsored && !d.isBestseller ? '<span style="color:var(--text-sub);font-size:0.75rem">Thường</span>' : ''}
+            </td>
+            <td><strong>${d.calculatedWeight}</strong></td>
+            <td>
+              <div style="display:flex;align-items:center;gap:0.6rem">
+                <div class="admin-prob-meter" style="width:140px">
+                  <div class="admin-prob-fill ${d.isSponsored ? 'is-sponsored' : ''}" style="width:${Math.min(100, Math.max(3, d.percentage * 4))}%"></div>
+                </div>
+                <strong>${d.percentage}%</strong>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      }
+    });
+  };
+  bindRuleSlider('slider-sponsored-multiplier', 'badge-sponsored-multiplier', 'lbl-sponsored-multiplier', 'x');
+  bindRuleSlider('slider-bestseller-multiplier', 'badge-bestseller-multiplier', 'lbl-bestseller-multiplier', 'x');
+  bindRuleSlider('slider-ancient-rate', 'badge-ancient-rate', 'lbl-ancient-rate', '%');
+  bindRuleSlider('slider-legendary-rate', 'badge-legendary-rate', 'lbl-legendary-rate', '%');
+  bindRuleSlider('slider-airdrop-rate', 'badge-airdrop-rate', 'lbl-airdrop-rate', '%');
+
+  // Lưu Cài Đặt Web & CMS (Tab 4)
+  document.getElementById('admin-settings-form')?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const currentSettings = state.adminSettings || getDynamicSettings();
+    const readCheckbox = (name, currentVal) => {
+      const el = form.elements[name];
+      if (!el) return Boolean(currentVal);
+      if (el.disabled) return Boolean(currentVal);
+      return Boolean(el.checked);
+    };
+
+    const newSettings = {
+      features: {
+        ...currentSettings.features,
+        mealEnabled: readCheckbox('feat_mealEnabled', currentSettings.features?.mealEnabled !== false),
+        arenaEnabled: readCheckbox('feat_arenaEnabled', currentSettings.features?.arenaEnabled !== false),
+        airdropEnabled: readCheckbox('feat_airdropEnabled', currentSettings.features?.airdropEnabled !== false),
+        quizEnabled: readCheckbox('feat_quizEnabled', currentSettings.features?.quizEnabled !== false),
+        nearbyEnabled: readCheckbox('feat_nearbyEnabled', currentSettings.features?.nearbyEnabled !== false),
+        maintenanceMode: readCheckbox('feat_maintenanceMode', currentSettings.features?.maintenanceMode),
+        maintenanceNotice: String(form.elements['feat_maintenanceNotice']?.value || '').trim(),
+      },
+      announcement: {
+        ...currentSettings.announcement,
+        enabled: readCheckbox('ann_enabled', currentSettings.announcement?.enabled),
+        title: String(form.elements['ann_title']?.value || '').trim(),
+        text: String(form.elements['ann_text']?.value || '').trim(),
+        type: String(form.elements['ann_type']?.value || 'promo'),
+        link: String(form.elements['ann_link']?.value || '').trim(),
+      },
+      ads: {
+        ...currentSettings.ads,
+        bannerEnabled: readCheckbox('ads_bannerEnabled', currentSettings.ads?.bannerEnabled),
+        title: String(form.elements['ads_title']?.value || '').trim(),
+        badge: String(form.elements['ads_badge']?.value || 'TÀI TRỢ HOT').trim(),
+        subtitle: String(form.elements['ads_subtitle']?.value || '').trim(),
+        img: String(form.elements['ads_img']?.value || '').trim(),
+        link: String(form.elements['ads_link']?.value || '').trim(),
+      },
+    };
+    try {
+      const saved = await requestApi('/api/admin/settings', {
+        method: 'PUT',
+        body: newSettings,
+      });
+      state.adminSettings = saved;
+      setDynamicSettings(saved);
+      await loadAdminDashboard('Đã lưu cài đặt Web & CMS thành công!');
+    } catch (error) {
+      state.adminMessage = error.message;
+      state.adminMessageType = 'error';
+      renderApp();
+    }
+  });
+
+  // Tương tác trực tiếp bật/tắt chế độ bảo trì để khóa/mở các tính năng con
+  const maintToggle = document.getElementById('admin-maintenance-toggle');
+  maintToggle?.addEventListener('change', () => {
+    const isMaint = maintToggle.checked;
+    const notice = document.getElementById('maintenance-lock-notice');
+    const card = maintToggle.closest('.admin-maintenance-card');
+    const grid = document.getElementById('admin-subfeatures-grid');
+    if (notice) notice.classList.toggle('hidden', !isMaint);
+    if (card) card.classList.toggle('is-active', isMaint);
+    if (grid) grid.classList.toggle('is-maintenance-locked', isMaint);
+    document.querySelectorAll('.feature-sub-checkbox').forEach(cb => {
+      cb.disabled = isMaint;
+      cb.closest('.admin-flag-item')?.classList.toggle('is-locked-by-maintenance', isMaint);
+    });
+  });
+
+  // Vô hiệu hóa (Khóa) hoặc Mở khóa tài khoản người dùng
+  document.querySelectorAll('[data-toggle-user-ban]').forEach(button => {
+    button.addEventListener('click', async () => {
+      const userId = button.dataset.toggleUserBan;
+      const action = button.dataset.action;
+      const isBanAction = action === 'ban';
+      const promptText = isBanAction
+        ? 'Bạn có chắc muốn VÔ HIỆU HÓA (khóa) tài khoản này? Người này sẽ bị chặn không thể đăng nhập vào website.'
+        : 'Bạn có chắc muốn MỞ KHÓA (kích hoạt lại) tài khoản này?';
+      if (!window.confirm(promptText)) return;
+      try {
+        await requestApi(`/api/admin/users/${userId}`, {
+          method: 'PATCH',
+          body: { status: isBanAction ? 'banned' : 'active', isBanned: isBanAction },
+        });
+        await loadAdminDashboard(isBanAction ? 'Đã vô hiệu hóa tài khoản thành công.' : 'Đã mở khóa tài khoản thành công.');
+      } catch (error) {
+        state.adminMessage = error.message;
+        state.adminMessageType = 'error';
+        renderApp();
+      }
+    });
+  });
+
+  // Xóa sạch nhật ký sự kiện
+  document.getElementById('admin-clear-analytics')?.addEventListener('click', async () => {
+    if (!window.confirm('Bạn có chắc muốn xóa sạch toàn bộ lịch sử sự kiện và nhật ký hoạt động?')) return;
+    try {
+      await requestApi('/api/admin/analytics/clear', { method: 'DELETE' });
+      await loadAdminDashboard('Đã xóa sạch lịch sử sự kiện.');
+    } catch (error) {
+      state.adminMessage = error.message;
+      state.adminMessageType = 'error';
+      renderApp();
+    }
+  });
+
+  // Đóng thông báo nổi và thanh thông báo
+  const dismissAnnouncement = () => {
+    state.announcementDismissed = true;
+    try { sessionStorage.setItem('bung_ann_dismissed', 'true'); } catch (_) {}
+    const popup = document.getElementById('announcement-modal-backdrop');
+    if (popup) {
+      popup.classList.add('is-closing');
+      setTimeout(() => popup.remove(), 200);
+    }
+    const bar = document.getElementById('announcement-bar');
+    if (bar) bar.style.display = 'none';
+  };
+  document.getElementById('announcement-modal-close')?.addEventListener('click', dismissAnnouncement);
+  document.getElementById('announcement-modal-dismiss')?.addEventListener('click', dismissAnnouncement);
+  document.getElementById('announcement-close')?.addEventListener('click', dismissAnnouncement);
+
+  // Theo dõi lượt click quảng cáo quán đối tác (Ad Clicks tracking)
+  document.querySelectorAll('[data-sponsor-click]').forEach(el => {
+    el.addEventListener('click', () => {
+      const rawId = el.dataset.sponsorClick;
+      const dishId = Number(rawId) || null;
+      const sponsorName = el.dataset.sponsorName || '';
+      const dishName = el.dataset.dishName || '';
+      trackAnalyticsEvent('ad_click', { dishId, sponsorName, dishName });
     });
   });
 
@@ -1634,9 +3124,19 @@ function bindAll() {
   });
 
   // Tìm kiếm & Danh mục trang Khám Phá
+  let searchDebounceTimer = null;
   const searchInput = document.getElementById('explore-search');
   if (searchInput) {
-    searchInput.addEventListener('input', () => updateExploreGrid());
+    searchInput.addEventListener('input', () => {
+      updateExploreGrid();
+      clearTimeout(searchDebounceTimer);
+      const query = searchInput.value.trim();
+      if (query.length >= 2) {
+        searchDebounceTimer = setTimeout(() => {
+          trackAnalyticsEvent('search', { query });
+        }, 1000);
+      }
+    });
   }
   document.querySelectorAll('.cat-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1743,9 +3243,16 @@ window.addEventListener(AUTH_SESSION_EXPIRED_EVENT, () => {
   navigateTo('auth');
 });
 window.addEventListener('popstate', () => navigateTo(pageForPath(window.location.pathname), { updateUrl: false }));
+window.addEventListener(SETTINGS_UPDATED_EVENT, () => {
+  renderApp();
+});
+
 void (async () => {
   try {
-    await initializeAuth();
+    await Promise.all([
+      initializeAuth(),
+      fetchDynamicSettings().catch(() => {}),
+    ]);
   } catch (error) {
     state.authMessage = `Không thể khôi phục phiên đăng nhập: ${error.message}`;
     state.authMessageType = 'error';

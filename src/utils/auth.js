@@ -30,13 +30,27 @@ function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
 }
 
-function sanitizeUser(user) {
+export function sanitizeUser(user) {
   if (!user) return null;
+  const isPrimary = Boolean(user.isPrimaryRootAdmin || user.adminLevel === 'primary_root' || String(user.email).toLowerCase() === 'admin@bungoiangi.com' || Number(user.id) === 1);
+  const isSub = !isPrimary && Boolean(user.isSubRootAdmin || user.adminLevel === 'sub_root' || user.subRole === 'sub_root');
+  const isCtv = !isPrimary && !isSub && Boolean(user.isCtv || user.adminLevel === 'ctv' || user.role === 'admin');
+  const adminLevel = isPrimary ? 'primary_root' : (isSub ? 'sub_root' : (isCtv ? 'ctv' : (user.adminLevel || 'customer')));
+
   return {
     id: user.id,
     name: user.name || '',
     email: user.email,
     role: user.role || 'customer',
+    adminLevel,
+    isSubRootAdmin: isSub,
+    isPrimaryRootAdmin: isPrimary,
+    isRootAdmin: isPrimary,
+    canManageSettings: isPrimary || isSub,
+    isCtv,
+    roleTitle: user.roleTitle || (isPrimary ? 'Admin Gốc Chính' : isSub ? 'Admin Gốc Phụ' : isCtv ? 'Cộng tác viên (CTV)' : 'Khách hàng'),
+    status: user.status || (user.isBanned ? 'banned' : 'active'),
+    isBanned: Boolean(user.isBanned || user.status === 'banned'),
     createdAt: user.createdAt || new Date().toISOString(),
   };
 }
@@ -156,8 +170,16 @@ function getRequestFailureMessage(error, fallback = 'Thao tác không thành cô
   if (!message) return fallback;
 
   const lower = message.toLowerCase();
-  if (/already registered|already exists|email.*đã được đăng ký|email.*đã tồn tại/i.test(message)) {
-    return 'Email này đã được đăng ký.';
+  if (/tên.*đã.*(tồn tại|sử dụng)/i.test(message)) {
+    return message;
+  }
+
+  if (/email.*đã.*(tồn tại|sử dụng|đăng ký)/i.test(message)) {
+    return message;
+  }
+
+  if (/already registered|already exists/i.test(message)) {
+    return 'Email này đã được sử dụng. Vui lòng chọn email khác hoặc đăng nhập.';
   }
 
   if (/invalid login credentials|invalid credentials|email hoặc mật khẩu không đúng/i.test(lower)) {

@@ -14,6 +14,7 @@ import {
 } from './airdropView.js';
 
 import { playCrateOpenSound, playRevealSound, playUiSound } from './airdropAudio.js';
+import { pickWeightedDish, trackAnalyticsEvent } from '../../utils/weightEngine.js';
 
 let airdropPhase = AIRDROP_PHASE.READY;
 let airdropDishId = null;
@@ -173,7 +174,15 @@ function handleOpen() {
 
   const candidatePool = pool.filter(d => d.id !== lastAirdropId);
   const finalPool = candidatePool.length > 0 ? candidatePool : pool;
-  const picked = finalPool[Math.floor(Math.random() * finalPool.length)];
+  const picked = pickWeightedDish(finalPool) || finalPool[0];
+
+  trackAnalyticsEvent('game_roll', {
+    game: 'airdrop',
+    dishId: picked.id,
+    dishName: picked.name,
+    isSponsored: picked.isSponsored,
+    isBestseller: picked.isBestseller,
+  });
 
   lastAirdropId = picked.id;
   airdropDishId = picked.id;

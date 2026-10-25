@@ -3,6 +3,7 @@
 // ============================================================
 
 import { dishes as defaultDishes, BUDGETS, CATEGORIES } from '../../data/dishes.js';
+import { pickWeightedDish } from '../../utils/weightEngine.js';
 
 /**
  * Xóa dấu tiếng Việt và chuẩn hóa chuỗi để tìm kiếm không dấu
@@ -99,6 +100,9 @@ export function filterDishes(targetOrMood, maybeBudgetId = 'all', maybeCategoryI
   const normCategory = normalizeCategory(categoryId);
 
   return list.filter(dish => {
+    // 0. Bỏ qua món bị Admin ẩn/tắt
+    if (dish.active === false) return false;
+
     // 1. Lọc theo tâm trạng (mood)
     if (moodId && !isAll(moodId)) {
       if (!dish.moods || !dish.moods.includes(moodId)) {
@@ -195,7 +199,7 @@ export function getRandomDish(targetOrMood, maybeBudgetId) {
   }
 
   if (pool.length > 0) {
-    return pool[Math.floor(Math.random() * pool.length)];
+    return pickWeightedDish(pool);
   }
-  return defaultDishes[Math.floor(Math.random() * defaultDishes.length)];
+  return pickWeightedDish(defaultDishes) || defaultDishes[0];
 }

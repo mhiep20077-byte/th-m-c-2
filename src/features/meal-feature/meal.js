@@ -2,6 +2,7 @@ import { formatCurrency, getCategoryName } from './dishRender.js';
 import { DISH_TYPES } from './filterUtils.js';
 import { BUDGET_GROUPS } from './priceFilter.js';
 import { foodImageFallback } from './foodImages.js';
+import { pickWeightedDish } from '../../utils/weightEngine.js';
 
 /* ===== Khung bữa ăn ===== */
 
@@ -265,7 +266,7 @@ export function pickCourseDish(pool, course, currentDishes = [], preference = ME
   const preferred = applyPreference ? candidates.filter(dish => matchesPreference(dish, preference)) : candidates;
   const source = preferred.length > 0 ? preferred : candidates;
 
-  return source[Math.floor(Math.random() * source.length)];
+  return pickWeightedDish(source) || source[0];
 }
 
 /**

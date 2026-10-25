@@ -51,6 +51,7 @@ import {
 
 import { applyFoodImages } from './foodImages.js';
 import bundledDishes from './data/dishes.json';
+import { trackAnalyticsEvent } from '../../utils/weightEngine.js';
 
 // Trạng thái cục bộ của bữa cơm
 let allDishes = [];
@@ -115,6 +116,17 @@ export function fillMealSlot(courseId) {
 /** Món vừa lộ ra khỏi hộp */
 export function revealMealSlot(courseId) {
   fillMealSlot(courseId);
+  const slot = mealState.slots.find(s => s.courseId === courseId);
+  if (slot?.dish) {
+    trackAnalyticsEvent('game_roll', {
+      game: 'meal',
+      courseId,
+      dishId: slot.dish.id,
+      dishName: slot.dish.name,
+      isSponsored: slot.dish.isSponsored,
+      isBestseller: slot.dish.isBestseller,
+    });
+  }
   mealRollingCourseId = null;
   mealRevealedCourseId = courseId;
   renderMealState();

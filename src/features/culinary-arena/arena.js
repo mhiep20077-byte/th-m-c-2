@@ -16,6 +16,7 @@ import {
 
 import { launchConfetti } from './confetti.js';
 import { getSavedFortunes, saveFortune, clearFortuneHistory } from './storage.js';
+import { pickWeightedDishes, trackAnalyticsEvent } from '../../utils/weightEngine.js';
 
 // Danh sách các kiểu trải bài
 const SPREAD_CONFIGS = {
@@ -291,9 +292,14 @@ function drawTarotCards() {
         candidateDishes = allDishes;
     }
 
-    // Xáo trộn và lấy đủ số lượng lá bài
-    const shuffled = shuffleArray([...candidateDishes]);
-    const chosenDishes = shuffled.slice(0, config.count);
+    // Xáo trộn và lấy đủ số lượng lá bài theo trọng số tỉ lệ cấu hình
+    const chosenDishes = pickWeightedDishes(candidateDishes, config.count);
+    trackAnalyticsEvent('game_roll', {
+      game: 'arena_tarot',
+      spread: currentSpread,
+      mood: currentMood,
+      dishes: chosenDishes.map(d => ({ id: d.id, name: d.name, isSponsored: d.isSponsored, isBestseller: d.isBestseller })),
+    });
 
     altarCards = chosenDishes.map((dish, i) => {
         const slot = config.slots[i] || config.slots[0];
