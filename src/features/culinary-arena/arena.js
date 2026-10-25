@@ -17,6 +17,7 @@ import {
 import { launchConfetti } from './confetti.js';
 import { getSavedFortunes, saveFortune, clearFortuneHistory } from './storage.js';
 import { pickWeightedDishes, trackAnalyticsEvent } from '../../utils/weightEngine.js';
+import { getCurrentVoucherCalculation } from '../../utils/voucherWidget.js';
 
 // Danh sách các kiểu trải bài
 const SPREAD_CONFIGS = {
@@ -330,7 +331,10 @@ function renderAltar() {
     const cardsClass = `cards-${config.count}`;
 
     const cardsHtml = altarCards.map((card, idx) => {
-        const priceFormatted = Number(card.dish.price).toLocaleString('vi-VN') + ' đ';
+        const voucherCalc = getCurrentVoucherCalculation(card.dish.price);
+        const priceFormatted = voucherCalc?.result?.isValid
+            ? `<del style="opacity:0.6;font-size:0.8em;margin-right:4px;font-weight:normal">${Number(card.dish.price).toLocaleString('vi-VN')} đ</del>👉 <b style="color:#fef08a">${Number(voucherCalc.result.finalPrice).toLocaleString('vi-VN')} đ</b>`
+            : Number(card.dish.price).toLocaleString('vi-VN') + ' đ';
         const fallbackImg = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80';
         const tagsHtml = (card.dish.tags || []).slice(0, 3).map(t => `<span class="tarot-tag">#${t}</span>`).join('');
 
@@ -363,6 +367,11 @@ function renderAltar() {
                 ${card.dish.type === 'chay' ? '🥗 Món Chay' : '🍖 Món Mặn'}
               </div>
               <div class="tarot-price-badge">${priceFormatted}</div>
+              ${voucherCalc?.result?.isValid ? `
+                <div class="tarot-voucher-badge" title="${voucherCalc.voucher.title || voucherCalc.voucher.code}">
+                  🎟️ -${voucherCalc.result.discount.toLocaleString('vi-VN')}đ
+                </div>
+              ` : ''}
             </div>
 
             <div class="tarot-front-body">
@@ -375,7 +384,10 @@ function renderAltar() {
               </div>
               <div class="tarot-card-actions">
                 <button type="button" class="btn-tarot-action btn-tarot-fav ${oracleCallbacks.isFav?.(card.dish.id) ? 'active' : ''}" data-dish-id="${card.dish.id}" title="Lưu vào Gu của tôi">
-                  ${oracleCallbacks.isFav?.(card.dish.id) ? '❤️ Đã lưu gu' : '🤍 Lưu gu'}
+                  ${oracleCallbacks.isFav?.(card.dish.id) ? '❤️ Đã lưu' : '🤍 Lưu gu'}
+                </button>
+                <button type="button" class="btn-tarot-action btn-tarot-voucher" data-dish-id="${card.dish.id}" title="Áp mã ưu đãi & Xem chi tiết">
+                  🎟️ Voucher
                 </button>
                 <button type="button" class="btn-tarot-action btn-tarot-meal" data-dish-id="${card.dish.id}" title="Dựng mâm cơm ngay với món này">
                   🍽️ Dựng bữa
@@ -502,6 +514,19 @@ function renderAltar() {
             const dish = foundCard ? foundCard.dish : allDishes.find(d => d.id === dishId);
             if (oracleCallbacks.onGoToMeal) {
                 oracleCallbacks.onGoToMeal(dish ? [dish] : []);
+            }
+        });
+    });
+
+    container.querySelectorAll('.btn-tarot-voucher').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            playUiClick();
+            const dishId = Number(btn.dataset.dishId);
+            const foundCard = altarCards.find(c => c.dish && c.dish.id === dishId);
+            const dish = foundCard ? foundCard.dish : allDishes.find(d => d.id === dishId);
+            if (oracleCallbacks.onOpenDishModal && dish) {
+                oracleCallbacks.onOpenDishModal(dish);
             }
         });
     });

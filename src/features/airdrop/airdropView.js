@@ -1,5 +1,6 @@
 import { normalizeCategory } from '../filters/dishFilters.js';
 import { formatCurrency } from '../../utils/formatCurrency.js';
+import { getCurrentVoucherCalculation } from '../../utils/voucherWidget.js';
 
 /** Các giai đoạn của chuỗi sự kiện hòm thính */
 export const AIRDROP_PHASE = {
@@ -243,7 +244,12 @@ function renderReward(dish, isFavorite, isExcluded) {
         <p class="airdrop-reward-desc">${dish.description || dish.desc}</p>
         ${tagsHTML ? `<div class="airdrop-reward-tags">${tagsHTML}</div>` : ''}
         <div class="airdrop-reward-foot">
-          <strong class="airdrop-reward-price">${formatCurrency(dish.price)}</strong>
+          <strong class="airdrop-reward-price">${(() => {
+            const calc = getCurrentVoucherCalculation(dish.price);
+            return calc?.result?.isValid
+              ? `<del style="opacity:0.6;font-size:0.85em;margin-right:6px;font-weight:normal">${formatCurrency(dish.price)}</del> 👉 <span style="color:#ea580c;font-weight:800">${formatCurrency(calc.result.finalPrice)}</span>`
+              : formatCurrency(dish.price);
+          })()}</strong>
           <div class="airdrop-reward-actions">
             <button type="button" class="airdrop-detail-button" data-action="detail" data-id="${dish.id}">
               Xem chi tiết món
@@ -260,6 +266,7 @@ function renderReward(dish, isFavorite, isExcluded) {
           </div>
         </div>
       </div>
+      <div class="airdrop-voucher-host" id="airdrop-voucher-host"></div>
       <div class="airdrop-nearby-host"></div>
     </article>
   `;

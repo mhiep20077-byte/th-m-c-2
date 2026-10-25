@@ -15,6 +15,8 @@ import {
 
 import { playCrateOpenSound, playRevealSound, playUiSound } from './airdropAudio.js';
 import { pickWeightedDish, trackAnalyticsEvent } from '../../utils/weightEngine.js';
+import { formatCurrency } from '../../utils/formatCurrency.js';
+import { mountVoucherWidget } from '../../utils/voucherWidget.js';
 
 let airdropPhase = AIRDROP_PHASE.READY;
 let airdropDishId = null;
@@ -130,6 +132,30 @@ export function renderAirdropState() {
   });
 
   if (airdropPhase === AIRDROP_PHASE.REVEALED && currentDish) {
+    const voucherHost = containerEl.querySelector('.airdrop-voucher-host');
+    if (voucherHost) {
+      mountVoucherWidget({
+        container: voucherHost,
+        targetPrice: currentDish.price,
+        contextTitle: 'Ưu Đãi Món Từ Hòm Thính',
+        idPrefix: `airdrop-vw-${currentDish.id}`,
+        showWalletLink: true,
+        onApplied: ({ calcResult }) => {
+          const priceEl = containerEl.querySelector('.airdrop-reward-price');
+          if (priceEl && calcResult?.isValid) {
+            priceEl.innerHTML = `<del style="opacity:0.6;font-size:0.85em;margin-right:6px;font-weight:normal">${formatCurrency(currentDish.price)}</del> 👉 <span style="color:#ea580c;font-weight:800">${formatCurrency(calcResult.finalPrice)}</span>`;
+          }
+        },
+        onRemoved: () => {
+          const priceEl = containerEl.querySelector('.airdrop-reward-price');
+          if (priceEl) priceEl.textContent = formatCurrency(currentDish.price);
+        },
+        onNavigateToWallet: () => {
+          window.location.hash = '#vouchers';
+        }
+      });
+    }
+
     const nearbyHost = containerEl.querySelector('.airdrop-nearby-host');
     if (nearbyHost) mountNearbyPanelFn(currentDish, nearbyHost);
   }

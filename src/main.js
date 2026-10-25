@@ -51,6 +51,7 @@ import {
   trackAnalyticsEvent,
   getDishWeight
 } from './utils/weightEngine.js';
+import { mountVoucherWidget, getCurrentVoucherCalculation } from './utils/voucherWidget.js';
 
 // ============================================================
 // STATE QUẢN LÝ ỨNG DỤNG
@@ -177,6 +178,11 @@ function initializeArenaPage() {
       }
     },
     isFav: (dishId) => state.favorites.includes(Number(dishId)),
+    onOpenDishModal: (dish) => {
+      if (!dish) return;
+      const fullDish = dishes.find(d => d.id === dish.id) || dish;
+      openModal(fullDish, false);
+    },
     onGoToMeal: (dishesFromOracle) => {
       navigateTo('meal');
       if (Array.isArray(dishesFromOracle) && dishesFromOracle.length > 0) {
@@ -2116,6 +2122,7 @@ function renderQuiz() {
       ${steps}
       <div class="quiz-result hidden" id="quiz-result">
         <div class="quiz-result-dish" id="quiz-result-dish"></div>
+        <div id="quiz-voucher-section"></div>
         <div id="quiz-nearby-panel"></div>
         <div style="display:flex;gap:.75rem;margin-top:1rem">
           <button class="btn-primary" id="quiz-restart-btn">🔄 Thử lại</button>
@@ -2136,14 +2143,57 @@ function showQuizResult(dish) {
   }
   const result = document.getElementById('quiz-result');
   const dishEl = document.getElementById('quiz-result-dish');
-  dishEl.innerHTML = `
-    <img src="${dish.img}" alt="${dish.name}" style="width:100%;height:200px;object-fit:cover;border-radius:12px;margin-bottom:1rem" />
-    <div class="quiz-result-name">${dish.name}</div>
-    <div class="quiz-result-desc">${dish.desc}</div>
-    <div class="dish-meta" style="justify-content:center;margin-bottom:.5rem">
+
+  const updateQuizDishPrice = (calc) => {
+    const metaEl = document.getElementById('quiz-dish-meta');
+    if (!metaEl) return;
+    const priceHTML = calc?.result?.isValid
+      ? `<span>💰 <del style="opacity:0.6;font-size:0.85em;margin-right:4px">${formatCurrency(dish.price)}</del>👉 <b style="color:#ea580c">${formatCurrency(calc.result.finalPrice)}</b></span>`
+      : `<span>💰 ${formatCurrency(dish.price)}</span>`;
+    metaEl.innerHTML = `
       <span>⭐ ${dish.rating}</span> <span>🔥 ${dish.calo} kcal</span>
-      <span>💰 ${formatCurrency(dish.price)}</span>
+      ${priceHTML}
+    `;
+  };
+
+  const initialCalc = getCurrentVoucherCalculation(dish.price);
+  const initialPriceHTML = initialCalc?.result?.isValid
+    ? `<span>💰 <del style="opacity:0.6;font-size:0.85em;margin-right:4px">${formatCurrency(dish.price)}</del>👉 <b style="color:#ea580c">${formatCurrency(initialCalc.result.finalPrice)}</b></span>`
+    : `<span>💰 ${formatCurrency(dish.price)}</span>`;
+
+  dishEl.innerHTML = `
+    <img src="${dish.img}" alt="${dish.name}" style="width:100%;height:200px;object-fit:cover;border-radius:12px;margin-bottom:1rem;cursor:pointer" id="quiz-dish-img-click" title="Bấm để xem chi tiết đầy đủ" />
+    <div class="quiz-result-name" style="cursor:pointer" id="quiz-dish-name-click" title="Bấm để xem chi tiết đầy đủ">${dish.name}</div>
+    <div class="quiz-result-desc">${dish.desc}</div>
+    <div class="dish-meta" id="quiz-dish-meta" style="justify-content:center;margin-bottom:.5rem">
+      <span>⭐ ${dish.rating}</span> <span>🔥 ${dish.calo} kcal</span>
+      ${initialPriceHTML}
     </div>`;
+
+  const voucherContainer = document.getElementById('quiz-voucher-section');
+  if (voucherContainer) {
+    mountVoucherWidget({
+      container: voucherContainer,
+      targetPrice: dish.price,
+      contextTitle: 'Ưu Đãi Cho Món Gợi Ý Này',
+      idPrefix: `quiz-vw-${dish.id}`,
+      showWalletLink: true,
+      onApplied: ({ calcResult, voucher }) => {
+        updateQuizDishPrice({ result: calcResult, voucher });
+      },
+      onRemoved: () => {
+        updateQuizDishPrice(null);
+      },
+      onNavigateToWallet: () => {
+        navigateTo('vouchers');
+      },
+      showToast: (msg, type) => showVoucherToast(msg, type)
+    });
+  }
+
+  document.getElementById('quiz-dish-img-click')?.addEventListener('click', () => openModal(dish, false));
+  document.getElementById('quiz-dish-name-click')?.addEventListener('click', () => openModal(dish, false));
+
   renderNearbyPanel(dish, document.getElementById('quiz-nearby-panel'));
   result.classList.remove('hidden');
   playWin();

@@ -3302,6 +3302,12 @@ body::after {
 /* ============================================================
    🎟️ MODAL VOUCHER APPLY COMPONENT
    ============================================================ */
+.quiz-result #quiz-voucher-section {
+  text-align: left;
+  margin: 1rem 0;
+  width: 100%;
+}
+
 .modal-voucher-box {
   margin: 1rem 0;
   padding: 1rem 1.15rem;

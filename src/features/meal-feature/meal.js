@@ -3,6 +3,7 @@ import { DISH_TYPES } from './filterUtils.js';
 import { BUDGET_GROUPS } from './priceFilter.js';
 import { foodImageFallback } from './foodImages.js';
 import { pickWeightedDish } from '../../utils/weightEngine.js';
+import { mountVoucherWidget, getCurrentVoucherCalculation } from '../../utils/voucherWidget.js';
 
 /* ===== Khung bữa ăn ===== */
 
@@ -518,14 +519,26 @@ function renderServedHTML(meal) {
         </ul>
 
         <div class="meal-served-foot">
-          <div class="meal-served-total">
-            <span>Tổng cộng</span>
-            <strong>${formatCurrency(meal.total)}</strong>
+          <div class="meal-served-total" id="meal-served-total-box">
+            <span>${(() => {
+              const c = getCurrentVoucherCalculation(meal.total);
+              return c?.result?.isValid ? 'Tổng thanh toán (Đã áp voucher)' : 'Tổng cộng';
+            })()}</span>
+            <strong>
+              ${(() => {
+                const c = getCurrentVoucherCalculation(meal.total);
+                return c?.result?.isValid
+                  ? `<del style="opacity:0.6;font-size:0.85em;margin-right:6px;font-weight:normal">${formatCurrency(meal.total)}</del>👉 <span style="color:#ea580c;font-weight:800">${formatCurrency(c.result.finalPrice)}</span>`
+                  : formatCurrency(meal.total);
+              })()}
+            </strong>
           </div>
           ${totalCalo > 0 ? `<p class="meal-served-energy">🔥 Tổng năng lượng ước tính: <b>${totalCalo} kcal</b></p>` : ''}
           <p class="meal-served-verdict">${verdict.icon} <b>${verdict.label}</b> — ${verdict.note}</p>
           <p class="meal-served-budget">${budgetGroup.icon} Mức giá đã dùng: <b>${budgetGroup.name}</b></p>
         </div>
+
+        <div id="meal-served-voucher-host" class="meal-served-voucher-host"></div>
 
         <div class="meal-served-actions">
           <button type="button" class="meal-btn meal-btn--primary" data-action="new">🍳 Dọn bữa mới</button>
@@ -757,6 +770,41 @@ export function renderMealPanel(container, state, handlers = {}) {
 
   const totalEl = container.querySelector('[data-role="total"]');
   if (totalEl) animateTotal(totalEl, previousTotal, total);
+
+  const servedVoucherHost = container.querySelector('#meal-served-voucher-host');
+  if (servedVoucherHost && meal.servedMeal) {
+    mountVoucherWidget({
+      container: servedVoucherHost,
+      targetPrice: meal.servedMeal.total,
+      contextTitle: 'Ưu Đãi Cho Mâm Cơm Này',
+      idPrefix: 'meal-served-vw',
+      showWalletLink: true,
+      onApplied: ({ calcResult }) => {
+        const totalBox = container.querySelector('#meal-served-total-box');
+        if (totalBox && calcResult?.isValid) {
+          totalBox.innerHTML = `
+            <span>Tổng thanh toán (Đã áp voucher)</span>
+            <strong>
+              <del style="opacity:0.6;font-size:0.85em;margin-right:6px;font-weight:normal">${formatCurrency(meal.servedMeal.total)}</del>
+              👉 <span style="color:#ea580c;font-weight:800">${formatCurrency(calcResult.finalPrice)}</span>
+            </strong>
+          `;
+        }
+      },
+      onRemoved: () => {
+        const totalBox = container.querySelector('#meal-served-total-box');
+        if (totalBox) {
+          totalBox.innerHTML = `
+            <span>Tổng cộng</span>
+            <strong>${formatCurrency(meal.servedMeal.total)}</strong>
+          `;
+        }
+      },
+      onNavigateToWallet: () => {
+        window.location.hash = '#vouchers';
+      }
+    });
+  }
 
   if (spinningCourseId) {
     // Chuông đóng lại đúng lúc hộp ngừng lắc

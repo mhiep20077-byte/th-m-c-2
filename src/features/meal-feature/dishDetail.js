@@ -2,6 +2,7 @@ import { formatCurrency, getCategoryName } from './dishRender.js';
 import { DISH_TYPES } from './filterUtils.js';
 import { foodImageFallback } from './foodImages.js';
 import { rarityOf } from './foodRarity.js';
+import { mountVoucherWidget, getCurrentVoucherCalculation } from '../../utils/voucherWidget.js';
 
 /**
  * Tìm một món ăn theo ID
@@ -96,6 +97,11 @@ function buildDetailContentHTML(dish, isFavorite, isExcluded, notice) {
     // thấy trước lý do tiếng vừa nghe "nặng" hay "nhẹ"
     const rarity = rarityOf(dish);
 
+    const activeCalc = getCurrentVoucherCalculation(dish.price);
+    const priceHTML = activeCalc?.result?.isValid
+      ? `<del style="opacity:0.6;font-size:0.85em;margin-right:6px;font-weight:normal">${formatCurrency(dish.price)}</del> 👉 <span style="color:#ea580c;font-weight:800">${formatCurrency(activeCalc.result.finalPrice)}</span>`
+      : formatCurrency(dish.price);
+
     return `
     <div class="detail-badges">
       <span class="detail-badge">🍽️ ${getCategoryName(dish.category)}</span>
@@ -103,10 +109,11 @@ function buildDetailContentHTML(dish, isFavorite, isExcluded, notice) {
       <span class="detail-badge detail-badge-rarity" data-rarity="${rarity.id}">${rarity.icon} ${rarity.label}</span>
     </div>
     <h2 class="detail-name" id="dish-detail-name">${dish.name}</h2>
-    <p class="detail-price">${formatCurrency(dish.price)}</p>
+    <p class="detail-price" id="dish-detail-price">${priceHTML}</p>
     <p class="detail-desc">${dish.description}</p>
     <div class="detail-tags">${tagsHTML}</div>
     ${noticeHTML}
+    <div id="dish-detail-voucher-host" class="dish-detail-voucher-host"></div>
     <div class="detail-actions">
     <button type="button" class="btn-detail-fav ${isFavorite ? 'active' : ''}" data-action="fav" aria-pressed="${isFavorite}">
       ${isFavorite ? '❤️ Đã yêu thích' : '🤍 Yêu thích'}
@@ -223,6 +230,31 @@ export function renderDishDetail(containerEl, dish, handlers = {}) {
     const closeBtn = containerEl.querySelector('[data-action="close"]');
     if (closeBtn) {
         closeBtn.addEventListener('click', () => onClose && onClose());
+    }
+
+    const voucherHost = containerEl.querySelector('#dish-detail-voucher-host');
+    if (voucherHost) {
+        mountVoucherWidget({
+            container: voucherHost,
+            targetPrice: dish.price,
+            contextTitle: 'Ưu Đãi & Mã Giảm Giá Món Này',
+            idPrefix: `dish-detail-vw-${dish.id}`,
+            showWalletLink: true,
+            onApplied: ({ calcResult }) => {
+                const priceEl = containerEl.querySelector('#dish-detail-price');
+                if (priceEl && calcResult?.isValid) {
+                    priceEl.innerHTML = `<del style="opacity:0.6;font-size:0.85em;margin-right:6px;font-weight:normal">${formatCurrency(dish.price)}</del> 👉 <span style="color:#ea580c;font-weight:800">${formatCurrency(calcResult.finalPrice)}</span>`;
+                }
+            },
+            onRemoved: () => {
+                const priceEl = containerEl.querySelector('#dish-detail-price');
+                if (priceEl) priceEl.textContent = formatCurrency(dish.price);
+            },
+            onNavigateToWallet: () => {
+                if (onClose) onClose();
+                window.location.hash = '#vouchers';
+            }
+        });
     }
 }
 

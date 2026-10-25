@@ -1403,6 +1403,13 @@
   box-shadow: 0 26px 50px -12px #0009, 0 0 40px #ffab4066
 }
 
+.airdrop-voucher-host {
+  grid-column: 1/-1;
+  min-width: 0;
+  text-align: left;
+  margin-top: 6px;
+}
+
 .airdrop-nearby-host {
   grid-column: 1/-1;
   min-width: 0
