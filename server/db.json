@@ -1,0 +1,2843 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Quản trị viên",
+      "email": "admin@bungoiangi.com",
+      "password": "$2a$10$ABe84tK2.qNoPl/E79IzFuzYaRm.P1zB0m3OgWPOHG/PqmVo8hUui",
+      "role": "admin",
+      "createdAt": "2026-10-01T20:35:35.462Z"
+    },
+    {
+      "id": 2,
+      "name": "hieppp",
+      "email": "hiep@gmail.com",
+      "role": "customer",
+      "password": "$2a$10$erwOv893FM1bDe.eJsvf3OSr4.v7PAZw02VaNGL0au7.Zohy3q23K",
+      "createdAt": "2026-10-04T13:55:45.338Z",
+      "status": "active",
+      "isBanned": false
+    },
+    {
+      "email": "huy@gmail.com",
+      "password": "$2a$10$iT4r308FZBasFB5.GKhZXOT61vJjTZrQ0bzjAWRMzpjDb2M2N9I7C",
+      "name": "huy",
+      "role": "admin",
+      "id": 3
+    },
+    {
+      "email": "hhiepm003@gmail.com",
+      "password": "$2a$10$Se4uOd4LwFlUFe0kGb3Es.BvhStFZuKzGXEoNCqv9h2btEl/V08Cm",
+      "name": "10",
+      "role": "admin",
+      "id": 4,
+      "adminLevel": "ctv"
+    },
+    {
+      "id": 5,
+      "name": "Nguyen Van CTV",
+      "email": "ctv_test@bungoiangi.com",
+      "role": "admin",
+      "password": "$2a$10$W6Ek5fC1Axqm9IVf6j8rBOrhr2A1YFFjq4CwmK/WdUv9MXB.6dIV2",
+      "createdAt": "2026-10-25T12:48:57.943Z"
+    },
+    {
+      "id": 6,
+      "name": "ada",
+      "email": "mhiep20077@gmail.com",
+      "role": "customer",
+      "password": "$2a$10$b.5vLxJm7Oi9ww4uIaxUY.MB39jKkunlg.xGM4HTN4BaFbzxPQu3W",
+      "createdAt": "2026-10-25T12:51:50.581Z"
+    }
+  ],
+  "dishes": [
+    {
+      "id": 1,
+      "name": "Mì cay Hải Sản",
+      "desc": "Mì cay Hàn Quốc với tôm, mực, chả cá và 7 cấp độ cay xé lưỡi",
+      "price": 45000,
+      "calo": 545,
+      "moods": [
+        "ngon",
+        "cay"
+      ],
+      "budget": "b40",
+      "category": "nuoc",
+      "tags": [
+        "cay",
+        "no",
+        "an-vui"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": true,
+      "rating": 4.2,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 2,
+      "name": "Cơm Tấm Sườn Bì Chả",
+      "desc": "Cơm tấm nóng hổi kèm sườn nướng mật ong thơm lừng, bì và chả chưng",
+      "price": 40000,
+      "calo": 435,
+      "moods": [
+        "ngon",
+        "ngheo"
+      ],
+      "budget": "b40",
+      "category": "com",
+      "tags": [
+        "no",
+        "phobien",
+        "tiet-kiem"
+      ],
+      "img": "https://th.bing.com/th/id/OSK.29c02d6833ee4b06246817f9b699976c?w=424&h=424&c=7&rs=1&qlt=90&o=6&dpr=1.3&pid=16.1",
+      "popular": true,
+      "rating": 4.3,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man",
+      "isSponsored": true,
+      "sponsorName": "Cơm Tấm Ba Ghiền",
+      "sponsorBadge": "Quán Vàng 🏆",
+      "sponsorLink": "https://shopee.vn",
+      "dropWeight": 4,
+      "isBestseller": true,
+      "active": true
+    },
+    {
+      "id": 3,
+      "name": "Bún Bò Huế Đặc Biệt",
+      "desc": "Nước dùng đậm đà hương sả mắm ruốc, bò nạm, giò heo và huyết",
+      "price": 50000,
+      "calo": 458,
+      "moods": [
+        "ngon",
+        "cay"
+      ],
+      "budget": "b70",
+      "category": "nuoc",
+      "tags": [
+        "cay",
+        "no",
+        "dam-da"
+      ],
+      "img": "https://th.bing.com/th/id/OIP._iu9kozRYB1qE0GH4ucRiwHaE8?w=258&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": true,
+      "rating": 4.4,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man",
+      "isSponsored": true,
+      "sponsorName": "Bún Bò Huế O Xuân",
+      "sponsorBadge": "Deal 20% 🔥",
+      "sponsorLink": "https://food.grab.com",
+      "dropWeight": 3.5,
+      "isBestseller": true,
+      "active": true
+    },
+    {
+      "id": 4,
+      "name": "Bún Thịt Nướng Chả Giò",
+      "desc": "Bún tươi ăn kèm thịt nướng xiên, chả giòn rụm và nước mắm chua ngọt",
+      "price": 38000,
+      "calo": 583,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo"
+      ],
+      "budget": "b40",
+      "category": "xao-kho",
+      "tags": [
+        "tiet-kiem",
+        "ngon-lanh",
+        "phobien"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.LHsoGHiKplW_PMZICWrRhwHaFL?w=262&h=184&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": true,
+      "rating": 4.5,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 5,
+      "name": "Cơm Gà Xối Mỡ",
+      "desc": "Đùi gà chiên giòn rụm da vàng ươm ăn kèm cơm đỏ sốt cà chua",
+      "price": 45000,
+      "calo": 319,
+      "moods": [
+        "ngon"
+      ],
+      "budget": "b40",
+      "category": "com",
+      "tags": [
+        "no",
+        "gion-rum"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.i61PRfA3PC4-GCR8GdryWQHaEP?w=296&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": true,
+      "rating": 4.6,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 6,
+      "name": "Bánh Bột Lọc Huế",
+      "desc": "Bánh bột lọc nhân tôm thịt dai giòn sần sật châm nước mắm cay",
+      "price": 25000,
+      "calo": 304,
+      "moods": [
+        "ngon",
+        "cay",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b20",
+      "category": "anvat",
+      "tags": [
+        "an-vui",
+        "tiet-kiem",
+        "cay"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.9NvWVB2CPbS7m_j-it0jTAHaIX?w=165&h=186&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": true,
+      "rating": 4.7,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 7,
+      "name": "Tokbokki Phô Mai",
+      "desc": "Bánh gạo Hàn Quốc sốt cay phủ phô mai kéo sợi thơm béo",
+      "price": 35000,
+      "calo": 212,
+      "moods": [
+        "ngon",
+        "cay",
+        "luoi"
+      ],
+      "budget": "b40",
+      "category": "anvat",
+      "tags": [
+        "cay",
+        "beo-bap",
+        "an-vui"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.AklzBTMVJkGoJmr9nEnaYgHaHa?w=178&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": true,
+      "rating": 4.8,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 8,
+      "name": "Trà Sữa Trân Châu Đường Đen",
+      "desc": "Trà sữa đậm vị kèm trân châu đường đen dẻo thơm ngạt ngào",
+      "price": 30000,
+      "calo": 588,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b40",
+      "category": "uong",
+      "tags": [
+        "giai-khat",
+        "ngot-ngao"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.p4gpy1DCjuFJX_fd-KEA5AHaHa?w=181&h=181&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": true,
+      "rating": 4.9,
+      "time": "3 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 9,
+      "name": "Trà Đào Cam Sả",
+      "desc": "Vị chua thanh của cam kết hợp hương sả thơm lừng và miếng đào giòn tan",
+      "price": 28000,
+      "calo": 402,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b40",
+      "category": "uong",
+      "tags": [
+        "giai-khat",
+        "thanh-mat"
+      ],
+      "img": "data:image/webp;base64,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",
+      "popular": true,
+      "rating": 4.2,
+      "time": "3 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 10,
+      "name": "Mì Xào Bò Rau Củ",
+      "desc": "Mì trứng xào thịt bò mềm ngọt cùng rau cải cúc, cà rốt và hành tây",
+      "price": 42000,
+      "calo": 343,
+      "moods": [
+        "ngon",
+        "healthy"
+      ],
+      "budget": "b40",
+      "category": "xao-kho",
+      "tags": [
+        "no",
+        "dinh-duong"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.MR299XPAlT_A35ebOWn61AHaE8?w=251&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": true,
+      "rating": 4.3,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 11,
+      "name": "Phở Bò Tái Nạm",
+      "desc": "Phở truyền thống Hà Nội với nước dùng ninh xương ngọt thanh đậm đà",
+      "price": 55000,
+      "calo": 347,
+      "moods": [
+        "ngon"
+      ],
+      "budget": "b70",
+      "category": "nuoc",
+      "tags": [
+        "no",
+        "truyen-thong"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.-8fSFNhUhdtzQYayaRe1IgHaFW?w=254&h=183&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": true,
+      "rating": 4.4,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 12,
+      "name": "Cơm Chiên Dương Châu",
+      "desc": "Cơm chiên hạt vàng ươm tơi xốp phối cùng lạp xưởng, đậu hà lan và tôm",
+      "price": 35000,
+      "calo": 247,
+      "moods": [
+        "ngon",
+        "ngheo"
+      ],
+      "budget": "b40",
+      "category": "com",
+      "tags": [
+        "no",
+        "tiet-kiem"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.tW3BOc_h8lHn27BGXYJIrgHaF7?w=220&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": true,
+      "rating": 4.5,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 13,
+      "name": "Gỏi Cuốn Tôm Thịt",
+      "desc": "Gỏi cuốn tươi mát với tôm, thịt, rau sống và nước chấm chua ngọt",
+      "price": 32000,
+      "calo": 522,
+      "moods": [
+        "ngon",
+        "ngheo",
+        "party",
+        "luoi"
+      ],
+      "budget": "b40",
+      "category": "anvat",
+      "tags": [
+        "sang",
+        "moi",
+        "tiet-kiem"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.NbE2a1R238JYyH0bb1nfXQHaHa?w=180&h=181&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": true,
+      "rating": 4.6,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 14,
+      "name": "Bánh Tráng Trộn",
+      "desc": "Bánh tráng trộn nóng hổi, mứt dưa, khô bò, hành phi và xoài xanh",
+      "price": 26000,
+      "calo": 497,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b40",
+      "category": "anvat",
+      "tags": [
+        "vui",
+        "an-vui",
+        "moi"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.uYERNiVT5sDQ30mVgybiIgHaEc?w=295&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": true,
+      "rating": 4.7,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 15,
+      "name": "Súp Bắp Cà Chua",
+      "desc": "Súp bắp mềm mịn, ngọt thanh cùng cà chua và hành phi thơm lừng",
+      "price": 24000,
+      "calo": 364,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "party"
+      ],
+      "budget": "b20",
+      "category": "xao-kho",
+      "tags": [
+        "dinh-duong",
+        "thu-gian"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.n5bqM8O_icWz7C5Nnbcv4wHaE7?w=265&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": true,
+      "rating": 4.8,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 16,
+      "name": "Sinh Tố Xoài Chanh Dây",
+      "desc": "Sinh tố xoài mát lạnh, sánh mịn và thơm vị trái cây tươi",
+      "price": 29000,
+      "calo": 235,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b40",
+      "category": "uong",
+      "tags": [
+        "mat",
+        "thanh-mat",
+        "giai-khat"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.fuUJ3YxHPZkfiNpL7lR5BAHaFr?w=229&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": false,
+      "rating": 4.9,
+      "time": "3 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 17,
+      "name": "Bún Bò Bà Lệ Thốt Nốt",
+      "desc": "Bún bò Sài Gòn giá rẻ với nước dùng ngọt, thịt bò và nước mắm chua cay",
+      "price": 18000,
+      "calo": 241,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo"
+      ],
+      "budget": "b20",
+      "category": "nuoc",
+      "tags": [
+        "tiet-kiem",
+        "phobien",
+        "ngon-lanh"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.VwluQ8g0Rw1XDd5YM65VcgHaEK?w=301&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": true,
+      "rating": 4.2,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 18,
+      "name": "Bánh Mì Chả Cá",
+      "desc": "Ổ bánh mì đặc ruột, chả cá chiên giòn chan nước mắm chua ngọt và rau thơm",
+      "price": 15000,
+      "calo": 334,
+      "moods": [
+        "ngon",
+        "ngheo",
+        "party",
+        "luoi"
+      ],
+      "budget": "b20",
+      "category": "anvat",
+      "tags": [
+        "tiet-kiem",
+        "phobien",
+        "sang"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.p-kVrh4KJFs3RUnuZ4-WTwHaFj?w=221&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": true,
+      "rating": 4.3,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 19,
+      "name": "Cơm Tấm Trứng Ốp La",
+      "desc": "Cơm tấm dẻo ăn kèm trứng ốp lòng đào lòng đào và nước mắm chua ngọt",
+      "price": 19000,
+      "calo": 442,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b20",
+      "category": "com",
+      "tags": [
+        "tiet-kiem",
+        "dinh-duong",
+        "an-sang"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.olKQlsEQndT6m72l3w8rUAHaEK?w=319&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": false,
+      "rating": 4.4,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 20,
+      "name": "Bánh Cuốn Nhân Thịt Nấm",
+      "desc": "Bánh cuốn mỏng mịn cuộn nhân thịt nấm thơm dứt, chấm nước mắm sen",
+      "price": 12000,
+      "calo": 561,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b20",
+      "category": "anvat",
+      "tags": [
+        "chay",
+        "truyen-thong",
+        "an-vui"
+      ],
+      "img": "data:image/webp;base64,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",
+      "popular": true,
+      "rating": 4.5,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 21,
+      "name": "Bún Chả Cá Lã Vọng",
+      "desc": "Bún trắng quen thuộc ăn kèm chả cá Lã Vọng nướng thơm và nước mắm chua",
+      "price": 17000,
+      "calo": 500,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo"
+      ],
+      "budget": "b20",
+      "category": "nuoc",
+      "tags": [
+        "tiet-kiem",
+        "phobien",
+        "ngon-lanh"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.euVr0NcdqAgKRnj9grJ-ogHaE8?w=274&h=183&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": true,
+      "rating": 4.6,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 22,
+      "name": "Nước Đậu Xanh Nóng Sả",
+      "desc": "Nước đậu xanh nóng giàu chất xơ, thơm miếng sả và lá bạc hà tươi",
+      "price": 8000,
+      "calo": 471,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b20",
+      "category": "uong",
+      "tags": [
+        "mat",
+        "thanh-mat",
+        "giai-khat"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.eLE7n_LPojzwiWn3y0e9UwHaE7?w=249&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": false,
+      "rating": 4.7,
+      "time": "3 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 23,
+      "name": "Bánh Đa Nướng Giòn",
+      "desc": "Bánh đa nướng giòn rụm rắc hành phi, mè rang và nước mắm chấm",
+      "price": 13000,
+      "calo": 583,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b20",
+      "category": "anvat",
+      "tags": [
+        "chay",
+        "tiet-kiem",
+        "an-vui"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.qJidj1OiRV4-vkGbhTYFkgHaEz?w=300&h=194&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": false,
+      "rating": 4.8,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 24,
+      "name": "Cơm Gạo Lứt Bò Kho Dưa",
+      "desc": "Cơm gạo lứt thơm dẻo ăn cùng bò kho dưa cải chua nước dừa mặn ngọt",
+      "price": 18000,
+      "calo": 203,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b20",
+      "category": "com",
+      "tags": [
+        "dinh-duong",
+        "tiet-kiem",
+        "an-sang"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.ebYPdsLJpsMK9oaGTpVsmAHaEw?w=261&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": false,
+      "rating": 4.9,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 25,
+      "name": "Chả Giò Nem Lụi Chấm Mắm",
+      "desc": "Chả giò cuộn lá bánh tráng giòn rụm ăn kèm chấm mắm tôm và đuôi tôm",
+      "price": 14000,
+      "calo": 285,
+      "moods": [
+        "ngon",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b20",
+      "category": "anvat",
+      "tags": [
+        "phobien",
+        "an-vui",
+        "tiet-kiem"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.kXIObzKwGqBACsbJiBxQ4gHaE8?w=252&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": true,
+      "rating": 4.2,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 26,
+      "name": "Trà Tắc Nóng",
+      "desc": "Trà tắc nóng giải khát, ấm bụng với vị chua dứa tươi mát cổ",
+      "price": 10000,
+      "calo": 566,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "party",
+        "luoi"
+      ],
+      "budget": "b20",
+      "category": "uong",
+      "tags": [
+        "giai-khat",
+        "thu-gian",
+        "mat"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.Jv6oskSbHXzwD1dHjSqn0gHaEj?w=282&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": false,
+      "rating": 4.3,
+      "time": "3 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 27,
+      "name": "Mì Quảng Tôm Thịt",
+      "desc": "Mì Quảng vàng ươm đặc trưng miền Trung, tôm thịt và rau thơm",
+      "price": 19000,
+      "calo": 357,
+      "moods": [
+        "ngon",
+        "ngheo"
+      ],
+      "budget": "b20",
+      "category": "nuoc",
+      "tags": [
+        "truyen-thong",
+        "tiet-kiem",
+        "phobien"
+      ],
+      "img": "https://th.bing.com/th/id/OIP.PAXvKG2tiEQzJmJ-qIWRzQHaEK?w=285&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+      "popular": true,
+      "rating": 4.4,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 28,
+      "name": "Bánh Khoai Mì Nướng",
+      "desc": "Khoai mì nướng xù xình, vỏ nạnh lòng dẻo ăn kèm muối tôm và dầu mè",
+      "price": 9000,
+      "calo": 299,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b20",
+      "category": "anvat",
+      "tags": [
+        "chay",
+        "tiet-kiem",
+        "vui"
+      ],
+      "img": "https://images.unsplash.com/photo-1509440159596-0249088772ff",
+      "popular": false,
+      "rating": 4.5,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 29,
+      "name": "Hủ Tiếu Nam Bò Tươi",
+      "desc": "Hủ tiếu Nam bò tươi, nước dùng ninh xương trong và thơm tiêu",
+      "price": 32000,
+      "calo": 334,
+      "moods": [
+        "ngon",
+        "ngheo",
+        "party"
+      ],
+      "budget": "b40",
+      "category": "nuoc",
+      "tags": [
+        "no",
+        "thu-gian",
+        "tiet-kiem"
+      ],
+      "img": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624",
+      "popular": false,
+      "rating": 4.6,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 30,
+      "name": "Bánh Xèo Giò Chả",
+      "desc": "Bánh xèo giòn rụm nhân giò heo, tôm chua và đậu xanh, ăn kèm nước chấm",
+      "price": 35000,
+      "calo": 353,
+      "moods": [
+        "ngon",
+        "luoi"
+      ],
+      "budget": "b40",
+      "category": "anvat",
+      "tags": [
+        "phobien",
+        "truyen-thong",
+        "moi"
+      ],
+      "img": "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=900&q=80",
+      "popular": true,
+      "rating": 4.7,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 31,
+      "name": "Lẩu Thái Chua Cay Nóng",
+      "desc": "Lẩu Thái chua cay chua chát, tôm cua và rau nhúng đầy sức sống",
+      "price": 58000,
+      "calo": 417,
+      "moods": [
+        "ngon",
+        "cay",
+        "party"
+      ],
+      "budget": "b70",
+      "category": "nuoc",
+      "tags": [
+        "cay",
+        "dam-da",
+        "sang"
+      ],
+      "img": "https://images.unsplash.com/photo-1541014741259-de529411b96a?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.8,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 32,
+      "name": "Gà Kho Sả Nướng Mật",
+      "desc": "Đùi gà kho sả nướng mật ong, da vàng bóng, thịt ngọt mềm thơm sả",
+      "price": 62000,
+      "calo": 583,
+      "moods": [
+        "ngon",
+        "party"
+      ],
+      "budget": "b70",
+      "category": "com",
+      "tags": [
+        "no",
+        "sang",
+        "gion-rum"
+      ],
+      "img": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.9,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 33,
+      "name": "Cá Chỉ Vàng Sốt Mè Tôm",
+      "desc": "Cá chỉ vàng chiên giòn sốt mè tôm dào vị, ăn cùng cơm nóng",
+      "price": 55000,
+      "calo": 298,
+      "moods": [
+        "ngon",
+        "healthy"
+      ],
+      "budget": "b70",
+      "category": "xao-kho",
+      "tags": [
+        "no",
+        "dinh-duong",
+        "phobien"
+      ],
+      "img": "https://images.unsplash.com/photo-1534939561126-855b8675edd7?auto=format&fit=crop&w=900&q=80",
+      "popular": true,
+      "rating": 4.2,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 34,
+      "name": "Chè Hạt Sen Nha Đà",
+      "desc": "Chè hạt sen nha đà nấu nhừ, giòn ngon thanh mát và dịu ngọt",
+      "price": 42000,
+      "calo": 477,
+      "moods": [
+        "ngon",
+        "healthy",
+        "luoi"
+      ],
+      "budget": "b40",
+      "category": "ngot",
+      "tags": [
+        "chay",
+        "thanh-mat",
+        "ngot-ngao"
+      ],
+      "img": "https://images.unsplash.com/photo-1488900128323-21503983a07e?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.3,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 35,
+      "name": "Bún Bò Thái Lan Hải Sản",
+      "desc": "Bún bò Thái trộn mắm tôm cay nồng, lòng bò thái lát mỏng và rau nhúng",
+      "price": 65000,
+      "calo": 439,
+      "moods": [
+        "ngon",
+        "cay",
+        "party"
+      ],
+      "budget": "b70",
+      "category": "nuoc",
+      "tags": [
+        "cay",
+        "dam-da",
+        "sang"
+      ],
+      "img": "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.4,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 36,
+      "name": "Lẩu Hải Sản Dây Chuyền",
+      "desc": "Lẩu hải sản dây chuyền cuốn tôm, mực, hành và rau, quay vòng ăn cùng nhau",
+      "price": 120000,
+      "calo": 240,
+      "moods": [
+        "ngon",
+        "party"
+      ],
+      "budget": "b150",
+      "category": "nuoc",
+      "tags": [
+        "sang",
+        "dam-da",
+        "noi-gia-dinhinh"
+      ],
+      "img": "https://images.unsplash.com/photo-1592194996308-7b43878e84a6?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.5,
+      "time": "15 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 37,
+      "name": "Gà Hấp Mè Sả",
+      "desc": "Gà ta hấp mè sả, da vàng óng, thịt ngọt mềm thơm nồng mùi dứa",
+      "price": 95000,
+      "calo": 317,
+      "moods": [
+        "ngon",
+        "healthy",
+        "party"
+      ],
+      "budget": "b150",
+      "category": "com",
+      "tags": [
+        "no",
+        "dinh-duong",
+        "thu-gian"
+      ],
+      "img": "https://images.unsplash.com/photo-1587593810167-a84920ea2781?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.6,
+      "time": "15 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 38,
+      "name": "Lẩu Thắt Cốt Truyền Thống",
+      "desc": "Lẩu thắt cốt truyền thống Hà Nội, nước dùng ngọt thanh và bắp ngọt",
+      "price": 78000,
+      "calo": 569,
+      "moods": [
+        "ngon",
+        "party"
+      ],
+      "budget": "b70",
+      "category": "nuoc",
+      "tags": [
+        "truyen-thong",
+        "thu-gian",
+        "dam-da"
+      ],
+      "img": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=900&q=80",
+      "popular": true,
+      "rating": 4.7,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 39,
+      "name": "Bò Sốt Vang Mật Ong",
+      "desc": "Bò sốt vang mật ong đậm đà, thịt mềm tan thớt nhúng rau cuốn",
+      "price": 110000,
+      "calo": 232,
+      "moods": [
+        "ngon",
+        "healthy",
+        "party"
+      ],
+      "budget": "b150",
+      "category": "xao-kho",
+      "tags": [
+        "no",
+        "sang",
+        "dinh-duong"
+      ],
+      "img": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.8,
+      "time": "15 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 40,
+      "name": "Gà Nướng Mật Ong Cưỡi Lửa",
+      "desc": "Cả gà nướng cưỡi lửa mọng nước, da giòn tan, mật ong thơm ngọt",
+      "price": 140000,
+      "calo": 396,
+      "moods": [
+        "ngon",
+        "party"
+      ],
+      "budget": "b150",
+      "category": "com",
+      "tags": [
+        "sang",
+        "gion-rum",
+        "noi-gia-dinhinh"
+      ],
+      "img": "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.9,
+      "time": "15 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 41,
+      "name": "Mực Nướng Muối Ớt",
+      "desc": "Mực lá nướng muối ớt dẻo dai, thơm lừng và ăn cùng dưa leo muối",
+      "price": 125000,
+      "calo": 388,
+      "moods": [
+        "ngon",
+        "cay",
+        "party"
+      ],
+      "budget": "b150",
+      "category": "xao-kho",
+      "tags": [
+        "cay",
+        "no",
+        "sang"
+      ],
+      "img": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.2,
+      "time": "15 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 42,
+      "name": "Lẩu Dê Thái Lạc",
+      "desc": "Lẩu dê Thái thơm nồng với lá lạc, nấm và rau nhúng đậm chất miền Tây",
+      "price": 150000,
+      "calo": 221,
+      "moods": [
+        "ngon",
+        "cay",
+        "party"
+      ],
+      "budget": "b150",
+      "category": "nuoc",
+      "tags": [
+        "cay",
+        "sang",
+        "noi-gia-dinhinh"
+      ],
+      "img": "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.3,
+      "time": "15 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 43,
+      "name": "Set Lẩu Nướng BBQ Mini",
+      "desc": "Set mini gồm thịt bò lẩu cuộn mỏng, mực nướng và rau nhúng đa dạng",
+      "price": 130000,
+      "calo": 558,
+      "moods": [
+        "ngon",
+        "party"
+      ],
+      "budget": "b150",
+      "category": "xao-kho",
+      "tags": [
+        "sang",
+        "noi-gia-dinhinh",
+        "dam-da"
+      ],
+      "img": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.4,
+      "time": "15 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 44,
+      "name": "Chè Bánh Bột Lọc Sơn Hồng",
+      "desc": "Chè bánh bột lọc sơn hồng truyền thống, đậu đỏ hầm mềm trong nước đường",
+      "price": 85000,
+      "calo": 399,
+      "moods": [
+        "ngon",
+        "healthy",
+        "party",
+        "luoi"
+      ],
+      "budget": "b150",
+      "category": "ngot",
+      "tags": [
+        "chay",
+        "truyen-thong",
+        "ngot-ngao"
+      ],
+      "img": "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=900&q=80",
+      "popular": true,
+      "rating": 4.5,
+      "time": "15 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 45,
+      "name": "Combo Hải Sản Nướng",
+      "desc": "Combo hải sản nướng tỉ phú gồm tôm, mực, nghêu và sòa nướng thơm phức",
+      "price": 190000,
+      "calo": 543,
+      "moods": [
+        "ngon",
+        "party"
+      ],
+      "budget": "b150",
+      "category": "xao-kho",
+      "tags": [
+        "sang",
+        "noi-gia-dinhinh",
+        "phobien"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": true,
+      "rating": 4.6,
+      "time": "15 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 46,
+      "name": "Dừa Xiêm Tươi",
+      "desc": "Dừa xiêm bổ mạch ăn trong tại chỗ, nước dừa ngọt lịm và phần dừa non giòn",
+      "price": 70000,
+      "calo": 442,
+      "moods": [
+        "ngon",
+        "healthy",
+        "luoi"
+      ],
+      "budget": "b70",
+      "category": "uong",
+      "tags": [
+        "mat",
+        "thanh-mat",
+        "giai-khat"
+      ],
+      "img": "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.7,
+      "time": "3 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 47,
+      "name": "Phở Chay Rau Nấm",
+      "desc": "Nước phở nấu từ nấm rơm và củ cả muối ngọt, chan bằng rau củ tươi và bánh phở cuốn",
+      "price": 38000,
+      "calo": 539,
+      "moods": [
+        "ngon",
+        "healthy"
+      ],
+      "budget": "b40",
+      "category": "nuoc",
+      "tags": [
+        "chay",
+        "thanh-mat",
+        "dinh-duong"
+      ],
+      "img": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.8,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 48,
+      "name": "Bún Chay Nấm",
+      "desc": "Bún trộn nấm vàng sáp, đậu hũ chiên giòn và rau sống, chấm nước mắm chay",
+      "price": 42000,
+      "calo": 227,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo"
+      ],
+      "budget": "b40",
+      "category": "nuoc",
+      "tags": [
+        "chay",
+        "noi-gia-dinhinh",
+        "tiet-kiem"
+      ],
+      "img": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.9,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 49,
+      "name": "Bánh Canh Chay Rau Củ",
+      "desc": "Bánh canh giọt thịt chay nấu ngọt nước dừa cùng bí đỏ, nấm và đậu hũ",
+      "price": 35000,
+      "calo": 466,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b40",
+      "category": "nuoc",
+      "tags": [
+        "chay",
+        "tiet-kiem",
+        "an-sang"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.2,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 50,
+      "name": "Canh Chua Bắp Chay",
+      "desc": "Canh bắp ngọt với đậu bắp non, đậu xanh và chút me chua chanh giải ngon",
+      "price": 30000,
+      "calo": 204,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo"
+      ],
+      "budget": "b40",
+      "category": "nuoc",
+      "tags": [
+        "chay",
+        "thanh-mat",
+        "giai-khat"
+      ],
+      "img": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.3,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 51,
+      "name": "Cơm Chiên Chay Thập Cẩm",
+      "desc": "Cơm chiên trộn rau củ giòn, đậu hũ, nấm và chà bông chay giòn tan",
+      "price": 39000,
+      "calo": 350,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo"
+      ],
+      "budget": "b40",
+      "category": "com",
+      "tags": [
+        "chay",
+        "tiet-kiem",
+        "dinh-duong"
+      ],
+      "img": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.4,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 52,
+      "name": "Chay Địa Phương",
+      "desc": "Mâm cơm chay đầy màu: đậu hũ kho nấm, canh bí đao, rau xào và cơm gạo lứt",
+      "price": 45000,
+      "calo": 457,
+      "moods": [
+        "ngon",
+        "healthy"
+      ],
+      "budget": "b40",
+      "category": "com",
+      "tags": [
+        "chay",
+        "truyen-thong",
+        "noi-gia-dinhinh"
+      ],
+      "img": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80",
+      "popular": true,
+      "rating": 4.5,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 53,
+      "name": "Rau Xào Chay Củ",
+      "desc": "Rau xào thập cẩm giòn mềm, tô đầy màu cho bữa chay đỡ ngán",
+      "price": 28000,
+      "calo": 270,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo"
+      ],
+      "budget": "b40",
+      "category": "xao-kho",
+      "tags": [
+        "chay",
+        "dinh-duong",
+        "tiet-kiem"
+      ],
+      "img": "https://images.unsplash.com/photo-1534939561126-855b8675edd7?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.6,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 54,
+      "name": "Gỏi Cuốn Chay Tôm Nứa",
+      "desc": "Bánh tráng cuốn tôm nứa, rau củ giòn, chấm mắm tôm chay tươi mát",
+      "price": 32000,
+      "calo": 540,
+      "moods": [
+        "ngon",
+        "healthy",
+        "luoi"
+      ],
+      "budget": "b40",
+      "category": "anvat",
+      "tags": [
+        "chay",
+        "mat",
+        "an-vui"
+      ],
+      "img": "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.7,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 55,
+      "name": "Chè Đậu Xanh Nấu Gừng",
+      "desc": "Đậu xanh nấu nhừ với nước dừa và lát gừng cay ấm, ăn nguội cùng đá lạnh",
+      "price": 25000,
+      "calo": 501,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b20",
+      "category": "ngot",
+      "tags": [
+        "chay",
+        "ngot-ngao",
+        "truyen-thong"
+      ],
+      "img": "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=900&q=80",
+      "popular": true,
+      "rating": 4.8,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 56,
+      "name": "Chè Đậu Đỏ Nấu Gừng",
+      "desc": "Đậu đỏ nấu bong dừa béo ngậy, gừng ấm bụng cho bữa ăn nhẹ nhàng",
+      "price": 26000,
+      "calo": 397,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b40",
+      "category": "ngot",
+      "tags": [
+        "chay",
+        "ngot-ngao",
+        "dinh-duong"
+      ],
+      "img": "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.9,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 57,
+      "name": "Bánh Cam Nhân Đậu Xanh",
+      "desc": "Bánh cam nhân đậu xanh bùi tan trong miệng, vỏ mềm và trắng ngần",
+      "price": 32000,
+      "calo": 415,
+      "moods": [
+        "ngon",
+        "healthy",
+        "luoi"
+      ],
+      "budget": "b40",
+      "category": "ngot",
+      "tags": [
+        "chay",
+        "ngot-ngao",
+        "vui"
+      ],
+      "img": "https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.2,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 58,
+      "name": "Bánh Chuối Nướng",
+      "desc": "Bánh chuối xiên que nướng giòn thơm mùi caramel, ăn kèm một ly trà",
+      "price": 24000,
+      "calo": 390,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b20",
+      "category": "ngot",
+      "tags": [
+        "chay",
+        "ngot-ngao",
+        "an-sang"
+      ],
+      "img": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.3,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 59,
+      "name": "Trà Sữa Thái Trà Xanh",
+      "desc": "Trà xanh Thái đậm chát quyện sữa đặc, thêm chút muối để đậm đà hơn",
+      "price": 45000,
+      "calo": 481,
+      "moods": [
+        "ngon",
+        "healthy",
+        "luoi"
+      ],
+      "budget": "b40",
+      "category": "uong",
+      "tags": [
+        "giai-khat",
+        "ngot-ngao",
+        "vui"
+      ],
+      "img": "https://images.unsplash.com/photo-1558857563-b371033873b8?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.4,
+      "time": "3 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 60,
+      "name": "Sữa Tươi Quế Đông",
+      "desc": "Sữa tươi hồng quế thơm nồng, pha thêm chút bột quế để rõ vị",
+      "price": 55000,
+      "calo": 369,
+      "moods": [
+        "ngon",
+        "healthy",
+        "party",
+        "luoi"
+      ],
+      "budget": "b70",
+      "category": "uong",
+      "tags": [
+        "giai-khat",
+        "thu-gian",
+        "dinh-duong"
+      ],
+      "img": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.5,
+      "time": "3 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 61,
+      "name": "Bánh Bò Hấp Đường",
+      "desc": "Bánh bò hấp đường vừa ăn vừa còn ấm, mềm thơm vị đường mía.",
+      "price": 8000,
+      "calo": 562,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b20",
+      "category": "ngot",
+      "tags": [
+        "ngot-ngao",
+        "tiet-kiem",
+        "chay",
+        "truyen-thong"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": true,
+      "rating": 4.6,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 62,
+      "name": "Kẹo Dừa Lọc Nước Cốt",
+      "desc": "Kẹo dừa non lọc nước cốt ngọt dịu, tan ngay trên đầu lưỡi.",
+      "price": 10000,
+      "calo": 352,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b20",
+      "category": "ngot",
+      "tags": [
+        "ngot-ngao",
+        "tiet-kiem",
+        "chay",
+        "vui"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.7,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 63,
+      "name": "Chè Đậu Xanh Giãn Thôi",
+      "desc": "Chè đậu xanh giãn thôi tự nhiên, nước đậu sánh đặc và béo thơm.",
+      "price": 12000,
+      "calo": 457,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b20",
+      "category": "ngot",
+      "tags": [
+        "ngot-ngao",
+        "tiet-kiem",
+        "chay",
+        "thanh-mat"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.8,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 64,
+      "name": "Bánh Bao Chiên Mật Ong",
+      "desc": "Bánh bao chiên giòn sơn mật ong, chín ở giữa và dẻo ngoài.",
+      "price": 15000,
+      "calo": 443,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b20",
+      "category": "ngot",
+      "tags": [
+        "ngot-ngao",
+        "tiet-kiem",
+        "chay",
+        "moi"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.9,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 65,
+      "name": "Kem Đá Bào Dừa",
+      "desc": "Kem đá bào dừa giòn lạnh, rải dừa nạo và mật ong lên trên.",
+      "price": 16000,
+      "calo": 514,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b20",
+      "category": "ngot",
+      "tags": [
+        "ngot-ngao",
+        "tiet-kiem",
+        "chay",
+        "thanh-mat",
+        "vui"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.2,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 66,
+      "name": "Bánh Pudding Caramel",
+      "desc": "Pudding trứng mịn nước caramel đắng nhẹ, tan trong miệng.",
+      "price": 22000,
+      "calo": 343,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b20",
+      "category": "ngot",
+      "tags": [
+        "ngot-ngao",
+        "tiet-kiem",
+        "chay",
+        "moi"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.3,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 67,
+      "name": "Bánh Mochi Nhân Đậu Đỏ",
+      "desc": "Bánh mochi dẻo nhân đậu đỏ ngọt bùa, ăn một cái là đủ.",
+      "price": 28000,
+      "calo": 246,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b40",
+      "category": "ngot",
+      "tags": [
+        "ngot-ngao",
+        "chay",
+        "vui",
+        "moi"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.4,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 68,
+      "name": "Chè Bánh Chung Nhân Đậu Xanh",
+      "desc": "Chè bánh chung nấu nhừ với đậu xanh đã xay, quen thuộc ngày Tết.",
+      "price": 30000,
+      "calo": 388,
+      "moods": [
+        "ngon",
+        "healthy",
+        "ngheo",
+        "luoi"
+      ],
+      "budget": "b40",
+      "category": "ngot",
+      "tags": [
+        "ngot-ngao",
+        "chay",
+        "truyen-thong"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": true,
+      "rating": 4.5,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 69,
+      "name": "Chè Thái Sữa Trân Châu",
+      "desc": "Chè thái sữa trân châu trắng giòn, vị béo ngọt hợp khẩu vị.",
+      "price": 32000,
+      "calo": 389,
+      "moods": [
+        "ngon",
+        "healthy",
+        "luoi"
+      ],
+      "budget": "b40",
+      "category": "ngot",
+      "tags": [
+        "ngot-ngao",
+        "chay",
+        "vui",
+        "moi"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.6,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 70,
+      "name": "Bánh Bông Lan Trứng Muối",
+      "desc": "Bánh bông lan mềm xốp kèm trứng muối mặn ngọt cân bằng.",
+      "price": 35000,
+      "calo": 364,
+      "moods": [
+        "ngon",
+        "healthy",
+        "party",
+        "luoi"
+      ],
+      "budget": "b40",
+      "category": "ngot",
+      "tags": [
+        "ngot-ngao",
+        "chay",
+        "sang",
+        "an-vui"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.7,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 71,
+      "name": "Chè Hạt Dẻ Nước Cốt Dừa",
+      "desc": "Chè hạt dẻ trong nước cốt dừa, dẻo bột và thơm dừa.",
+      "price": 45000,
+      "calo": 573,
+      "moods": [
+        "ngon",
+        "healthy",
+        "luoi"
+      ],
+      "budget": "b40",
+      "category": "ngot",
+      "tags": [
+        "ngot-ngao",
+        "chay",
+        "dinh-duong",
+        "thanh-mat"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.8,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 72,
+      "name": "Kem Socola Dừa Ốc Quế",
+      "desc": "Kem socola đen nhúng dừa ốc quế giòn rụm, vị đậm và béo.",
+      "price": 55000,
+      "calo": 367,
+      "moods": [
+        "ngon",
+        "healthy",
+        "party",
+        "luoi"
+      ],
+      "budget": "b70",
+      "category": "ngot",
+      "tags": [
+        "ngot-ngao",
+        "chay",
+        "sang",
+        "vui"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.9,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 73,
+      "name": "Bánh Tart Trái Cây",
+      "desc": "Tart bánh mì giòn xốc kem và xếp trái cây tươi theo mùa.",
+      "price": 60000,
+      "calo": 381,
+      "moods": [
+        "ngon",
+        "healthy",
+        "party",
+        "luoi"
+      ],
+      "budget": "b70",
+      "category": "ngot",
+      "tags": [
+        "ngot-ngao",
+        "chay",
+        "sang",
+        "vui"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.2,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 74,
+      "name": "Bánh Tiramisu Phô Mai",
+      "desc": "Tiramisu phô mai mềm, thơm cà phê và ca ca trên mỗi miếng bánh.",
+      "price": 65000,
+      "calo": 547,
+      "moods": [
+        "ngon",
+        "party",
+        "luoi"
+      ],
+      "budget": "b70",
+      "category": "ngot",
+      "tags": [
+        "ngot-ngao",
+        "man",
+        "sang",
+        "moi"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.3,
+      "time": "5 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "id": 75,
+      "name": "Chè Thái Phong Hạt Nổ",
+      "desc": "Chè thái hạt nổ giòn tanh tách cùng nước cốt dừa béo ngậy.",
+      "price": 75000,
+      "calo": 215,
+      "moods": [
+        "ngon",
+        "healthy",
+        "party",
+        "luoi"
+      ],
+      "budget": "b70",
+      "category": "ngot",
+      "tags": [
+        "ngot-ngao",
+        "chay",
+        "sang",
+        "vui"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.4,
+      "time": "5 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 76,
+      "name": "Bánh Chocolate Lava Bạc Xu",
+      "desc": "Bánh chocolate lava nhân bạc xu chảy ra khi cắt, ăn nóng còn ấm tận miệng.",
+      "price": 110000,
+      "calo": 422,
+      "moods": [
+        "ngon",
+        "healthy",
+        "party",
+        "luoi"
+      ],
+      "budget": "b150",
+      "category": "ngot",
+      "tags": [
+        "ngot-ngao",
+        "chay",
+        "sang",
+        "moi"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.5,
+      "time": "15 phút",
+      "type": "chay",
+      "diet": "chay"
+    },
+    {
+      "id": 77,
+      "name": "Bánh Tiramisu Bỏ Rượu Nhật",
+      "desc": "Tiramisu bỏ rượu Nhật đi vị cà phê, kem mascarpone lạnh và bột cacao.",
+      "price": 120000,
+      "calo": 233,
+      "moods": [
+        "ngon",
+        "party",
+        "luoi"
+      ],
+      "budget": "b150",
+      "category": "ngot",
+      "tags": [
+        "ngot-ngao",
+        "man",
+        "sang",
+        "moi"
+      ],
+      "img": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+      "popular": false,
+      "rating": 4.6,
+      "time": "15 phút",
+      "type": "man",
+      "diet": "man"
+    },
+    {
+      "name": "Bún Rêu Cua Đồng",
+      "desc": "Bún riêu cua thanh ngọt đậm đà, kèm gạch cua, đậu phụ chiên và rau sống tươi.",
+      "price": 45000,
+      "calo": 420,
+      "category": "nuoc",
+      "type": "man",
+      "diet": "man",
+      "tags": [],
+      "img": "https://tse4.mm.bing.net/th/id/OIP.MhzhOM1SlIxK_vribU3qVAHaE8?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+      "rating": 0,
+      "time": "",
+      "popular": false,
+      "id": 78
+    },
+    {
+      "name": "Phở bò nam định",
+      "desc": "ngon",
+      "price": 35000,
+      "calo": 100,
+      "category": "nuoc",
+      "type": "man",
+      "diet": "man",
+      "tags": [],
+      "img": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6tq_uK3L2FR6qIH3IYOfgUabDusNab5-2UvGvmI34wA&s=10",
+      "rating": 0,
+      "time": "",
+      "popular": false,
+      "isSponsored": true,
+      "sponsorName": "phở bò nam định",
+      "sponsorLink": "https://shopeefood.vn/ho-chi-minh/pho-bo-ga-nam-dinh-161a-cong-hoa-pho-cong-hoa.lelkt9",
+      "sponsorBadge": "Deal 20%",
+      "isBestseller": true,
+      "dropWeight": 1.1,
+      "active": true,
+      "id": 79
+    }
+  ],
+  "favorites": [],
+  "history": [
+    {
+      "id": 1,
+      "userId": 2,
+      "dishId": 2,
+      "viewedAt": "2026-10-04T13:56:31.621Z"
+    },
+    {
+      "id": 2,
+      "userId": 3,
+      "dishId": 3,
+      "viewedAt": "2026-10-04T14:03:41.988Z"
+    },
+    {
+      "id": 3,
+      "userId": 3,
+      "dishId": 4,
+      "viewedAt": "2026-10-04T14:11:21.642Z"
+    },
+    {
+      "id": 4,
+      "userId": 3,
+      "dishId": 3,
+      "viewedAt": "2026-10-04T14:12:04.754Z"
+    },
+    {
+      "id": 5,
+      "userId": 3,
+      "dishId": 3,
+      "viewedAt": "2026-10-04T14:16:11.090Z"
+    },
+    {
+      "id": 6,
+      "userId": 3,
+      "dishId": 2,
+      "viewedAt": "2026-10-04T14:16:43.602Z"
+    }
+  ],
+  "settings": {
+    "gameRules": {
+      "sponsoredMultiplier": 8,
+      "bestsellerMultiplier": 6,
+      "guaranteeSponsored": false,
+      "mealAncientRate": 9,
+      "mealLegendaryRate": 23,
+      "airdropHotRate": 33,
+      "arenaSpecialRate": 25
+    },
+    "features": {
+      "mealEnabled": true,
+      "arenaEnabled": true,
+      "airdropEnabled": true,
+      "quizEnabled": true,
+      "nearbyEnabled": true,
+      "maintenanceMode": false,
+      "maintenanceNotice": "HHe thong dang bao tri nhanh!"
+    },
+    "announcement": {
+      "enabled": true,
+      "text": "🎉 Ưu đãi đặc biệt: Bốc món ngon nhận voucher giảm tới 30.000đ từ quán đối tác!",
+      "link": "https://shopee.vn",
+      "type": "promo",
+      "title": "Thông báo từ Admin Gốc Phụ"
+    },
+    "ads": {
+      "bannerEnabled": true,
+      "title": "Cơm Tấm Ba Ghiền - Đậm Đà Chuẩn Vị Sài Gòn",
+      "subtitle": "Tặng ngay 1 ly trà đá & giảm 20% khi đặt qua link hôm nay!",
+      "badge": "HOT",
+      "img": "https://th.bing.com/th/id/OSK.29c02d6833ee4b06246817f9b699976c?w=424&h=424&c=7&rs=1&qlt=90&o=6&dpr=1.3&pid=16.1",
+      "link": "https://shopeefood.vn/ha-noi/com-tam-chuan-vi-sai-gon-hong-tien"
+    }
+  },
+  "events": [
+    {
+      "id": 1,
+      "type": "ad_click",
+      "userId": 2,
+      "userName": "hieppp",
+      "details": {
+        "dishId": 2,
+        "sponsorName": "Cơm Tấm Ba Ghiền",
+        "dishName": "Cơm Tấm Sườn Bì Chả"
+      },
+      "timestamp": "2026-10-25T10:30:00.000Z"
+    },
+    {
+      "id": 2,
+      "type": "game_roll",
+      "userId": 3,
+      "userName": "huy",
+      "details": {
+        "game": "meal",
+        "dishId": 2,
+        "dishName": "Cơm Tấm Sườn Bì Chả"
+      },
+      "timestamp": "2026-10-25T11:15:00.000Z"
+    },
+    {
+      "id": 3,
+      "type": "search",
+      "userId": null,
+      "userName": "Khách vãng lai",
+      "details": {
+        "query": "cơm tấm"
+      },
+      "timestamp": "2026-10-25T11:45:00.000Z"
+    },
+    {
+      "id": 4,
+      "type": "ad_click",
+      "userId": 3,
+      "userName": "huy",
+      "details": {
+        "dishId": 3,
+        "sponsorName": "Bún Bò Huế O Xuân",
+        "dishName": "Bún Bò Huế Đặc Biệt"
+      },
+      "timestamp": "2026-10-25T12:00:00.000Z"
+    },
+    {
+      "id": 5,
+      "type": "ad_click",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "dishId": null,
+        "sponsorName": "Cơm Tấm Ba Ghiền - Đậm Đà Chuẩn Vị Sài Gòn",
+        "dishName": ""
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T11:15:40.110Z"
+    },
+    {
+      "id": 6,
+      "type": "ad_click",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "dishId": null,
+        "sponsorName": "Cơm Tấm Ba Ghiền - Đậm Đà Chuẩn Vị Sài Gòn",
+        "dishName": ""
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T11:15:58.654Z"
+    },
+    {
+      "id": 7,
+      "type": "game_roll",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "game": "arena_tarot",
+        "spread": "three",
+        "mood": "all",
+        "dishes": [
+          {
+            "id": 2,
+            "name": "Cơm Tấm Sườn Bì Chả",
+            "isSponsored": true,
+            "isBestseller": true
+          },
+          {
+            "id": 66,
+            "name": "Bánh Pudding Caramel"
+          },
+          {
+            "id": 3,
+            "name": "Bún Bò Huế Đặc Biệt",
+            "isSponsored": true,
+            "isBestseller": true
+          }
+        ]
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T11:17:08.605Z"
+    },
+    {
+      "id": 8,
+      "type": "ad_click",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "dishId": null,
+        "sponsorName": "Thanh thông báo",
+        "dishName": ""
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T11:17:14.630Z"
+    },
+    {
+      "id": 9,
+      "type": "ad_click",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "dishId": 3,
+        "sponsorName": "Bún Bò Huế O Xuân",
+        "dishName": ""
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T11:20:40.045Z"
+    },
+    {
+      "id": 10,
+      "type": "ad_click",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "dishId": 79,
+        "sponsorName": "phở bò nam định",
+        "dishName": ""
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T11:21:42.965Z"
+    },
+    {
+      "id": 11,
+      "type": "ad_click",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "dishId": null,
+        "sponsorName": "Cơm Tấm Ba Ghiền - Đậm Đà Chuẩn Vị Sài Gòn",
+        "dishName": ""
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T12:05:29.745Z"
+    },
+    {
+      "id": 12,
+      "type": "ad_click",
+      "userId": 4,
+      "userName": "10",
+      "details": {
+        "dishId": null,
+        "sponsorName": "Ưu Đãi Đặc Biệt Từ BungOiAnGi ✨",
+        "dishName": ""
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+      "timestamp": "2026-10-25T12:07:02.745Z"
+    },
+    {
+      "id": 13,
+      "type": "dish_view",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "dishId": 2,
+        "dishName": "Cơm Tấm Sườn Bì Chả",
+        "isSponsored": true,
+        "isBestseller": true
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T12:11:38.050Z"
+    },
+    {
+      "id": 14,
+      "type": "dish_view",
+      "userId": 4,
+      "userName": "10",
+      "details": {
+        "dishId": 2,
+        "dishName": "Cơm Tấm Sườn Bì Chả",
+        "isSponsored": true,
+        "isBestseller": true
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+      "timestamp": "2026-10-25T12:17:24.590Z"
+    },
+    {
+      "id": 15,
+      "type": "dish_view",
+      "userId": 4,
+      "userName": "10",
+      "details": {
+        "dishId": 2,
+        "dishName": "Cơm Tấm Sườn Bì Chả",
+        "isSponsored": true,
+        "isBestseller": true
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+      "timestamp": "2026-10-25T12:31:26.571Z"
+    },
+    {
+      "id": 16,
+      "type": "dish_view",
+      "userId": 4,
+      "userName": "10",
+      "details": {
+        "dishId": 2,
+        "dishName": "Cơm Tấm Sườn Bì Chả",
+        "isSponsored": true,
+        "isBestseller": true
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+      "timestamp": "2026-10-25T12:32:00.691Z"
+    },
+    {
+      "id": 17,
+      "type": "dish_view",
+      "userId": 5,
+      "userName": "Nguyen Van CTV",
+      "details": {
+        "dishId": 2,
+        "dishName": "Cơm Tấm Sườn Bì Chả",
+        "isSponsored": true,
+        "isBestseller": true
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T13:28:57.767Z"
+    },
+    {
+      "id": 18,
+      "type": "dish_view",
+      "userId": 5,
+      "userName": "Nguyen Van CTV",
+      "details": {
+        "dishId": 2,
+        "dishName": "Cơm Tấm Sườn Bì Chả",
+        "isSponsored": true,
+        "isBestseller": true
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T13:30:33.171Z"
+    },
+    {
+      "id": 19,
+      "type": "dish_view",
+      "userId": 5,
+      "userName": "Nguyen Van CTV",
+      "details": {
+        "dishId": 2,
+        "dishName": "Cơm Tấm Sườn Bì Chả",
+        "isSponsored": true,
+        "isBestseller": true
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T13:39:53.821Z"
+    },
+    {
+      "id": 20,
+      "type": "dish_view",
+      "userId": 4,
+      "userName": "10",
+      "details": {
+        "dishId": 3,
+        "dishName": "Bún Bò Huế Đặc Biệt",
+        "isSponsored": true,
+        "isBestseller": true
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+      "timestamp": "2026-10-25T13:51:20.549Z"
+    },
+    {
+      "id": 21,
+      "type": "dish_view",
+      "userId": 4,
+      "userName": "10",
+      "details": {
+        "dishId": 8,
+        "dishName": "Trà Sữa Trân Châu Đường Đen",
+        "isSponsored": false,
+        "isBestseller": false
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+      "timestamp": "2026-10-25T13:52:04.313Z"
+    },
+    {
+      "id": 22,
+      "type": "dish_view",
+      "userId": 4,
+      "userName": "10",
+      "details": {
+        "dishId": 2,
+        "dishName": "Cơm Tấm Sườn Bì Chả",
+        "isSponsored": true,
+        "isBestseller": true
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+      "timestamp": "2026-10-25T13:54:26.562Z"
+    },
+    {
+      "id": 23,
+      "type": "dish_view",
+      "userId": 4,
+      "userName": "10",
+      "details": {
+        "dishId": 7,
+        "dishName": "Tokbokki Phô Mai",
+        "isSponsored": false,
+        "isBestseller": false
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+      "timestamp": "2026-10-25T13:54:41.155Z"
+    },
+    {
+      "id": 24,
+      "type": "dish_view",
+      "userId": 4,
+      "userName": "10",
+      "details": {
+        "dishId": 15,
+        "dishName": "Súp Bắp Cà Chua",
+        "isSponsored": false,
+        "isBestseller": false
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+      "timestamp": "2026-10-25T13:54:52.985Z"
+    },
+    {
+      "id": 25,
+      "type": "dish_view",
+      "userId": 4,
+      "userName": "10",
+      "details": {
+        "dishId": 20,
+        "dishName": "Bánh Cuốn Nhân Thịt Nấm",
+        "isSponsored": false,
+        "isBestseller": false
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+      "timestamp": "2026-10-25T13:54:57.426Z"
+    },
+    {
+      "id": 26,
+      "type": "search",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "query": "BBanh Xeo"
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T14:57:13.552Z"
+    },
+    {
+      "id": 27,
+      "type": "dish_view",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "dishId": 30,
+        "dishName": "Bánh Xèo Giò Chả",
+        "isSponsored": false,
+        "isBestseller": false
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T14:59:33.669Z"
+    },
+    {
+      "id": 28,
+      "type": "search",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "query": "MMi Cay Hai San"
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T15:04:34.164Z"
+    },
+    {
+      "id": 29,
+      "type": "search",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "query": "Mi"
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T15:10:18.926Z"
+    },
+    {
+      "id": 30,
+      "type": "search",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "query": "Mi cay"
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T15:16:49.993Z"
+    },
+    {
+      "id": 31,
+      "type": "ad_click",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "dishId": null,
+        "sponsorName": "Thông báo từ Admin Gốc Phụ",
+        "dishName": ""
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T15:19:13.831Z"
+    },
+    {
+      "id": 32,
+      "type": "search",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "query": "BBanh Xeo"
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T15:20:15.918Z"
+    },
+    {
+      "id": 33,
+      "type": "search",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "query": "xeo"
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T15:22:09.725Z"
+    },
+    {
+      "id": 34,
+      "type": "dish_view",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "dishId": 30,
+        "dishName": "Bánh Xèo Giò Chả",
+        "isSponsored": false,
+        "isBestseller": false
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T15:22:28.242Z"
+    },
+    {
+      "id": 35,
+      "type": "search",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "query": "com ga"
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T15:25:11.190Z"
+    },
+    {
+      "id": 36,
+      "type": "dish_view",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "dishId": 5,
+        "dishName": "Cơm Gà Xối Mỡ",
+        "isSponsored": false,
+        "isBestseller": false
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T15:25:36.078Z"
+    },
+    {
+      "id": 37,
+      "type": "dish_view",
+      "userId": 4,
+      "userName": "10",
+      "details": {
+        "dishId": 3,
+        "dishName": "Bún Bò Huế Đặc Biệt",
+        "isSponsored": true,
+        "isBestseller": true
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+      "timestamp": "2026-10-25T15:42:08.487Z"
+    },
+    {
+      "id": 38,
+      "type": "dish_view",
+      "userId": 4,
+      "userName": "10",
+      "details": {
+        "dishId": 44,
+        "dishName": "Chè Bánh Bột Lọc Sơn Hồng",
+        "isSponsored": false,
+        "isBestseller": false
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+      "timestamp": "2026-10-25T16:22:43.164Z"
+    },
+    {
+      "id": 39,
+      "type": "dish_view",
+      "userId": 4,
+      "userName": "10",
+      "details": {
+        "dishId": 44,
+        "dishName": "Chè Bánh Bột Lọc Sơn Hồng",
+        "isSponsored": false,
+        "isBestseller": false
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+      "timestamp": "2026-10-25T16:22:44.502Z"
+    },
+    {
+      "id": 40,
+      "type": "dish_view",
+      "userId": 4,
+      "userName": "10",
+      "details": {
+        "dishId": 27,
+        "dishName": "Mì Quảng Tôm Thịt",
+        "isSponsored": false,
+        "isBestseller": false
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+      "timestamp": "2026-10-25T16:23:27.801Z"
+    },
+    {
+      "id": 41,
+      "type": "dish_view",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "dishId": 3,
+        "dishName": "Bún Bò Huế Đặc Biệt",
+        "isSponsored": true,
+        "isBestseller": true
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T16:24:56.068Z"
+    },
+    {
+      "id": 42,
+      "type": "dish_view",
+      "userId": 1,
+      "userName": "Quản trị viên",
+      "details": {
+        "dishId": 3,
+        "dishName": "Bún Bò Huế Đặc Biệt",
+        "isSponsored": true,
+        "isBestseller": true
+      },
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "timestamp": "2026-10-25T16:28:45.946Z"
+    }
+  ],
+  "vouchers": [
+    {
+      "id": 1,
+      "code": "BUNGNEW30",
+      "title": "Ưu Đãi Bạn Mới BungOiAnGi",
+      "desc": "Giảm ngay 30.000đ cho đơn từ 60.000đ khi đặt món lần đầu tiên",
+      "discountType": "fixed",
+      "discountValue": 30000,
+      "minOrder": 60000,
+      "maxDiscount": 30000,
+      "usageLimit": 150,
+      "usedCount": 18,
+      "expiryDate": "2026-12-31",
+      "badge": "🎉 Bạn Mới",
+      "category": "all",
+      "active": true,
+      "createdAt": "2026-10-26T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "code": "FREESHIP20",
+      "title": "Miễn Phí Vận Chuyển Hỏa Tốc",
+      "desc": "Freeship tối đa 20.000đ cho đơn hàng đồ ăn từ 80.000đ",
+      "discountType": "fixed",
+      "discountValue": 20000,
+      "minOrder": 80000,
+      "maxDiscount": 20000,
+      "usageLimit": 200,
+      "usedCount": 42,
+      "expiryDate": "2026-11-30",
+      "badge": "🛵 Freeship",
+      "category": "all",
+      "active": true,
+      "createdAt": "2026-10-26T00:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "code": "TIECVANG50",
+      "title": "Đại Tiệc Hoàng Kim VIP",
+      "desc": "Giảm 50.000đ cho đơn từ 150.000đ khi chọn các món Cổ Đại & Huyền Thoại",
+      "discountType": "fixed",
+      "discountValue": 50000,
+      "minOrder": 150000,
+      "maxDiscount": 50000,
+      "usageLimit": 100,
+      "usedCount": 9,
+      "expiryDate": "2026-12-31",
+      "badge": "💎 Đại Tiệc VIP",
+      "category": "ancient",
+      "active": true,
+      "createdAt": "2026-10-26T00:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "code": "BUNGIAM20",
+      "title": "Siêu Deal Giảm 20% Trưa Nay",
+      "desc": "Giảm 20% tối đa 40.000đ cho mọi đơn đặt món từ 90.000đ",
+      "discountType": "percent",
+      "discountValue": 20,
+      "minOrder": 90000,
+      "maxDiscount": 40000,
+      "usageLimit": 300,
+      "usedCount": 85,
+      "expiryDate": "2026-11-15",
+      "badge": "🔥 Hot Deal 20%",
+      "category": "all",
+      "active": true,
+      "createdAt": "2026-10-26T00:00:00.000Z"
+    },
+    {
+      "id": 5,
+      "code": "DEMKHUYA15",
+      "title": "Cứu Đói Đêm Khuya 15K",
+      "desc": "Giảm 15.000đ cho đơn đồ ăn đêm từ 50.000đ",
+      "discountType": "fixed",
+      "discountValue": 15000,
+      "minOrder": 50000,
+      "maxDiscount": 15000,
+      "usageLimit": 250,
+      "usedCount": 31,
+      "expiryDate": "2026-12-31",
+      "badge": "🌙 Ăn Đêm",
+      "category": "all",
+      "active": true,
+      "createdAt": "2026-10-26T00:00:00.000Z"
+    }
+  ],
+  "user_vouchers": [
+    {
+      "id": 1,
+      "userId": 2,
+      "voucherId": 1,
+      "code": "BUNGNEW30",
+      "claimedAt": "2026-10-26T01:00:00.000Z",
+      "isUsed": false,
+      "usedAt": null
+    },
+    {
+      "id": 2,
+      "userId": 2,
+      "voucherId": 2,
+      "code": "FREESHIP20",
+      "claimedAt": "2026-10-26T01:10:00.000Z",
+      "isUsed": false,
+      "usedAt": null
+    }
+  ]
+}

@@ -10,6 +10,17 @@ import './features/culinary-arena/arena.css';
 
 import { dishes, MOODS, BUDGETS, CATEGORIES, replaceDishes } from './data/dishes.js';
 import { DEFAULT_VOUCHERS, getLocalVouchers, saveLocalVouchers, getLocalClaimedVoucherIds, saveLocalClaimedVoucherIds } from './data/vouchers.js';
+import {
+  getLocalAdminDishes,
+  saveLocalAdminDishes,
+  getLocalAdminUsers,
+  saveLocalAdminUsers,
+  computeLocalStats,
+  getActiveVoucherCode,
+  setActiveVoucherCode,
+  clearActiveVoucherCode,
+  calculateVoucherDiscount,
+} from './data/adminStorage.js';
 import { filterDishes, sortDishes, getRandomDish, getCategoryLabel, removeVietnameseTones } from './features/filters/dishFilters.js';
 import { rarityOf, rarityLabel, RARITY_TIERS } from './features/meal-feature/foodRarity.js';
 import { QUIZ_QUESTIONS, resolveQuizMood } from './features/quiz/quizData.js';
@@ -46,6 +57,7 @@ import {
 // ============================================================
 const state = {
   activePage: 'home',
+  activeVoucherCode: getActiveVoucherCode(),
   mood: null,
   budget: 'all',
   exploreDiet: 'all',
@@ -67,9 +79,9 @@ const state = {
   claimedVoucherIds: getLocalClaimedVoucherIds(),
   voucherFilter: 'all',
   adminTab: 'dishes',
-  adminDishes: [],
-  adminUsers: [],
-  adminVouchers: [],
+  adminDishes: getLocalAdminDishes(),
+  adminUsers: getLocalAdminUsers(),
+  adminVouchers: getLocalVouchers(),
   adminStats: null,
   adminAnalytics: null,
   adminSettings: null,
@@ -2256,6 +2268,7 @@ function renderModal() {
           <div class="modal-desc" id="modal-desc"></div>
           <div class="modal-facts" id="modal-facts"></div>
           <div class="modal-reason" id="modal-reason"></div>
+          <div id="modal-voucher-section"></div>
           <div id="modal-nearby-panel"></div>
           <div class="modal-actions">
             <button class="btn-secondary" id="modal-change-btn">🔄 Đổi món khác</button>
@@ -2264,6 +2277,160 @@ function renderModal() {
         </div>
       </div>
     </div>`;
+}
+
+function renderModalVoucherSection(dish) {
+  const container = document.getElementById('modal-voucher-section');
+  if (!container || !dish) return;
+
+  const dishPrice = Number(dish.price) || 0;
+  let activeCode = (state.activeVoucherCode || getActiveVoucherCode() || '').trim().toUpperCase();
+
+  const allVouchers = state.vouchers?.length ? state.vouchers : getLocalVouchers();
+  const matchedVoucher = activeCode ? allVouchers.find(v => v.code.toUpperCase() === activeCode) : null;
+  const calcResult = matchedVoucher ? calculateVoucherDiscount(matchedVoucher, dishPrice) : null;
+
+  const claimedIds = new Set(state.claimedVoucherIds?.length ? state.claimedVoucherIds : getLocalClaimedVoucherIds());
+  const availableVouchers = allVouchers.filter(v => v.active !== false).slice(0, 6);
+
+  container.innerHTML = `
+    <div class="modal-voucher-box">
+      <div class="mv-header">
+        <span class="mv-title">🎟️ Ưu Đãi & Mã Giảm Giá</span>
+        <a href="#vouchers" class="mv-link-wallet" id="mv-open-wallet-btn">Xem kho voucher ➔</a>
+      </div>
+
+      <div class="mv-input-row">
+        <div class="mv-input-wrapper">
+          <input
+            type="text"
+            id="modal-voucher-input"
+            class="mv-input"
+            placeholder="Nhập mã ưu đãi (VD: BUNGNEW30)..."
+            value="${escapeHTML(activeCode)}"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          ${activeCode ? `<button type="button" id="modal-voucher-clear-btn" class="mv-clear-btn" title="Gỡ mã">✕</button>` : ''}
+        </div>
+        <button type="button" id="modal-voucher-apply-btn" class="mv-apply-btn">
+          ${calcResult?.isValid ? '✓ Đang áp dụng' : 'Áp Dụng'}
+        </button>
+      </div>
+
+      ${availableVouchers.length > 0 ? `
+        <div class="mv-quick-list">
+          <span class="mv-quick-label">Gợi ý:</span>
+          ${availableVouchers.map(v => {
+            const isCurrent = activeCode === v.code.toUpperCase();
+            const badge = v.discountType === 'percent' ? `-${v.discountValue}%` : `-${formatCurrency(v.discountValue)}`;
+            const isMine = claimedIds.has(Number(v.id));
+            return `
+              <button
+                type="button"
+                class="mv-quick-chip ${isCurrent ? 'is-active' : ''}"
+                data-quick-voucher="${escapeHTML(v.code)}"
+                title="${escapeHTML(v.title)} (Đơn tối thiểu ${formatCurrency(v.minOrder)})"
+              >
+                ${isMine ? '⭐ ' : ''}${escapeHTML(v.code)} (${badge})
+              </button>
+            `;
+          }).join('')}
+        </div>
+      ` : ''}
+
+      <div id="modal-voucher-result" class="mv-result">
+        ${calcResult ? `
+          <div class="mv-result-card ${calcResult.isValid ? 'mv-result-card--success' : 'mv-result-card--error'}">
+            <div class="mv-result-top">
+              <span class="mv-result-badge">
+                ${calcResult.isValid ? `🎉 ${escapeHTML(matchedVoucher.title || matchedVoucher.code)}` : '⚠️ Chưa đủ điều kiện'}
+              </span>
+              <button type="button" id="modal-voucher-remove-btn" class="mv-result-remove">Gỡ mã</button>
+            </div>
+            ${calcResult.isValid ? `
+              <div class="mv-result-prices">
+                <span class="mv-price-orig">${formatCurrency(dishPrice)}</span>
+                <span class="mv-price-discount">Giảm ${formatCurrency(calcResult.discount)}</span>
+                <span class="mv-price-final">👉 ${formatCurrency(calcResult.finalPrice)}</span>
+              </div>
+            ` : ''}
+            <div class="mv-result-msg">${escapeHTML(calcResult.message)}</div>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+
+  const inputEl = document.getElementById('modal-voucher-input');
+  const applyBtn = document.getElementById('modal-voucher-apply-btn');
+  const clearBtn = document.getElementById('modal-voucher-clear-btn');
+  const removeBtn = document.getElementById('modal-voucher-remove-btn');
+  const walletBtn = document.getElementById('mv-open-wallet-btn');
+
+  const doApply = (codeToApply) => {
+    const code = String(codeToApply || inputEl?.value || '').trim().toUpperCase();
+    if (!code) {
+      state.activeVoucherCode = '';
+      clearActiveVoucherCode();
+      renderModalVoucherSection(dish);
+      return;
+    }
+    const found = allVouchers.find(v => v.code.toUpperCase() === code);
+    if (!found) {
+      showVoucherToast(`Mã "${code}" không tồn tại hoặc đã ngưng phát hành!`, 'error');
+      state.activeVoucherCode = code;
+      setActiveVoucherCode(code);
+      renderModalVoucherSection(dish);
+      return;
+    }
+    const res = calculateVoucherDiscount(found, dishPrice);
+    state.activeVoucherCode = code;
+    setActiveVoucherCode(code);
+    playClick();
+    if (res.isValid) {
+      playWin();
+      showVoucherToast(`🎉 Đã áp dụng mã "${code}" giảm ${formatCurrency(res.discount)}!`, 'success');
+    } else {
+      showVoucherToast(res.message, 'error');
+    }
+    renderModalVoucherSection(dish);
+  };
+
+  applyBtn?.addEventListener('click', () => doApply());
+  inputEl?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      doApply();
+    }
+  });
+
+  clearBtn?.addEventListener('click', () => {
+    state.activeVoucherCode = '';
+    clearActiveVoucherCode();
+    renderModalVoucherSection(dish);
+  });
+
+  removeBtn?.addEventListener('click', () => {
+    state.activeVoucherCode = '';
+    clearActiveVoucherCode();
+    showVoucherToast('Đã gỡ mã ưu đãi.', 'info');
+    renderModalVoucherSection(dish);
+  });
+
+  container.querySelectorAll('[data-quick-voucher]').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const code = chip.dataset.quickVoucher;
+      if (inputEl) inputEl.value = code;
+      doApply(code);
+    });
+  });
+
+  walletBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    closeModal();
+    navigateTo('vouchers');
+  });
 }
 
 function openModal(dish, onRoll) {
@@ -2318,6 +2485,7 @@ function openModal(dish, onRoll) {
     <div class="modal-fact"><span class="mf-value">⭐ ${dish.rating}</span><span class="mf-key">Đánh giá</span></div>
   `;
   document.getElementById('modal-reason').textContent = `✅ Lý do nên ăn: ${dish.desc.split('–')[0].trim()}`;
+  renderModalVoucherSection(dish);
   renderNearbyPanel(dish);
 
   const saveBtn = document.getElementById('modal-save-btn');
@@ -2762,11 +2930,18 @@ async function loadRemoteDishes() {
   try {
     const remoteDishes = await requestApi('/api/dishes', { auth: false });
     if (Array.isArray(remoteDishes) && remoteDishes.length) {
+      saveLocalAdminDishes(remoteDishes);
       replaceDishes(remoteDishes);
       renderApp();
+      return;
     }
   } catch (error) {
-    console.warn('Không thể đồng bộ danh sách món từ JSON Server:', error.message);
+    console.info('Sử dụng dữ liệu món ăn lưu trữ cục bộ:', error.message);
+  }
+  const local = getLocalAdminDishes();
+  if (Array.isArray(local) && local.length) {
+    replaceDishes(local);
+    renderApp();
   }
 }
 
@@ -2813,32 +2988,60 @@ async function loadCustomerFavorites() {
 
 async function loadAdminDashboard(successMessage = '') {
   try {
-    const [stats, adminDishes, users, analytics, settings, adminVouchers] = await Promise.all([
-      requestApi('/api/admin/stats'),
-      requestApi('/api/admin/dishes'),
-      requestApi('/api/admin/users'),
+    const localDishes = getLocalAdminDishes();
+    const localUsers = getLocalAdminUsers();
+    const localSettings = getDynamicSettings();
+    const localVouchers = getLocalVouchers();
+
+    let [stats, adminDishes, users, analytics, settings, adminVouchers] = await Promise.all([
+      requestApi('/api/admin/stats').catch(() => null),
+      requestApi('/api/admin/dishes').catch(() => null),
+      requestApi('/api/admin/users').catch(() => null),
       requestApi('/api/admin/analytics').catch(() => null),
       requestApi('/api/admin/settings').catch(() => null),
-      requestApi('/api/admin/vouchers').catch(() => getLocalVouchers()),
+      requestApi('/api/admin/vouchers').catch(() => null),
     ]);
+
+    if (Array.isArray(adminDishes) && adminDishes.length > 0) {
+      saveLocalAdminDishes(adminDishes);
+    } else {
+      adminDishes = localDishes;
+    }
+
+    if (Array.isArray(users) && users.length > 0) {
+      saveLocalAdminUsers(users);
+    } else {
+      users = localUsers;
+    }
+
+    if (settings) {
+      setDynamicSettings(settings);
+    } else {
+      settings = localSettings;
+    }
+
+    if (Array.isArray(adminVouchers) && adminVouchers.length > 0) {
+      saveLocalVouchers(adminVouchers);
+    } else {
+      adminVouchers = localVouchers;
+    }
+
+    if (!stats) {
+      stats = computeLocalStats(adminDishes, users, adminVouchers);
+    }
+
     state.adminStats = stats;
     state.adminDishes = adminDishes;
     state.adminUsers = users;
     if (analytics) state.adminAnalytics = analytics;
-    if (settings) {
-      state.adminSettings = settings;
-      setDynamicSettings(settings);
-    }
-    if (Array.isArray(adminVouchers) && adminVouchers.length > 0) {
-      state.adminVouchers = adminVouchers;
-      state.vouchers = adminVouchers;
-      saveLocalVouchers(adminVouchers);
-    }
+    state.adminSettings = settings;
+    state.adminVouchers = adminVouchers;
+    state.vouchers = adminVouchers;
     replaceDishes(adminDishes);
 
     // Đồng bộ ngay vai trò và quyền hạn của tài khoản đang đăng nhập từ database
     const session = getAuthSession();
-    if (session?.user && session?.token) {
+    if (session?.user && session?.token && Array.isArray(users)) {
       const match = users.find(u => String(u.id) === String(session.user.id) || String(u.email).toLowerCase() === String(session.user.email).toLowerCase());
       if (match) {
         setAuthSession({ ...session.user, ...match }, session.token);
@@ -3082,19 +3285,36 @@ function bindAll() {
       active: values.active === 'on' || values.active === true || values.active === 'true',
     };
     const editingId = state.adminEditDishId;
+    let savedDish = null;
     try {
-      await requestApi(editingId ? `/api/admin/dishes/${editingId}` : '/api/admin/dishes', {
+      savedDish = await requestApi(editingId ? `/api/admin/dishes/${editingId}` : '/api/admin/dishes', {
         method: editingId ? 'PATCH' : 'POST',
         body: dish,
       });
-      state.adminEditDishId = null;
-      state.adminDishDraft = null;
-      await loadAdminDashboard(editingId ? 'Đã cập nhật món ăn.' : 'Đã thêm món ăn.');
-    } catch (error) {
-      state.adminMessage = error.message;
-      state.adminMessageType = 'error';
-      renderApp();
+    } catch (_) {
+      // Local fallback on Vercel
     }
+
+    if (!savedDish || typeof savedDish !== 'object') {
+      if (editingId) {
+        savedDish = { ...dish, id: Number(editingId) };
+      } else {
+        const maxId = Math.max(0, ...state.adminDishes.map(d => Number(d.id) || 0));
+        savedDish = { ...dish, id: maxId + 1 };
+      }
+    }
+
+    if (editingId) {
+      state.adminDishes = state.adminDishes.map(d => Number(d.id) === Number(editingId) ? { ...d, ...savedDish } : d);
+    } else {
+      state.adminDishes = [savedDish, ...state.adminDishes];
+    }
+    saveLocalAdminDishes(state.adminDishes);
+    replaceDishes(state.adminDishes);
+
+    state.adminEditDishId = null;
+    state.adminDishDraft = null;
+    await loadAdminDashboard(editingId ? 'Đã cập nhật món ăn.' : 'Đã thêm món ăn.');
   });
 
   document.querySelectorAll('[data-edit-dish]').forEach(button => {
@@ -3117,14 +3337,14 @@ function bindAll() {
   document.querySelectorAll('[data-delete-dish]').forEach(button => {
     button.addEventListener('click', async () => {
       if (!window.confirm('Bạn có chắc muốn xóa món này?')) return;
+      const deleteId = Number(button.dataset.deleteDish);
       try {
-        await requestApi(`/api/admin/dishes/${button.dataset.deleteDish}`, { method: 'DELETE' });
-        await loadAdminDashboard('Đã xóa món ăn.');
-      } catch (error) {
-        state.adminMessage = error.message;
-        state.adminMessageType = 'error';
-        renderApp();
-      }
+        await requestApi(`/api/admin/dishes/${deleteId}`, { method: 'DELETE' }).catch(() => {});
+      } catch (_) {}
+      state.adminDishes = state.adminDishes.filter(d => Number(d.id) !== deleteId);
+      saveLocalAdminDishes(state.adminDishes);
+      replaceDishes(state.adminDishes);
+      await loadAdminDashboard('Đã xóa món ăn.');
     });
   });
 
@@ -3142,18 +3362,32 @@ function bindAll() {
       values.role = 'customer';
       values.adminLevel = 'customer';
     }
+
+    let savedUser = null;
     try {
-      await requestApi('/api/admin/users', { method: 'POST', body: values });
-      await loadAdminDashboard('Đã tạo người dùng mới thành công.');
-    } catch (error) {
-      state.adminMessage = error.message;
-      state.adminMessageType = 'error';
-      renderApp();
+      savedUser = await requestApi('/api/admin/users', { method: 'POST', body: values });
+    } catch (_) {}
+
+    if (!savedUser) {
+      const maxId = Math.max(0, ...state.adminUsers.map(u => Number(u.id) || 0));
+      savedUser = {
+        id: maxId + 1,
+        name: values.name,
+        email: values.email,
+        role: values.role,
+        adminLevel: values.adminLevel,
+        status: 'active',
+        createdAt: new Date().toISOString(),
+      };
     }
+    state.adminUsers = [savedUser, ...state.adminUsers];
+    saveLocalAdminUsers(state.adminUsers);
+    await loadAdminDashboard('Đã tạo người dùng mới thành công.');
   });
 
   document.querySelectorAll('[data-user-role]').forEach(select => {
     select.addEventListener('change', async () => {
+      const userId = Number(select.dataset.userRole);
       const val = select.value;
       const payload = val === 'sub_root'
         ? { role: 'admin', adminLevel: 'sub_root' }
@@ -3162,21 +3396,20 @@ function bindAll() {
           : { role: 'customer', adminLevel: 'customer' };
 
       try {
-        await requestApi(`/api/admin/users/${select.dataset.userRole}`, {
-          method: 'PATCH', body: payload,
-        });
-        await loadAdminDashboard('Đã cập nhật vai trò người dùng.');
-      } catch (error) {
-        state.adminMessage = error.message;
-        state.adminMessageType = 'error';
-        renderApp();
+        await requestApi(`/api/admin/users/${userId}`, { method: 'PATCH', body: payload }).catch(() => {});
+      } catch (_) {}
+      const targetUser = state.adminUsers.find(u => Number(u.id) === userId);
+      if (targetUser) {
+        Object.assign(targetUser, payload);
+        saveLocalAdminUsers(state.adminUsers);
       }
+      await loadAdminDashboard('Đã cập nhật vai trò người dùng.');
     });
   });
 
   document.querySelectorAll('[data-save-user-name]').forEach(button => {
     button.addEventListener('click', async () => {
-      const userId = button.dataset.saveUserName;
+      const userId = Number(button.dataset.saveUserName);
       const nameInput = document.querySelector(`[data-user-name="${userId}"]`);
       const name = String(nameInput?.value || '').trim();
       if (name.length < 2) {
@@ -3186,27 +3419,27 @@ function bindAll() {
         return;
       }
       try {
-        await requestApi(`/api/admin/users/${userId}`, { method: 'PATCH', body: { name } });
-        await loadAdminDashboard('Đã cập nhật người dùng.');
-      } catch (error) {
-        state.adminMessage = error.message;
-        state.adminMessageType = 'error';
-        renderApp();
+        await requestApi(`/api/admin/users/${userId}`, { method: 'PATCH', body: { name } }).catch(() => {});
+      } catch (_) {}
+      const targetUser = state.adminUsers.find(u => Number(u.id) === userId);
+      if (targetUser) {
+        targetUser.name = name;
+        saveLocalAdminUsers(state.adminUsers);
       }
+      await loadAdminDashboard('Đã cập nhật người dùng.');
     });
   });
 
   document.querySelectorAll('[data-delete-user]').forEach(button => {
     button.addEventListener('click', async () => {
       if (!window.confirm('Bạn có chắc muốn xóa người dùng này?')) return;
+      const userId = Number(button.dataset.deleteUser);
       try {
-        await requestApi(`/api/admin/users/${button.dataset.deleteUser}`, { method: 'DELETE' });
-        await loadAdminDashboard('Đã xóa người dùng.');
-      } catch (error) {
-        state.adminMessage = error.message;
-        state.adminMessageType = 'error';
-        renderApp();
-      }
+        await requestApi(`/api/admin/users/${userId}`, { method: 'DELETE' }).catch(() => {});
+      } catch (_) {}
+      state.adminUsers = state.adminUsers.filter(u => Number(u.id) !== userId);
+      saveLocalAdminUsers(state.adminUsers);
+      await loadAdminDashboard('Đã xóa người dùng.');
     });
   });
 
@@ -3234,28 +3467,22 @@ function bindAll() {
         nextValue = !dish.isBestseller;
       }
       const propKey = field === 'sponsored' ? 'isSponsored' : (field === 'bestseller' ? 'isBestseller' : 'active');
+      dish[propKey] = nextValue;
+      saveLocalAdminDishes(state.adminDishes);
+      replaceDishes(state.adminDishes);
+      renderApp();
+
       const payload = {
         field,
         value: nextValue,
         [propKey]: nextValue
       };
       try {
-        const updated = await requestApi(`/api/admin/dishes/${dishId}/quick-toggle`, {
+        await requestApi(`/api/admin/dishes/${dishId}/quick-toggle`, {
           method: 'PATCH',
           body: payload,
-        });
-        if (updated && typeof updated === 'object') {
-          Object.assign(dish, updated);
-        } else {
-          dish[propKey] = nextValue;
-        }
-        replaceDishes(state.adminDishes);
-        renderApp();
-      } catch (error) {
-        state.adminMessage = error.message;
-        state.adminMessageType = 'error';
-        renderApp();
-      }
+        }).catch(() => {});
+      } catch (_) {}
     });
   });
 
@@ -3266,28 +3493,22 @@ function bindAll() {
       const dish = state.adminDishes.find(d => Number(d.id) === dishId);
       if (!dish) return;
       const newWeight = Math.max(0.1, Number(input.value) || 1);
+      dish.dropWeight = newWeight;
+      saveLocalAdminDishes(state.adminDishes);
+      replaceDishes(state.adminDishes);
+      renderApp();
+
       const payload = {
         field: 'dropWeight',
         value: newWeight,
         dropWeight: newWeight
       };
       try {
-        const updated = await requestApi(`/api/admin/dishes/${dishId}/quick-toggle`, {
+        await requestApi(`/api/admin/dishes/${dishId}/quick-toggle`, {
           method: 'PATCH',
           body: payload,
-        });
-        if (updated && typeof updated === 'object') {
-          Object.assign(dish, updated);
-        } else {
-          dish.dropWeight = newWeight;
-        }
-        replaceDishes(state.adminDishes);
-        renderApp();
-      } catch (error) {
-        state.adminMessage = error.message;
-        state.adminMessageType = 'error';
-        renderApp();
-      }
+        }).catch(() => {});
+      } catch (_) {}
     });
   });
 
@@ -3303,24 +3524,25 @@ function bindAll() {
       mealLegendaryRate: Number(formData.get('mealLegendaryRate') || 15),
       airdropHotRate: Number(formData.get('airdropHotRate') || 30),
     };
+    const currentSettings = state.adminSettings || getDynamicSettings();
+    const newSettings = {
+      ...currentSettings,
+      gameRules: { ...currentSettings.gameRules, ...updatedRules },
+    };
+    state.adminSettings = newSettings;
+    setDynamicSettings(newSettings);
+
     try {
-      const currentSettings = state.adminSettings || getDynamicSettings();
-      const newSettings = {
-        ...currentSettings,
-        gameRules: { ...currentSettings.gameRules, ...updatedRules },
-      };
       const saved = await requestApi('/api/admin/settings', {
         method: 'PUT',
         body: newSettings,
-      });
-      state.adminSettings = saved;
-      setDynamicSettings(saved);
-      await loadAdminDashboard('Đã lưu cấu hình luật chơi & tỉ lệ thành công!');
-    } catch (error) {
-      state.adminMessage = error.message;
-      state.adminMessageType = 'error';
-      renderApp();
-    }
+      }).catch(() => null);
+      if (saved) {
+        state.adminSettings = saved;
+        setDynamicSettings(saved);
+      }
+    } catch (_) {}
+    await loadAdminDashboard('Đã lưu cấu hình luật chơi & tỉ lệ thành công!');
   });
 
   // Tương tác trực tiếp với thanh trượt luật chơi & mô phỏng tỉ lệ rơi thời gian thực
@@ -3414,19 +3636,20 @@ function bindAll() {
         link: String(form.elements['ads_link']?.value || '').trim(),
       },
     };
+    state.adminSettings = newSettings;
+    setDynamicSettings(newSettings);
+
     try {
       const saved = await requestApi('/api/admin/settings', {
         method: 'PUT',
         body: newSettings,
-      });
-      state.adminSettings = saved;
-      setDynamicSettings(saved);
-      await loadAdminDashboard('Đã lưu cài đặt Web & CMS thành công!');
-    } catch (error) {
-      state.adminMessage = error.message;
-      state.adminMessageType = 'error';
-      renderApp();
-    }
+      }).catch(() => null);
+      if (saved) {
+        state.adminSettings = saved;
+        setDynamicSettings(saved);
+      }
+    } catch (_) {}
+    await loadAdminDashboard('Đã lưu cài đặt Web & CMS thành công!');
   });
 
   // Tương tác trực tiếp bật/tắt chế độ bảo trì để khóa/mở các tính năng con
@@ -3854,12 +4077,15 @@ function bindVoucherInteractions() {
     });
   });
 
-  // Dùng ngay voucher -> chuyển hướng sang Khám phá
+  // Dùng ngay voucher -> kích hoạt voucher, copy mã và chuyển hướng sang Khám phá
   document.querySelectorAll('[data-use-voucher]').forEach(btn => {
     btn.addEventListener('click', () => {
       playClick();
-      const code = btn.dataset.useVoucher;
+      const code = String(btn.dataset.useVoucher || '').trim().toUpperCase();
+      state.activeVoucherCode = code;
+      setActiveVoucherCode(code);
       copyVoucherCode(code);
+      showVoucherToast(`🎟️ Đã kích hoạt mã "${code}"! Hãy bấm vào món ăn bất kỳ để xem mức giảm giá.`, 'success');
       navigateTo('explore');
     });
   });

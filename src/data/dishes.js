@@ -1,5 +1,6 @@
 // ============================================================
-// 🍜 BungOiAnGi – Cơ sở dữ liệu món ăn Việt Nam (77 món chuẩn hóa)
+// 🍜 BungOiAnGi – Cơ sở dữ liệu món ăn Việt Nam (79 món chuẩn hóa)
+// Tự động đồng bộ từ server/db.json
 // ============================================================
 
 export const MOODS = {
@@ -76,7 +77,14 @@ export let dishes = [
     "rating": 4.3,
     "time": "5 phút",
     "type": "man",
-    "diet": "man"
+    "diet": "man",
+    "isSponsored": true,
+    "sponsorName": "Cơm Tấm Ba Ghiền",
+    "sponsorBadge": "Quán Vàng 🏆",
+    "sponsorLink": "https://shopee.vn",
+    "dropWeight": 4,
+    "isBestseller": true,
+    "active": true
   },
   {
     "id": 3,
@@ -100,7 +108,14 @@ export let dishes = [
     "rating": 4.4,
     "time": "5 phút",
     "type": "man",
-    "diet": "man"
+    "diet": "man",
+    "isSponsored": true,
+    "sponsorName": "Bún Bò Huế O Xuân",
+    "sponsorBadge": "Deal 20% 🔥",
+    "sponsorLink": "https://food.grab.com",
+    "dropWeight": 3.5,
+    "isBestseller": true,
+    "active": true
   },
   {
     "id": 4,
@@ -1979,6 +1994,43 @@ export let dishes = [
     "time": "15 phút",
     "type": "man",
     "diet": "man"
+  },
+  {
+    "name": "Bún Rêu Cua Đồng",
+    "desc": "Bún riêu cua thanh ngọt đậm đà, kèm gạch cua, đậu phụ chiên và rau sống tươi.",
+    "price": 45000,
+    "calo": 420,
+    "category": "nuoc",
+    "type": "man",
+    "diet": "man",
+    "tags": [],
+    "img": "https://tse4.mm.bing.net/th/id/OIP.MhzhOM1SlIxK_vribU3qVAHaE8?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+    "rating": 0,
+    "time": "",
+    "popular": false,
+    "id": 78
+  },
+  {
+    "name": "Phở bò nam định",
+    "desc": "ngon",
+    "price": 35000,
+    "calo": 100,
+    "category": "nuoc",
+    "type": "man",
+    "diet": "man",
+    "tags": [],
+    "img": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6tq_uK3L2FR6qIH3IYOfgUabDusNab5-2UvGvmI34wA&s=10",
+    "rating": 0,
+    "time": "",
+    "popular": false,
+    "isSponsored": true,
+    "sponsorName": "phở bò nam định",
+    "sponsorLink": "https://shopeefood.vn/ho-chi-minh/pho-bo-ga-nam-dinh-161a-cong-hoa-pho-cong-hoa.lelkt9",
+    "sponsorBadge": "Deal 20%",
+    "isBestseller": true,
+    "dropWeight": 1.1,
+    "active": true,
+    "id": 79
   }
 ];
 

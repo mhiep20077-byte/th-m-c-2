@@ -9,6 +9,7 @@
     "api": "node server.js",
     "start": "node server.js",
     "dev:all": "npm:dev",
+    "prebuild": "node scripts/sync-db-to-seed.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "test": "node --test"
