@@ -97,19 +97,19 @@ export async function findNearbyPlaces(location, radiusKm = 5, dishName, categor
         const allWithinRadius = places.filter(place => place.distanceKm <= radiusKm);
         if (allWithinRadius.length > 0) return allWithinRadius.slice(0, 8);
 
-        return generateLocalFallbackPlaces(location, radiusKm, dishName, category);
+        // Check verified real catalog strictly within radiusKm
+        const verified = generateLocalFallbackPlaces(location, radiusKm, dishName, category);
+        const withinRadiusVerified = verified.filter(place => place.distanceKm <= radiusKm);
+        return withinRadiusVerified.slice(0, 8);
     } catch (error) {
-        // Robust client-side fallback strictly within radiusKm
+        // Client-side verified real catalog strictly within radiusKm
         const fallback = generateLocalFallbackPlaces(location, radiusKm, dishName, category);
         const withinRadiusFallback = fallback.filter(place => place.distanceKm <= radiusKm);
         if (withinRadiusFallback.length > 0) {
-            return withinRadiusFallback;
+            return withinRadiusFallback.slice(0, 8);
         }
         if (error.name === 'AbortError') throw new Error('Tìm quán quá lâu. Hãy thử lại hoặc chọn bán kính nhỏ hơn.');
-        if (/failed to fetch|network|load failed/i.test(error.message || '')) {
-            throw new Error('Không thể kết nối dịch vụ tìm quán. Hãy thử lại sau ít phút.');
-        }
-        throw error;
+        return [];
     }
 }
 

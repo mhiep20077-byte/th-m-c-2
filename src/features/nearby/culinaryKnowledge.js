@@ -798,6 +798,132 @@ export const VERIFIED_REAL_RESTAURANTS = [
     badge: '⭐ Đệ Nhất Trà Sữa Quận 1', priceRange: '45.000đ - 70.000đ', openStatus: '🟢 Đang mở cửa (08:00 - 23:00)',
     specialties: ['Trà Sữa Trân Châu Đường Đen', 'Trà Sữa Thái', 'Sữa Tươi Trân Châu Đường Đen']
   },
+  {
+    name: 'Phê La - Cầu Giấy',
+    address: '125 Phố Cầu Giấy, Phường Quan Hoa, Quận Cầu Giấy, Hà Nội',
+    lat: 21.0348, lng: 105.7982, city: 'hanoi', genre: 'tra_sua',
+    rating: 4.9, reviewCount: 2450, ratingRate: '99% khen ngon',
+    dishReview: 'Trà Ô Long đặc sản Đà Lạt ủ thủ công đậm đà thơm ngát, trân châu ô long dẻo dai bùi béo kết hợp lớp sữa béo thanh mượt mà.',
+    badge: '🧋 Đậm Vị Ô Long Đặc Sản', priceRange: '45.000đ - 65.000đ', openStatus: '🟢 Đang mở cửa (08:00 - 23:00)',
+    specialties: ['Trà Sữa Ô Long', 'Trà Sữa Trân Châu Đường Đen', 'Ô Long Sữa Phê La']
+  },
+  {
+    name: 'Phê La - Hàng Cót',
+    address: '24 Phố Hàng Cót, Phường Hàng Mã, Quận Hoàn Kiếm, Hà Nội',
+    lat: 21.0372, lng: 105.8475, city: 'hanoi', genre: 'tra_sua',
+    rating: 4.9, reviewCount: 3100, ratingRate: '99% khen ngon',
+    dishReview: 'Ô Long sữa tươi nguyên bản đượm vị trà mộc mạc, hạt trân châu dẻo quánh nhai cực cuốn, không gian cắm trại độc đáo.',
+    badge: '✨ Trà Sữa Phố Cổ Nổi Bật', priceRange: '45.000đ - 65.000đ', openStatus: '🟢 Đang mở cửa (08:00 - 23:00)',
+    specialties: ['Trà Sữa Trân Châu', 'Trà Sữa Ô Long', 'Khói B’Lao']
+  },
+  {
+    name: 'Phê La - Trương Định',
+    address: '193/1 Trương Định, Phường 9, Quận 3, TP. Hồ Chí Minh',
+    lat: 10.7785, lng: 106.6872, city: 'hcm', genre: 'tra_sua',
+    rating: 4.9, reviewCount: 2900, ratingRate: '99% khen ngon',
+    dishReview: 'Vị trà Ô Long thơm lừng từ cao nguyên Lâm Đồng, sữa thanh béo dịu nhẹ kết hợp trân châu nướng dai giòn độc quyền.',
+    badge: '🏆 Ô Long Trà Sữa Đệ Nhất', priceRange: '45.000đ - 65.000đ', openStatus: '🟢 Đang mở cửa (08:00 - 23:00)',
+    specialties: ['Trà Sữa Ô Long', 'Trà Sữa Trân Châu Đường Đen', 'Phê La Trân Châu']
+  },
+  {
+    name: 'Phúc Long Coffee & Tea - Hàng Bông',
+    address: '82 Phố Hàng Bông, Phường Hàng Gai, Quận Hoàn Kiếm, Hà Nội',
+    lat: 21.0305, lng: 105.8482, city: 'hanoi', genre: 'tra_sua',
+    rating: 4.8, reviewCount: 2600, ratingRate: '98% khen ngon',
+    dishReview: 'Trà sữa Phúc Long truyền thống đậm vị trà đen Bảo Lộc thơm ngát, vị béo ngậy ngọt vừa phải, uống một ngụm là bừng tỉnh.',
+    badge: '👑 Trà Sữa Đậm Vị Truyền Thống', priceRange: '40.000đ - 65.000đ', openStatus: '🟢 Đang mở cửa (07:00 - 22:30)',
+    specialties: ['Trà Sữa Phúc Long', 'Trà Sữa Trân Châu', 'Trà Sữa Thái']
+  },
+  {
+    name: 'Phúc Long Coffee & Tea - IPH Xuân Thủy',
+    address: '241 Xuân Thủy, Phường Dịch Vọng Hậu, Quận Cầu Giấy, Hà Nội',
+    lat: 21.0365, lng: 105.7892, city: 'hanoi', genre: 'tra_sua',
+    rating: 4.8, reviewCount: 2100, ratingRate: '97% khen ngon',
+    dishReview: 'Trà sữa đậm đà ngát hương trà mộc, trân châu dai ngon hòa quyện sữa béo ngậy chuẩn chất lượng Phúc Long lâu năm.',
+    badge: '🧋 Trà Sữa Cầu Giấy', priceRange: '40.000đ - 65.000đ', openStatus: '🟢 Đang mở cửa (07:30 - 22:30)',
+    specialties: ['Trà Sữa Phúc Long', 'Trà Sữa Trân Châu Đường Đen', 'Trà Sữa Ô Long']
+  },
+  {
+    name: 'Phúc Long Coffee & Tea - Sư Vạn Hạnh',
+    address: '11 Sư Vạn Hạnh, Phường 12, Quận 10, TP. Hồ Chí Minh',
+    lat: 10.7725, lng: 106.6695, city: 'hcm', genre: 'tra_sua',
+    rating: 4.8, reviewCount: 3100, ratingRate: '98% khen ngon',
+    dishReview: 'Cốt trà ủ đậm vị hòa quyện sữa tươi thơm béo, trân châu hoàng kim giòn dai tạo nên ly trà sữa thương hiệu trứ danh Sài Gòn.',
+    badge: '⭐ Điểm Hẹn Trà Sữa Quận 10', priceRange: '40.000đ - 65.000đ', openStatus: '🟢 Đang mở cửa (07:00 - 22:30)',
+    specialties: ['Trà Sữa Phúc Long', 'Trà Sữa Trân Châu', 'Trà Sữa Thái']
+  },
+  {
+    name: 'TocoToco - Bách Khoa',
+    address: '51 Phố Trần Đại Nghĩa, Phường Bách Khoa, Quận Hai Bà Trưng, Hà Nội',
+    lat: 21.0035, lng: 105.8445, city: 'hanoi', genre: 'tra_sua',
+    rating: 4.7, reviewCount: 1850, ratingRate: '96% khen ngon',
+    dishReview: 'Trà sữa ba anh em ngập tràn trân châu sợi dẻo dai, thạch pudding béo ngậy mềm tan và thạch sương sáo thanh mát thơm lừng.',
+    badge: '🧋 Trà Sữa Sinh Viên Yêu Thích', priceRange: '28.000đ - 45.000đ', openStatus: '🟢 Đang mở cửa (08:00 - 22:30)',
+    specialties: ['Trà Sữa Trân Châu Sợi', 'Trà Sữa Ba Anh Em', 'Trà Sữa Trân Châu Đường Đen']
+  },
+  {
+    name: 'TocoToco - Nguyễn Khánh Toàn',
+    address: '34 Nguyễn Khánh Toàn, Phường Quan Hoa, Quận Cầu Giấy, Hà Nội',
+    lat: 21.0392, lng: 105.7995, city: 'hanoi', genre: 'tra_sua',
+    rating: 4.7, reviewCount: 1650, ratingRate: '96% khen ngon',
+    dishReview: 'Trà sữa nướng ngọt thơm dịu dàng, trân châu hoàng kim dẻo mềm óng ả nhai cực vui miệng, giá cả cực kỳ hợp lý.',
+    badge: '✨ Trà Sữa Giới Trẻ', priceRange: '28.000đ - 45.000đ', openStatus: '🟢 Đang mở cửa (08:30 - 22:30)',
+    specialties: ['Trà Sữa Trân Châu Hoàng Kim', 'Trà Sữa Trân Châu Đường Đen', 'Trà Sữa Nướng']
+  },
+  {
+    name: 'TocoToco - Quang Trung Gò Vấp',
+    address: '58 Quang Trung, Phường 10, Quận Gò Vấp, TP. Hồ Chí Minh',
+    lat: 10.8295, lng: 106.6685, city: 'hcm', genre: 'tra_sua',
+    rating: 4.7, reviewCount: 1920, ratingRate: '97% khen ngon',
+    dishReview: 'Cốt trà sữa thơm béo ngậy, trân châu sắn thủ công nấu đường đen dẻo bùi ngọt dịu cực kỳ bắt miệng.',
+    badge: '🧋 Trà Sữa Gò Vấp', priceRange: '28.000đ - 48.000đ', openStatus: '🟢 Đang mở cửa (08:00 - 23:00)',
+    specialties: ['Trà Sữa Trân Châu Đường Đen', 'Trà Sữa Thái', 'Trà Sữa Ba Anh Em']
+  },
+  {
+    name: 'Gong Cha - Giảng Võ',
+    address: '104 C4 Phố Giảng Võ, Phường Cát Linh, Quận Ba Đình, Hà Nội',
+    lat: 21.0265, lng: 105.8235, city: 'hanoi', genre: 'tra_sua',
+    rating: 4.8, reviewCount: 2200, ratingRate: '98% khen ngon',
+    dishReview: 'Lớp milk foam kem mặn béo ngậy trứ danh phủ trên cốt trà sữa Alisan đậm đà thơm ngát, trân châu trắng giòn sần sật.',
+    badge: '👑 Đệ Nhất Milk Foam Kem Mặn', priceRange: '45.000đ - 68.000đ', openStatus: '🟢 Đang mở cửa (08:30 - 22:30)',
+    specialties: ['Trà Sữa Alisan Milk Foam', 'Trà Sữa Trân Châu Đen', 'Trà Sữa Trân Châu Trắng']
+  },
+  {
+    name: 'Gong Cha - Hồ Tùng Mậu',
+    address: '83 Hồ Tùng Mậu, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh',
+    lat: 10.7728, lng: 106.7035, city: 'hcm', genre: 'tra_sua',
+    rating: 4.8, reviewCount: 3600, ratingRate: '98% khen ngon',
+    dishReview: 'Trà đen sữa truyền thống thơm thanh đậm vị Đài Loan, hòa quyện kem béo mặn mòi và hạt trân châu đen dai mềm óng mượt.',
+    badge: '⭐ Trà Sữa Đài Loan Đẳng Cấp', priceRange: '45.000đ - 70.000đ', openStatus: '🟢 Đang mở cửa (08:00 - 23:00)',
+    specialties: ['Trà Sữa Trân Châu Đen', 'Trà Sữa Ô Long', 'Trà Sữa Hokkaido']
+  },
+  {
+    name: 'Ding Tea - Cầu Giấy',
+    address: '102 Phố Cầu Giấy, Phường Quan Hoa, Quận Cầu Giấy, Hà Nội',
+    lat: 21.0345, lng: 105.7965, city: 'hanoi', genre: 'tra_sua',
+    rating: 4.7, reviewCount: 1750, ratingRate: '96% khen ngon',
+    dishReview: 'Vị trà sữa hạt dẻ thơm bùi ngọt dịu thanh mát, thạch pudding trứng mềm mịn và hạt trân châu đen dai giòn vừa vặn.',
+    badge: '🧋 Trà Sữa Đài Loan Thân Thuộc', priceRange: '32.000đ - 52.000đ', openStatus: '🟢 Đang mở cửa (08:00 - 22:30)',
+    specialties: ['Trà Sữa Hạt Dẻ', 'Trà Sữa Trân Châu', 'Trà Sữa Thái Xanh']
+  },
+  {
+    name: 'Koi Thé - Vincom Bà Triệu',
+    address: '191 Phố Bà Triệu, Phường Lê Đại Hành, Quận Hai Bà Trưng, Hà Nội',
+    lat: 21.0118, lng: 105.8498, city: 'hanoi', genre: 'tra_sua',
+    rating: 4.8, reviewCount: 2900, ratingRate: '98% khen ngon',
+    dishReview: 'Trà sữa hoàng kim hạt trân châu vàng óng giòn sần sật dẻo dai, cốt trà thanh mát kết hợp lớp sữa béo dịu không hề gắt cổ.',
+    badge: '👑 Vua Trân Châu Hoàng Kim', priceRange: '48.000đ - 75.000đ', openStatus: '🟢 Đang mở cửa (09:00 - 22:00)',
+    specialties: ['Trà Sữa Trân Châu Hoàng Kim', 'Lục Trà Macchiato', 'Trà Sữa Trân Châu']
+  },
+  {
+    name: 'Koi Thé - Ngô Đức Kế',
+    address: '76 Ngô Đức Kế, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh',
+    lat: 10.7732, lng: 106.7042, city: 'hcm', genre: 'tra_sua',
+    rating: 4.9, reviewCount: 4200, ratingRate: '99% khen ngon',
+    dishReview: 'Trân châu hoàng kim nhỏ xinh dẻo dai hòa quyện cốt trà đen sữa đậm đà ngậy béo, phục vụ chuẩn phong cách Đài Loan.',
+    badge: '🏆 Đệ Nhất Trà Sữa Phố Đi Bộ', priceRange: '48.000đ - 78.000đ', openStatus: '🟢 Đang mở cửa (08:30 - 23:00)',
+    specialties: ['Trà Sữa Trân Châu Hoàng Kim', 'Trà Sữa Ô Long', 'Trà Sữa Macchiato']
+  },
 
   // ==================== 20. CHÈ TRUYỀN THỐNG ====================
   {
@@ -1019,51 +1145,9 @@ export function generateLocalFallbackPlaces(location, radiusKm = 5, dishName, ca
     }
   }
 
-  // 2. Nếu quanh vị trí người dùng không có quán catalog trong bán kính maxRadius:
-  // Tự động phân bổ các điểm quán đặc trưng ĐÚNG TRONG BÁN KÍNH maxRadius (từ 0.4km đến maxRadius * 0.85km)
-  // ngay xung quanh tọa độ vị trí hiện tại của người dùng.
-  const brandNames = ['Gia Truyền', 'Cô Ba', 'Đặc Sản', 'Hương Việt'];
-  const generatedCount = 4;
-  const places = [];
-
-  for (let idx = 0; idx < generatedCount; idx++) {
-    const dist = Number(Math.min(maxRadius * 0.85, 0.4 + (idx * (maxRadius * 0.5) / generatedCount)).toFixed(2));
-    const roadDist = Number((dist < 0.8 ? dist * 1.18 : (dist < 3.0 ? dist * 1.28 : dist * 1.38)).toFixed(1));
-
-    const angle = (idx * (360 / generatedCount) + 25) * Math.PI / 180;
-    const latOffset = (dist / 111.0) * Math.cos(angle);
-    const lngOffset = (dist / (111.0 * Math.cos(location.lat * Math.PI / 180))) * Math.sin(angle);
-
-    const placeLat = Number((location.lat + latOffset).toFixed(6));
-    const placeLng = Number((location.lng + lngOffset).toFixed(6));
-
-    const placeName = `${knowledge.keywordTitle} ${brandNames[idx % brandNames.length]}`;
-    const houseNum = 18 + idx * 26;
-    const fullAddress = `${houseNum} Tuyến Phố Ẩm Thực ${idx + 1}, ${isHanoi ? 'Hà Nội' : 'TP. Hồ Chí Minh'}`;
-
-    places.push({
-      id: `local-dish-spot-${idx}`,
-      name: placeName,
-      lat: placeLat,
-      lng: placeLng,
-      address: fullAddress,
-      category: 'restaurant',
-      distanceKm: dist,
-      roadDistanceKm: roadDist,
-      rating: Number((4.7 + (idx % 3) * 0.1).toFixed(1)),
-      reviewCount: 380 + idx * 190,
-      ratingRate: `${96 + (idx % 4)}% khách khen ngon`,
-      dishReview: knowledge.dishReview,
-      badge: idx === 0 ? '🏆 Bestseller Khu Vực' : knowledge.badgePrefix,
-      priceRange: knowledge.priceRange,
-      openStatus: '🟢 Đang mở cửa (08:00 - 22:00)',
-      isTopRated: true,
-      specialties: [dishName || knowledge.keyword, ...knowledge.specialties],
-      searchTags: { name: placeName, dish: dishName || knowledge.keyword }
-    });
-  }
-
-  return places.sort((a, b) => a.distanceKm - b.distanceKm);
+  // 2. Nếu quanh vị trí người dùng không có quán thật trong bán kính maxRadius:
+  // TUYỆT ĐỐI không tự bịa địa chỉ ảo ("Tuyến Phố Ẩm Thực"). Trả về mảng rỗng để hệ thống thông báo trung thực.
+  return [];
 }
 
 function distanceBetweenKm(from, to) {

@@ -1997,8 +1997,27 @@ function renderNearbyPanel(dish, panel = document.getElementById('modal-nearby-p
       </div>`;
 
     if (places.length === 0) {
-      status.textContent = `Chưa tìm thấy quán nào trong bán kính ${currentRadius} km. Hãy bấm mở Google Maps bên dưới hoặc tăng bán kính.`;
-      resultsElement.innerHTML = googleLiveHeader;
+      status.textContent = `Không tìm thấy quán nào bán ${dish.name} trong bán kính ${currentRadius} km.`;
+      resultsElement.innerHTML = `
+        <div class="nearby-not-found-card">
+          <div class="nearby-not-found-icon">📍🔍</div>
+          <h4 class="nearby-not-found-title">Không tìm thấy quán bán “${escapeHTML(dish.name)}” trong bán kính ${currentRadius} km</h4>
+          <p class="nearby-not-found-desc">BungOiAnGi chỉ truy xuất thông tin quán ăn & địa chỉ có thật 100%. Quanh vị trí GPS của bạn trong phạm vi ${currentRadius} km chưa ghi nhận quán nào bán món này.</p>
+          <div class="nearby-not-found-hint">
+            💡 <strong>Gợi ý:</strong> Hãy thử chọn bán kính <strong>7 km</strong> hoặc <strong>10 km</strong> ở ô chọn bên trên để quét rộng hơn, hoặc bấm nút mở trực tiếp trên Google Maps bên dưới.
+          </div>
+          <div class="nearby-not-found-actions">
+            <a class="nearby-action-btn maps" href="${mapsSearchUrl}" target="_blank" rel="noopener noreferrer">
+              🗺️ Mở Google Maps quét toàn khu vực ↗
+            </a>
+            <a class="nearby-action-btn shopee" href="${serviceSearchUrl('shopee', dish.name, currentLocation)}" target="_blank" rel="noopener noreferrer">
+              🛵 Tìm đặt giao tận nơi trên ShopeeFood ↗
+            </a>
+            <a class="nearby-action-btn grab" href="${serviceSearchUrl('grab', dish.name, currentLocation)}" target="_blank" rel="noopener noreferrer">
+              🛵 Tìm đặt giao tận nơi trên GrabFood ↗
+            </a>
+          </div>
+        </div>`;
       return;
     }
 

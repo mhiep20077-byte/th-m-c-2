@@ -2539,6 +2539,108 @@ body::after {
   transition: all 0.15s ease;
 }
 
+/* ============================================================
+   NEARBY NOT FOUND CARD (Trung thực, không dữ liệu ảo)
+   ============================================================ */
+.nearby-not-found-card {
+  padding: 1.25rem 1rem;
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  margin-top: 0.5rem;
+}
+
+.nearby-not-found-icon {
+  font-size: 2.2rem;
+  margin-bottom: 0.4rem;
+}
+
+.nearby-not-found-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0 0 0.35rem;
+}
+
+.nearby-not-found-desc {
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0 0 0.65rem;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.nearby-not-found-hint {
+  font-size: 0.75rem;
+  color: #0369a1;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  margin: 0.5rem auto 0.85rem;
+  max-width: 480px;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.nearby-not-found-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.nearby-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 750;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.nearby-action-btn.maps {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
+}
+
+.nearby-action-btn.maps:hover {
+  background: linear-gradient(135deg, #0369a1, #075985);
+  transform: translateY(-1px);
+}
+
+.nearby-action-btn.shopee {
+  background: #fff7ed;
+  color: #ea580c;
+  border: 1px solid #fed7aa;
+}
+
+.nearby-action-btn.shopee:hover {
+  background: #ffedd5;
+  border-color: #fdba74;
+}
+
+.nearby-action-btn.grab {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.nearby-action-btn.grab:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+}
+
 .nearby-sample-btn:hover {
   background: #ffedd5;
   border-color: #ea580c;
