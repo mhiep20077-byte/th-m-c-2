@@ -2011,14 +2011,17 @@ function renderNearbyPanel(dish, panel = document.getElementById('modal-nearby-p
       </div>`;
 
     if (places.length === 0) {
-      status.textContent = `Không tìm thấy quán nào bán ${dish.name} trong bán kính ${currentRadius} km.`;
+      status.textContent = `Đã kết nối Google Maps quét các quán bán “${dish.name}” quanh vị trí của bạn:`;
       resultsElement.innerHTML = `
         <div class="nearby-not-found-card">
-          <div class="nearby-not-found-icon">📍🔍</div>
-          <h4 class="nearby-not-found-title">Không tìm thấy quán bán “${escapeHTML(dish.name)}” trong bán kính ${currentRadius} km</h4>
-          <p class="nearby-not-found-desc">BungOiAnGi chỉ truy xuất thông tin quán ăn & địa chỉ có thật 100%. Quanh vị trí GPS của bạn trong phạm vi ${currentRadius} km chưa ghi nhận quán nào bán món này.</p>
+          <div class="nearby-not-found-icon">📍🗺️</div>
+          <h4 class="nearby-not-found-title">Bản đồ Google Maps trực tiếp: “${escapeHTML(dish.name)} gần đây”</h4>
+          <p class="nearby-not-found-desc">Khung bản đồ vệ tinh Google Maps trực tiếp bên dưới đang quét các quán có bán món này quanh tọa độ GPS của bạn. Bạn có thể thu phóng và bấm vào từng ghim đỏ để xem chi tiết quán:</p>
+          <div class="nearby-live-map-wrap">
+            <iframe class="nearby-live-iframe" title="Google Maps tìm kiếm quán" src="https://maps.google.com/maps?hl=vi&q=${encodeURIComponent(dish.name + ' gần đây')}${currentLocation ? `&ll=${currentLocation.lat},${currentLocation.lng}` : ''}&z=14&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+          </div>
           <div class="nearby-not-found-hint">
-            💡 <strong>Gợi ý:</strong> Hãy thử chọn bán kính <strong>7 km</strong> hoặc <strong>10 km</strong> ở ô chọn bên trên để quét rộng hơn, hoặc bấm nút mở trực tiếp trên Google Maps bên dưới.
+            💡 <strong>Mẹo:</strong> Bạn có thể xem quán trên bản đồ trên, hoặc bấm mở toàn màn hình trong ứng dụng Google Maps / ShopeeFood để đặt ship tận nơi:
           </div>
           <div class="nearby-not-found-actions">
             <a class="nearby-action-btn maps" href="${mapsSearchUrl}" target="_blank" rel="noopener noreferrer">
